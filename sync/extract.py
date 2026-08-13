@@ -14,6 +14,13 @@ M = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 SHEET_PATH = r"D:\Mostafa Ibrahim\شيت تحصيل.xlsm"
 OUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "data.json")
 
+# عبد الرحمن = محمد شعبان (نفس الشخص) — نعرض الاسم الموحد
+COLLECTOR_ALIAS = {"عبد الرحمن": "محمد شعبان", "عبدالرحمن": "محمد شعبان"}
+
+
+def collector_alias(name):
+    return COLLECTOR_ALIAS.get(name, name)
+
 
 def xl_date(v):
     if isinstance(v, str):
@@ -120,7 +127,7 @@ def compute_master_row(cells):
         "agreement_days": cells.get("G", ""),
         "due_date": due,
         "status": status,
-        "collector": cells.get("J", ""),
+        "collector": collector_alias(cells.get("J", "")),
         "today_status": k,
         "classification": cells.get("L", ""),
         "notes": cells.get("M", ""),
