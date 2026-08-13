@@ -494,8 +494,27 @@ function viewLedger() {
     </div>`;
 }
 
+/* ---------- Theme (نهاري/ليلي) ---------- */
+function applyTheme(mode) {
+  document.documentElement.classList.toggle("dark", mode === "dark");
+  document.documentElement.classList.toggle("light", mode === "light");
+  try { localStorage.setItem("tahsil-theme", mode); } catch (e) {}
+}
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("tahsil-theme"); } catch (e) {}
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(saved || (prefersDark ? "dark" : "light"));
+}
+
 /* ---------- Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  $("themeBtn").addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    applyTheme(isDark ? "light" : "dark");
+    toast(isDark ? "الوضع النهاري" : "الوضع الليلي", isDark ? "تم تفعيل الوضع النهاري" : "تم تفعيل الوضع الليلي", "info");
+  });
   $("dateToday").textContent = todayStr();
   document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => switchView(b.dataset.view)));
   $("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));

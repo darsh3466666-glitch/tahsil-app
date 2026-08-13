@@ -25,12 +25,21 @@
   --space-5: 24px; --space-6: 32px; --space-7: 48px;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0B1120; --surface: #111A33; --foreground: #DBEAFE;
     --muted: #1E2A4A; --border: #24345C; --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
     --shadow-md: 0 4px 12px rgba(0,0,0,.5);
   }
 }
+html.dark {
+  --background: #0B1120; --surface: #111A33; --foreground: #DBEAFE;
+  --muted: #1E2A4A; --border: #24345C; --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.5);
+}
+#themeBtn .theme-sun { display: none; }
+#themeBtn .theme-moon { display: block; }
+html.dark #themeBtn .theme-sun { display: block; }
+html.dark #themeBtn .theme-moon { display: none; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 15px; }
 body {
