@@ -7,20 +7,19 @@ const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو
 const fmt = (n) => (n ?? 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
 
-const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false };
+const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {} };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 function todayStr() {
   const d = new Date();
-  return `${d.getDate()} ${AR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
 function dueLabel(due) {
   if (!due) return "—";
   const [y, m, day] = due.split("-").map(Number);
-  const dt = new Date(y, m - 1, day);
-  return `${dt.getDate()} ${AR_MONTHS[dt.getMonth()]}`;
+  return `${day}/${m}/${y}`;
 }
 function daysTo(due) {
   if (!due) return null;
@@ -28,6 +27,32 @@ function daysTo(due) {
   const target = new Date(y, m - 1, d);
   const now = new Date(); now.setHours(0, 0, 0, 0);
   return Math.round((target - now) / 86400000);
+}
+
+/* ---------- ترتيب موحّد (فرز) ---------- */
+const SORT_MODES = { sheet: "ترتيب الشيت", bal: "الرصيد الأعلى", old: "الأقدم أولاً", new: "الأحدث أولاً" };
+function sortBarMarkup(id, active) {
+  return `<div class="sort-bar" id="${id}" role="group" aria-label="ترتيب">
+    ${Object.entries(SORT_MODES).map(([k, l]) => `<button data-s="${k}" class="${k === active ? "active" : ""}">${l}</button>`).join("")}
+  </div>`;
+}
+function bindSortBar(id, key, rows, opts, draw) {
+  const bar = $(id);
+  if (!bar) return;
+  bar.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    state.sort[key] = b.dataset.s;
+    const s = state.sort[key];
+    bar.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x.dataset.s === s));
+    draw();
+  }));
+}
+function sortedBy(rows, mode, numKey, dateKey) {
+  if (!mode || mode === "sheet") return rows;
+  const r = rows.slice();
+  if (mode === "bal") r.sort((a, b) => (b[numKey] || 0) - (a[numKey] || 0));
+  if (mode === "old") r.sort((a, b) => (a[dateKey] || "").localeCompare(b[dateKey] || ""));
+  if (mode === "new") r.sort((a, b) => (b[dateKey] || "").localeCompare(a[dateKey] || ""));
+  return r;
 }
 
 /* ---------- Syncing ---------- */
@@ -179,18 +204,18 @@ function render() {
   $("navRouteCount").hidden = targets.length === 0;
   $("navRouteCount").textContent = targets.length;
   switchView(state.view, true);
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle };
   fns[state.view]();
 }
 
 function switchView(name, force) {
   state.view = name;
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي" };
+  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
   $("pageTitle").textContent = titles[name];
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
   if (force || !state.data) return;
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle };
   fns[name]();
 }
 
@@ -234,16 +259,11 @@ function viewDashboard() {
     <div class="two-col">
       <div class="card">
         <div class="card-head"><span class="card-title">🎯 أهداف اليوم — خط السير</span>
-          <div class="legend"><span><i style="background:var(--danger)"></i> مستحق اليوم</span></div>
+          ${sortBarMarkup("sort-dash", state.sort.dash)}
         </div>
         ${targets.length ? `<div class="table-wrap"><table>
           <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>الرصيد</th><th>آخر سداد</th><th>آخر زيارة</th><th>حالة</th></tr></thead>
-          <tbody>${targets.slice(0, 14).map((t) => `<tr>
-            <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
-            <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
-            <td>${dueLabel(t.last_visit)}</td>
-            <td><span class="chip chip-red">مستحق</span></td></tr>`).join("")}
-          </tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف اليوم</div>`}
+          <tbody id="dashTargetsBody"></tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف اليوم</div>`}
       </div>
       <div class="card">
         <div class="card-head"><span class="card-title">توزيع المديونية حسب المحصل</span></div>
@@ -276,6 +296,17 @@ function viewDashboard() {
         </div>
       </div>
     </div>`;
+  const drawTargets = () => {
+    if (!$("dashTargetsBody")) return;
+    const list = sortedBy(targets, state.sort.dash, "balance", "due");
+    $("dashTargetsBody").innerHTML = list.slice(0, 14).map((t) => `<tr>
+      <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
+      <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
+      <td>${dueLabel(t.last_visit)}</td>
+      <td><span class="chip chip-red">مستحق</span></td></tr>`).join("");
+  };
+  bindSortBar("sort-dash", "dash", targets, {}, drawTargets);
+  drawTargets();
 }
 
 /* ---------- ROUTE (خط سير اليوم) ---------- */
@@ -293,6 +324,7 @@ function viewRoute() {
         <button data-f="مصطفى">مصطفى</button>
         <button data-f="محمد شعبان">محمد شعبان</button>
       </div>
+      ${sortBarMarkup("sort-route", state.sort.route)}
     </div>
     <div class="table-wrap"><table class="route-table" id="routeTable">
       <thead><tr>
@@ -317,8 +349,12 @@ function viewRoute() {
     return { t, rl, rating, rChip };
   });
   const applyFilter = (f) => {
-    const items = rows.filter(({ t }) => f === "all" || t.collector === f);
-    items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
+    let items = rows.filter(({ t }) => f === "all" || t.collector === f);
+    const s = state.sort.route;
+    if (!s || s === "sheet") items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
+    else if (s === "bal") items.sort((a, b) => b.t.balance - a.t.balance);
+    else if (s === "old") items.sort((a, b) => (a.t.due || "").localeCompare(b.t.due || ""));
+    else if (s === "new") items.sort((a, b) => (b.t.due || "").localeCompare(a.t.due || ""));
     $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }) => `<tr>
       <td class="c-zone">${esc(t.area || "—")}</td>
       <td class="c-name"><b>${esc(t.customer)}</b></td>
@@ -332,6 +368,7 @@ function viewRoute() {
     document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
   };
   document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
+  bindSortBar("sort-route", "route", rows, {}, () => applyFilter(document.querySelector("#routeSeg .active").dataset.f));
   applyFilter("all");
 }
 
@@ -397,18 +434,30 @@ function viewCollectors() {
     <div class="card">
       <div class="card-head"><span class="card-title">تقييم العملاء — مرتب من الأخطر للأفضل (خط سير)</span>
         <div class="legend"><span><i style="background:var(--danger)"></i>خطر</span><span><i style="background:var(--warning)"></i>سيء</span><span><i style="background:var(--info)"></i>جيد</span><span><i style="background:var(--success)"></i>ممتاز</span></div>
+        ${sortBarMarkup("sort-collectors", state.sort.collectors)}
       </div>
       <div class="table-wrap"><table>
         <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>المديونية</th><th>معدل الدوران</th><th>التقييم</th><th>آخر رد</th></tr></thead>
-        <tbody>${rows.map(({ r, rep }) => {
-          const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
-          const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-          return `<tr><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
-            <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
-            <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-            <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;}).join("") || '<tr><td colspan="7" class="empty-state">لا توجد تقييمات</td></tr>'}
-        </tbody></table></div>
+        <tbody id="collectBody"></tbody></table></div>
     </div>`;
+  $("collectBody").innerHTML = rows.map(({ r, rep }) => {
+    const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
+    const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
+    return `<tr data-rating="${r.rating}" data-bal="${r.target_debt}" data-pay="${r.last_payment}"><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
+      <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
+      <td><span class="chip ${c}">${esc(r.rating)}</span></td>
+      <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;
+  }).join("") || '<tr><td colspan="7" class="empty-state">لا توجد تقييمات</td></tr>';
+  bindSortBar("sort-collectors", "collectors", rows, {}, () => {
+    const s = state.sort.collectors;
+    const trs = Array.from($("collectBody").querySelectorAll("tr"));
+    const get = (tr, k) => tr.getAttribute(k);
+    if (s === "sheet") trs.sort((a, b) => (rateOrder[a.dataset.rating] ?? 0) - (rateOrder[b.dataset.rating] ?? 0));
+    else if (s === "bal") trs.sort((a, b) => (b.dataset.bal || 0) - (a.dataset.bal || 0));
+    else if (s === "old") trs.sort((a, b) => (a.dataset.pay || "").localeCompare(b.dataset.pay || ""));
+    else if (s === "new") trs.sort((a, b) => (b.dataset.pay || "").localeCompare(a.dataset.pay || ""));
+    trs.forEach((tr) => $("collectBody").appendChild(tr));
+  });
 }
 
 /* ---------- RESPONSES (ردود العملاء) ---------- */
@@ -423,6 +472,7 @@ function viewResponses() {
           <input class="search-input" id="respSearch" placeholder="ابحث باسم عميل…">
           <select class="select" id="respArea"><option value="">كل المناطق</option>${byArea.map((a) => `<option>${esc(a)}</option>`).join("")}</select>
         </div>
+        ${sortBarMarkup("sort-resp", state.sort.resp)}
       </div>
       <div class="table-wrap"><table>
         <thead><tr><th>العميل</th><th>المنطقة</th><th>المديونية المستهدفة</th><th>آخر سداد</th><th>آخر فاتورة</th><th>آخر رد من العميل</th></tr></thead>
@@ -431,7 +481,8 @@ function viewResponses() {
   const draw = () => {
     const q = $("respSearch").value.trim();
     const area = $("respArea").value;
-    const list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
+    let list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
+    list = sortedBy(list, state.sort.resp, "target_debt", "last_payment");
     $("respBody").innerHTML = list.map((r) => `<tr>
       <td><b>${esc(r.customer)}</b></td><td>${esc(r.area || "—")}</td>
       <td class="tbl-amount neg">${money(r.target_debt)}</td>
@@ -441,6 +492,7 @@ function viewResponses() {
   };
   $("respSearch").addEventListener("input", draw);
   $("respArea").addEventListener("change", draw);
+  bindSortBar("sort-resp", "resp", rows, {}, draw);
   draw();
 }
 
@@ -470,21 +522,102 @@ function viewCashflow() {
     <div class="card">
       <div class="card-head"><span class="card-title">خطة السداد اليومية — ${cf.length} عميل</span>
         <div class="legend"><span><i style="background:var(--success)"></i>مكتمل</span><span><i style="background:var(--warning)"></i>جزئي</span><span><i style="background:var(--danger)"></i>لم يسدد</span></div>
+        ${sortBarMarkup("sort-cash", state.sort.cash)}
       </div>
       <div class="table-wrap"><table>
         <thead><tr><th>العميل</th><th>الرصيد</th><th>المتوقع</th><th>المحصّل</th><th>النسبة</th><th>موعد السداد</th><th>الحالة</th><th>المتبقي</th><th>ملاحظات</th></tr></thead>
-        <tbody>${cf.map((c) => `<tr>
-          <td><b>${esc(c.customer)}</b></td>
-          <td class="tbl-amount">${money(c.balance)}</td>
-          <td class="tbl-amount">${money(c.expected)}</td>
-          <td class="tbl-amount ${c.collected ? "pos" : ""}">${money(c.collected)}</td>
-          <td>${c.pay_ratio ? (Number(c.pay_ratio) * 100).toFixed(0) + "%" : "—"}</td>
-          <td>${dueLabel(c.due)}</td>
-          <td><span class="chip ${chipOf(c.pay_status)}">${statusOf(c.pay_status)}</span></td>
-          <td class="tbl-amount ${c.remaining ? "neg" : ""}">${money(c.remaining)}</td>
-          <td class="note-text">${esc(c.notes || "—")}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد خطة سداد</td></tr>'}
-        </tbody></table></div>
+        <tbody id="cashBody"></tbody></table></div>
     </div>`;
+  const cashRow = (c) => `<tr>
+      <td><b>${esc(c.customer)}</b></td>
+      <td class="tbl-amount">${money(c.balance)}</td>
+      <td class="tbl-amount">${money(c.expected)}</td>
+      <td class="tbl-amount ${c.collected ? "pos" : ""}">${money(c.collected)}</td>
+      <td>${c.pay_ratio ? (Number(c.pay_ratio) * 100).toFixed(0) + "%" : "—"}</td>
+      <td>${dueLabel(c.due)}</td>
+      <td><span class="chip ${chipOf(c.pay_status)}">${statusOf(c.pay_status)}</span></td>
+      <td class="tbl-amount ${c.remaining ? "neg" : ""}">${money(c.remaining)}</td>
+      <td class="note-text">${esc(c.notes || "—")}</td></tr>`;
+  const drawCash = () => {
+    if (!$("cashBody")) return;
+    const list = sortedBy(cf, state.sort.cash, "expected", "due");
+    $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="9" class="empty-state">لا توجد خطة سداد</td></tr>';
+  };
+  bindSortBar("sort-cash", "cash", cf, {}, drawCash);
+  drawCash();
+}
+
+/* ---------- CYCLE (عملاء بالدورة) ---------- */
+function viewCycle() {
+  const d = state.data;
+  const cc = (d.cycle_clients || []).slice();
+  const total = cc.reduce((s, c) => s + c.balance, 0);
+  const overdue = cc.filter((c) => (c.days_left || 0) < 0);
+  const active = cc.filter((c) => (c.days_left || 0) >= 0);
+  const overdueBal = overdue.reduce((s, c) => s + c.balance, 0);
+  const activeBal = active.reduce((s, c) => s + c.balance, 0);
+  $("view-cycle").innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi-card c-accent"><div class="kpi-label">عدد عملاء بالدورة</div><div class="kpi-value">${cc.length}</div><div class="kpi-sub">${cc.length ? "من شيت عملاء الدورة" : ""}</div></div>
+      <div class="kpi-card c-danger"><div class="kpi-label">إجمالي رصيد الدورة</div><div class="kpi-value">${money(total)}</div></div>
+      <div class="kpi-card c-success"><div class="kpi-label">دورة كاملة (مستمرة)</div><div class="kpi-value">${active.length}</div><div class="kpi-sub">${money(activeBal)}</div></div>
+      <div class="kpi-card c-danger"><div class="kpi-label">انتهت الدورة (استحق التحصيل)</div><div class="kpi-value">${overdue.length}</div><div class="kpi-sub">${money(overdueBal)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">عملاء بالدورة — ${cc.length} عميل</span>
+        <div class="filters">
+          <input class="search-input" id="cycleSearch" placeholder="ابحث باسم عميل…">
+          <select class="select" id="cycleState">
+            <option value="">كل الحالات</option><option value="active">دورة كاملة (مستمرة)</option><option value="overdue">انتهت الدورة</option><option value="soon">تستحق خلال أسبوع</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-head" style="border-top:none;padding-top:0">
+        <span class="card-title" style="font-weight:600;font-size:.82rem">ترتيب العملاء</span>
+        ${sortBarMarkup("sort-cycle", state.sort.cycle)}
+      </div>
+      <div class="table-wrap"><table class="cycle-table" id="cycleTable">
+        <thead><tr>
+          <th>م</th><th class="c-name">العميل</th><th class="c-bal">الرصيد</th>
+          <th class="c-date">موعد التحصيل</th><th class="c-date">بداية الدورة</th><th class="c-date">نهاية الدورة</th>
+          <th>الأيام المتبقية</th><th>حالة الدورة</th>
+        </tr></thead>
+        <tbody id="cycleBody"></tbody></table></div>
+    </div>`;
+  const draw = () => {
+    const q = $("cycleSearch").value.trim();
+    const st = $("cycleState").value;
+    let list = cc.filter((c) => {
+      if (q && !c.customer.includes(q)) return false;
+      const days = c.days_left || 0;
+      if (st === "active" && days < 0) return false;
+      if (st === "overdue" && days >= 0) return false;
+      if (st === "soon" && (days < 0 || days > 7)) return false;
+      return true;
+    });
+    list = sortedBy(list, state.sort.cycle, "balance", "due_date");
+    $("cycleBody").innerHTML = list.map((c, i) => {
+      const days = c.days_left || 0;
+      const end = days >= 0 ? "chip-green" : "chip-red";
+      const endTxt = days >= 0 ? "بالدورة" : "انتهت الدورة";
+      const dChip = days < 0 ? "chip-red" : days <= 7 ? "chip-amber" : "chip-green";
+      const dTxt = days < 0 ? `منذ ${Math.abs(days)} يوم` : days === 0 ? "اليوم" : `${days} يوم`;
+      return `<tr>
+        <td>${esc(c.seq)}</td>
+        <td class="c-name"><b>${esc(c.customer)}</b></td>
+        <td class="c-bal tbl-amount neg">${money(c.balance)}</td>
+        <td class="c-date">${dueLabel(c.due_date)}</td>
+        <td class="c-date">${dueLabel(c.cycle_start)}</td>
+        <td class="c-date">${dueLabel(c.cycle_end)}</td>
+        <td><span class="chip ${dChip}">${dTxt}</span></td>
+        <td><span class="chip ${end}">${endTxt}</span></td></tr>`;
+    }).join("") || '<tr><td colspan="8" class="empty-state">لا نتائج مطابقة</td></tr>';
+  };
+  $("cycleSearch").addEventListener("input", draw);
+  $("cycleState").addEventListener("change", draw);
+  bindSortBar("sort-cycle", "cycle", cc, { num: "balance", date: "due_date" }, draw);
+  draw();
 }
 
 /* ---------- Theme (نهاري/ليلي) ---------- */

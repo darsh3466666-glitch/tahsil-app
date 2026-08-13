@@ -280,6 +280,15 @@ table.route-table { table-layout: fixed; min-width: 980px; }
 .seg button.active { background: var(--surface); color: var(--primary); opacity: 1; box-shadow: var(--shadow-sm); }
 .seg button:hover:not(.active) { opacity: 1; }
 
+.sort-bar { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; margin-inline-start: auto; }
+.sort-bar button {
+  border: none; background: none; padding: 7px 13px; border-radius: 8px;
+  font-weight: 700; font-size: .8rem; color: var(--foreground); opacity: .65; transition: all .15s;
+  white-space: nowrap;
+}
+.sort-bar button.active { background: var(--primary); color: #fff; opacity: 1; box-shadow: var(--shadow-sm); }
+.sort-bar button:hover:not(.active) { opacity: 1; }
+
 /* ============ Buttons ============ */
 .btn {
   border: none; border-radius: var(--radius-sm); padding: 9px 18px;

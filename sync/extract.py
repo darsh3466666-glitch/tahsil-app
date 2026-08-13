@@ -222,6 +222,22 @@ def main():
             })
     daily.sort(key=lambda x: x["balance"], reverse=True)
 
+    # عملاء بالدورة: نفس منطق الشيت — عدد الأيام المتبقية = نهاية الدورة (F) - اليوم
+    # القيم السالبة = انتهت الدورة ويستحق التحصيل
+    cycle_clients = []
+    for rn, c in parse("عملاء الدورة "):
+        if rn <= 2 or not c.get("B"):
+            continue
+        cycle_clients.append({
+            "seq": c.get("A", ""),
+            "customer": c.get("B").strip(),
+            "balance": float(c.get("C") or 0),
+            "due_date": xl_date(c.get("D")),
+            "cycle_start": xl_date(c.get("E")),
+            "cycle_end": xl_date(c.get("F")),
+            "days_left": (float(c.get("F") or 0) - today_serial()) if c.get("F") else None,
+        })
+
     # شيتا Daily_Route (محمد شعبان) و Daily_Route_Mostafa (مصطفى)
     # كل شيت فيه كتلتان: "عملاء اليوم" (أعمدة B/C) و "المتأخرات" (أعمدة H/I)
     # الرواتب/التواريخ/الأعمدة كما هي في الشيت (نفس منطق الشيت بالضبط)
@@ -267,6 +283,7 @@ def main():
             "محمد شعبان": daily_route,
             "مصطفى": daily_route_mostafa,
         },
+        "cycle_clients": cycle_clients,
     }
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)

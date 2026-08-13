@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-13 15:07:33",
+  "generated_at": "2026-08-13 15:41:54",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -11047,5 +11047,745 @@
     }
    ]
   }
- }
+ },
+ "cycle_clients": [
+  {
+   "seq": "1",
+   "customer": "محمد مصطفي محمد حسين قيصر",
+   "balance": 479876.5,
+   "due_date": "2026-09-20",
+   "cycle_start": "2025-06-16",
+   "cycle_end": "2025-12-16",
+   "days_left": -240.0
+  },
+  {
+   "seq": "2",
+   "customer": "محمد علي ذيدان (البيضاء)",
+   "balance": 330515.0,
+   "due_date": "2026-07-31",
+   "cycle_start": "2025-06-11",
+   "cycle_end": "2025-12-11",
+   "days_left": -245.0
+  },
+  {
+   "seq": "3",
+   "customer": "مجدي احمد محمد (دوار)",
+   "balance": 0.0,
+   "due_date": "2026-07-29",
+   "cycle_start": "2025-07-02",
+   "cycle_end": "2026-01-02",
+   "days_left": -223.0
+  },
+  {
+   "seq": "4",
+   "customer": "نصر لملوم",
+   "balance": 11370.0,
+   "due_date": "2026-08-23",
+   "cycle_start": "2025-01-27",
+   "cycle_end": "2025-07-27",
+   "days_left": -382.0
+  },
+  {
+   "seq": "5",
+   "customer": "رجب الدريني سيلا",
+   "balance": 67135.0,
+   "due_date": "2026-08-20",
+   "cycle_start": "2025-09-06",
+   "cycle_end": "2026-03-06",
+   "days_left": -160.0
+  },
+  {
+   "seq": "6",
+   "customer": "سيد رشيد الحموى",
+   "balance": 55119.82,
+   "due_date": "2026-09-10",
+   "cycle_start": "2025-12-28",
+   "cycle_end": "2026-06-28",
+   "days_left": -46.0
+  },
+  {
+   "seq": "7",
+   "customer": "خليفه عامر الشيخ على",
+   "balance": 342860.0,
+   "due_date": "2026-09-14",
+   "cycle_start": "2026-02-07",
+   "cycle_end": "2026-08-07",
+   "days_left": -6.0
+  },
+  {
+   "seq": "8",
+   "customer": "حسن محمد حسن(الحطي وحيد كامل)",
+   "balance": 20215.0,
+   "due_date": "2026-08-27",
+   "cycle_start": "2025-12-23",
+   "cycle_end": "2026-06-23",
+   "days_left": -51.0
+  },
+  {
+   "seq": "9",
+   "customer": "جابر عبدالحميد قيصر",
+   "balance": 9290.0,
+   "due_date": "2026-12-18",
+   "cycle_start": "2026-06-20",
+   "cycle_end": "2026-12-20",
+   "days_left": 129.0
+  },
+  {
+   "seq": "10",
+   "customer": "روبي سيد عبد الواحد",
+   "balance": 319865.0,
+   "due_date": "2026-09-17",
+   "cycle_start": "2026-03-15",
+   "cycle_end": "2026-09-15",
+   "days_left": 33.0
+  },
+  {
+   "seq": "11",
+   "customer": "ماهر احمد(مصطفى الصعيدي)",
+   "balance": 0.0,
+   "due_date": "2026-10-09",
+   "cycle_start": "2026-04-11",
+   "cycle_end": "2026-10-11",
+   "days_left": 59.0
+  },
+  {
+   "seq": "12",
+   "customer": "عبود عدلي عبود قيصر",
+   "balance": 291474.92000000004,
+   "due_date": "2026-09-23",
+   "cycle_start": "2026-04-02",
+   "cycle_end": "2026-10-02",
+   "days_left": 50.0
+  },
+  {
+   "seq": "13",
+   "customer": "ايمن عدلي عبود قيصر",
+   "balance": 229284.95,
+   "due_date": "2026-08-27",
+   "cycle_start": "2026-03-07",
+   "cycle_end": "2026-09-07",
+   "days_left": 25.0
+  },
+  {
+   "seq": "14",
+   "customer": "رمضان جابر عبد الحميد (قيصر)",
+   "balance": 8850.0,
+   "due_date": "2026-12-13",
+   "cycle_start": "2026-06-13",
+   "cycle_end": "2026-12-13",
+   "days_left": 122.0
+  },
+  {
+   "seq": "15",
+   "customer": "جمال عبدالشفيق قيصر",
+   "balance": 4180.0,
+   "due_date": "2026-08-21",
+   "cycle_start": "2025-12-16",
+   "cycle_end": "2026-06-16",
+   "days_left": -58.0
+  },
+  {
+   "seq": "16",
+   "customer": "حمدي صلاح عبود قيصر",
+   "balance": 127385.07,
+   "due_date": "2026-10-17",
+   "cycle_start": "2026-02-10",
+   "cycle_end": "2026-08-10",
+   "days_left": -3.0
+  },
+  {
+   "seq": "17",
+   "customer": "علاء عدلي عبدالمعبود قيصر",
+   "balance": 208265.0,
+   "due_date": "2026-09-08",
+   "cycle_start": "2026-02-01",
+   "cycle_end": "2026-08-01",
+   "days_left": -12.0
+  },
+  {
+   "seq": "18",
+   "customer": "احمد محمد مرداشي (وحيد كامل)",
+   "balance": 172389.5,
+   "due_date": "2026-09-07",
+   "cycle_start": "2026-03-04",
+   "cycle_end": "2026-09-04",
+   "days_left": 22.0
+  },
+  {
+   "seq": "19",
+   "customer": "عارف صلاح قيصر",
+   "balance": 96965.0,
+   "due_date": "2026-08-06",
+   "cycle_start": "2025-11-06",
+   "cycle_end": "2026-05-06",
+   "days_left": -99.0
+  },
+  {
+   "seq": "20",
+   "customer": "محروس محمود عبد الوهاب (لطيف)",
+   "balance": 39000.0,
+   "due_date": "2027-01-05",
+   "cycle_start": "2026-08-05",
+   "cycle_end": "2027-02-05",
+   "days_left": 176.0
+  },
+  {
+   "seq": "21",
+   "customer": "محمد رجب عبد الشفيق (قيصر)",
+   "balance": 350630.0,
+   "due_date": "2026-09-02",
+   "cycle_start": "2025-11-15",
+   "cycle_end": "2026-05-15",
+   "days_left": -90.0
+  },
+  {
+   "seq": "22",
+   "customer": "خالد عبد الوهاب (البيضاء)",
+   "balance": 44600.0,
+   "due_date": "2027-01-03",
+   "cycle_start": "2026-08-05",
+   "cycle_end": "2027-02-05",
+   "days_left": 176.0
+  },
+  {
+   "seq": "23",
+   "customer": "سمحي ابو زيد عبد الرحمن (الهداهده)",
+   "balance": 8455.0,
+   "due_date": "2026-08-23",
+   "cycle_start": "2025-12-30",
+   "cycle_end": "2026-06-30",
+   "days_left": -44.0
+  },
+  {
+   "seq": "24",
+   "customer": "شحات قرني البسيونيه",
+   "balance": 40095.0,
+   "due_date": "2026-12-02",
+   "cycle_start": "2026-06-10",
+   "cycle_end": "2026-12-10",
+   "days_left": 119.0
+  },
+  {
+   "seq": "25",
+   "customer": "احمد سيد جبالى مهدى بيه",
+   "balance": 74300.0,
+   "due_date": "2026-11-29",
+   "cycle_start": "2026-06-01",
+   "cycle_end": "2026-12-01",
+   "days_left": 110.0
+  },
+  {
+   "seq": "26",
+   "customer": "عمر مدحت يوسف (الحموى)",
+   "balance": 0.0,
+   "due_date": "2026-05-14",
+   "cycle_start": "2025-10-04",
+   "cycle_end": "2026-04-04",
+   "days_left": -131.0
+  },
+  {
+   "seq": "27",
+   "customer": "رمضان طه ابو شويقى",
+   "balance": 21120.0,
+   "due_date": "2026-09-10",
+   "cycle_start": "2026-02-14",
+   "cycle_end": "2026-08-14",
+   "days_left": 1.0
+  },
+  {
+   "seq": "28",
+   "customer": "حسين احمدحسين (قيصر)",
+   "balance": 31595.0,
+   "due_date": "2026-08-31",
+   "cycle_start": "2025-11-05",
+   "cycle_end": "2026-05-05",
+   "days_left": -100.0
+  },
+  {
+   "seq": "29",
+   "customer": "اسماعيل يوسف (الحموي)",
+   "balance": 0.0,
+   "due_date": "2026-05-24",
+   "cycle_start": "2025-10-13",
+   "cycle_end": "2026-04-13",
+   "days_left": -122.0
+  },
+  {
+   "seq": "30",
+   "customer": "عاطف راغب (الهداهده)",
+   "balance": 17015.0,
+   "due_date": "2026-08-19",
+   "cycle_start": "2026-02-18",
+   "cycle_end": "2026-08-18",
+   "days_left": 5.0
+  },
+  {
+   "seq": "31",
+   "customer": "يوسف ابو الحاج",
+   "balance": 33650.0,
+   "due_date": "2026-08-26",
+   "cycle_start": "2026-03-18",
+   "cycle_end": "2026-09-18",
+   "days_left": 36.0
+  },
+  {
+   "seq": "32",
+   "customer": "حامد ابراهيم (الدوار)",
+   "balance": 18345.0,
+   "due_date": "2026-08-14",
+   "cycle_start": "2025-09-18",
+   "cycle_end": "2026-03-18",
+   "days_left": -148.0
+  },
+  {
+   "seq": "33",
+   "customer": "عبد الله كمال شاهين (معوض)",
+   "balance": 68130.0,
+   "due_date": "2026-08-19",
+   "cycle_start": "2026-05-19",
+   "cycle_end": "2026-11-19",
+   "days_left": 98.0
+  },
+  {
+   "seq": "34",
+   "customer": "حسين عبد الحميد حسين (قيصر)",
+   "balance": 80.0,
+   "due_date": "2026-07-14",
+   "cycle_start": "2025-09-07",
+   "cycle_end": "2026-03-07",
+   "days_left": -159.0
+  },
+  {
+   "seq": "35",
+   "customer": "محمود شعبان فرج الله",
+   "balance": 9555.0,
+   "due_date": "2027-01-14",
+   "cycle_start": "2026-07-25",
+   "cycle_end": "2027-01-25",
+   "days_left": 165.0
+  },
+  {
+   "seq": "36",
+   "customer": "عادل جمعه - البيضاء",
+   "balance": 29780.0,
+   "due_date": "2027-01-02",
+   "cycle_start": "2026-07-05",
+   "cycle_end": "2027-01-05",
+   "days_left": 145.0
+  },
+  {
+   "seq": "37",
+   "customer": "فارس ماهر",
+   "balance": 14290.0,
+   "due_date": "2026-12-14",
+   "cycle_start": "2026-06-20",
+   "cycle_end": "2026-12-20",
+   "days_left": 129.0
+  },
+  {
+   "seq": "38",
+   "customer": "محمد سيد جبالي",
+   "balance": 0.06999999999970896,
+   "due_date": "2026-05-24",
+   "cycle_start": "2025-07-12",
+   "cycle_end": "2026-01-12",
+   "days_left": -213.0
+  },
+  {
+   "seq": "39",
+   "customer": "ربيع جابر عبد الحميد",
+   "balance": 74585.0,
+   "due_date": "2026-09-02",
+   "cycle_start": "2025-12-01",
+   "cycle_end": "2026-06-01",
+   "days_left": -73.0
+  },
+  {
+   "seq": "40",
+   "customer": "عبد الله حسين داوود (محمد علي)",
+   "balance": 0.0,
+   "due_date": "2026-08-02",
+   "cycle_start": "2025-11-15",
+   "cycle_end": "2026-05-15",
+   "days_left": -90.0
+  },
+  {
+   "seq": "41",
+   "customer": "محمد سيد (مصطفي الصعيدي)",
+   "balance": 55285.0,
+   "due_date": "2026-11-14",
+   "cycle_start": "2026-05-17",
+   "cycle_end": "2026-11-17",
+   "days_left": 96.0
+  },
+  {
+   "seq": "42",
+   "customer": "خميس محمد يتيم (قيصر)",
+   "balance": 4350.0,
+   "due_date": "2027-01-05",
+   "cycle_start": "2026-08-05",
+   "cycle_end": "2027-02-05",
+   "days_left": 176.0
+  },
+  {
+   "seq": "43",
+   "customer": "محمد جابر الريفي(الشركه)",
+   "balance": 53390.0,
+   "due_date": "2026-11-17",
+   "cycle_start": "2026-05-30",
+   "cycle_end": "2026-11-30",
+   "days_left": 109.0
+  },
+  {
+   "seq": "44",
+   "customer": "جمعه محمد حسن (الحطي)",
+   "balance": 108000.0,
+   "due_date": "2026-08-15",
+   "cycle_start": "2026-01-31",
+   "cycle_end": "2026-07-31",
+   "days_left": -13.0
+  },
+  {
+   "seq": "45",
+   "customer": "مجدي محمد عبد العال",
+   "balance": 1949800.0,
+   "due_date": "2026-08-28",
+   "cycle_start": "2026-02-23",
+   "cycle_end": "2026-08-23",
+   "days_left": 10.0
+  },
+  {
+   "seq": "46",
+   "customer": "عيد ادريس (ابو بساط)",
+   "balance": 63510.0,
+   "due_date": "2026-11-20",
+   "cycle_start": "2026-05-20",
+   "cycle_end": "2026-11-20",
+   "days_left": 99.0
+  },
+  {
+   "seq": "47",
+   "customer": "رمضان احمد مصطفى",
+   "balance": 217095.0,
+   "due_date": "2026-09-07",
+   "cycle_start": "2026-03-09",
+   "cycle_end": "2026-09-09",
+   "days_left": 27.0
+  },
+  {
+   "seq": "48",
+   "customer": "كرم مسعود ابو بكر (الهداهده)",
+   "balance": 140425.0,
+   "due_date": "2026-10-05",
+   "cycle_start": "2026-04-11",
+   "cycle_end": "2026-10-11",
+   "days_left": 59.0
+  },
+  {
+   "seq": "49",
+   "customer": "بسيوني سيد مصطفى (مصطفى الصعيدي)",
+   "balance": 0.0,
+   "due_date": "2026-07-21",
+   "cycle_start": "2025-07-08",
+   "cycle_end": "2026-01-08",
+   "days_left": -217.0
+  },
+  {
+   "seq": "50",
+   "customer": "حيدر عبد الحميد حسين(قيصر)",
+   "balance": 104475.0,
+   "due_date": "2026-08-30",
+   "cycle_start": "2026-01-07",
+   "cycle_end": "2026-07-07",
+   "days_left": -37.0
+  },
+  {
+   "seq": "51",
+   "customer": "ايمن شحات (مصطفى الصعيدي)",
+   "balance": 8110.0,
+   "due_date": "2026-08-19",
+   "cycle_start": "2025-09-13",
+   "cycle_end": "2026-03-13",
+   "days_left": -153.0
+  },
+  {
+   "seq": "52",
+   "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
+   "balance": 2846380.0,
+   "due_date": "2026-08-15",
+   "cycle_start": "2025-12-08",
+   "cycle_end": "2026-06-08",
+   "days_left": -66.0
+  },
+  {
+   "seq": "53",
+   "customer": "اسامه علي عبد الكريم",
+   "balance": 207270.0,
+   "due_date": "2026-09-01",
+   "cycle_start": "2026-03-15",
+   "cycle_end": "2026-09-15",
+   "days_left": 33.0
+  },
+  {
+   "seq": "54",
+   "customer": "محمد راغب (الهداهده)",
+   "balance": 12965.0,
+   "due_date": "2026-08-09",
+   "cycle_start": "2026-02-14",
+   "cycle_end": "2026-08-14",
+   "days_left": 1.0
+  },
+  {
+   "seq": "55",
+   "customer": "محمود عبد المنعم (اللاهون)",
+   "balance": 73105.0,
+   "due_date": "2026-10-21",
+   "cycle_start": "",
+   "cycle_end": "",
+   "days_left": null
+  },
+  {
+   "seq": "56",
+   "customer": "رفيق مصطفى عبد المعبود (قيصر)",
+   "balance": 5575.0,
+   "due_date": "2026-08-31",
+   "cycle_start": "2026-02-01",
+   "cycle_end": "2026-08-01",
+   "days_left": -12.0
+  },
+  {
+   "seq": "57",
+   "customer": "حماده عبدالجيد فريد (الخرابه)",
+   "balance": 0.0,
+   "due_date": "2026-06-06",
+   "cycle_start": "2026-02-09",
+   "cycle_end": "2026-08-09",
+   "days_left": -4.0
+  },
+  {
+   "seq": "58",
+   "customer": "حسبو احمد حسين (قيصر)",
+   "balance": 6750.0,
+   "due_date": "2027-01-03",
+   "cycle_start": "2026-01-15",
+   "cycle_end": "2026-07-15",
+   "days_left": -29.0
+  },
+  {
+   "seq": "59",
+   "customer": "عماد صلاح عبدالمعبود (قيصر)",
+   "balance": 7035.0,
+   "due_date": "2027-01-31",
+   "cycle_start": "2026-02-07",
+   "cycle_end": "2026-08-07",
+   "days_left": -6.0
+  },
+  {
+   "seq": "60",
+   "customer": "ناصر شعبان هاشم ( طاميه)",
+   "balance": 0.0,
+   "due_date": "2026-06-27",
+   "cycle_start": "2026-04-23",
+   "cycle_end": "2026-10-23",
+   "days_left": 71.0
+  },
+  {
+   "seq": "61",
+   "customer": "نور حميده (البراني)",
+   "balance": 76405.0,
+   "due_date": "2026-09-16",
+   "cycle_start": "2026-05-18",
+   "cycle_end": "2026-11-18",
+   "days_left": 97.0
+  },
+  {
+   "seq": "62",
+   "customer": "ايمن منصور البحيرة(ياسر عبدالصمد)",
+   "balance": 187250.0,
+   "due_date": "2026-08-26",
+   "cycle_start": "2025-12-21",
+   "cycle_end": "2026-06-21",
+   "days_left": -53.0
+  },
+  {
+   "seq": "63",
+   "customer": "مدحت محمد (الخرابه)",
+   "balance": 183815.0,
+   "due_date": "2026-11-06",
+   "cycle_start": "2026-05-06",
+   "cycle_end": "2026-11-06",
+   "days_left": 85.0
+  },
+  {
+   "seq": "64",
+   "customer": "حسني صلاح عبدالمعبود - قيصر",
+   "balance": 95415.0,
+   "due_date": "2026-10-19",
+   "cycle_start": "2026-04-19",
+   "cycle_end": "2026-10-19",
+   "days_left": 67.0
+  },
+  {
+   "seq": "65",
+   "customer": "سيد محمد عبود - قيصر",
+   "balance": 178215.0,
+   "due_date": "2026-06-25",
+   "cycle_start": "2025-10-01",
+   "cycle_end": "2026-04-01",
+   "days_left": -134.0
+  },
+  {
+   "seq": "66",
+   "customer": "مصطفي هاشم  _ طامية",
+   "balance": 4905.0,
+   "due_date": "2026-08-02",
+   "cycle_start": "2025-10-23",
+   "cycle_end": "2026-04-23",
+   "days_left": -112.0
+  },
+  {
+   "seq": "67",
+   "customer": "عثمان ربيع _قيصر",
+   "balance": 186655.0,
+   "due_date": "2026-08-21",
+   "cycle_start": "2025-10-23",
+   "cycle_end": "2026-04-23",
+   "days_left": -112.0
+  },
+  {
+   "seq": "68",
+   "customer": "ممدوح عبد القادر محمد (قيصر)",
+   "balance": 7855.0,
+   "due_date": "2026-08-16",
+   "cycle_start": "2025-12-15",
+   "cycle_end": "2026-06-15",
+   "days_left": -59.0
+  },
+  {
+   "seq": "69",
+   "customer": "ذيدان علي ذيدان (البيضاء)",
+   "balance": 0.0,
+   "due_date": "2026-06-01",
+   "cycle_start": "",
+   "cycle_end": "",
+   "days_left": null
+  },
+  {
+   "seq": "70",
+   "customer": "عبدالله الجمل - كفر الشيخ",
+   "balance": 0.0,
+   "due_date": "2026-06-13",
+   "cycle_start": "2026-01-15",
+   "cycle_end": "2026-07-15",
+   "days_left": -29.0
+  },
+  {
+   "seq": "71",
+   "customer": "شعبان محمد - نجع اللهيب",
+   "balance": 4450.0,
+   "due_date": "2026-08-17",
+   "cycle_start": "2025-12-18",
+   "cycle_end": "2026-06-18",
+   "days_left": -56.0
+  },
+  {
+   "seq": "72",
+   "customer": "حسام عبدالقادر عبدالجليل-الهداهده",
+   "balance": 1420.0,
+   "due_date": "2027-01-01",
+   "cycle_start": "2026-07-01",
+   "cycle_end": "2027-01-01",
+   "days_left": 141.0
+  },
+  {
+   "seq": "73",
+   "customer": "ناصر مصطفى عبدالمعبود-قيصر",
+   "balance": 0.0,
+   "due_date": "2026-06-13",
+   "cycle_start": "2025-12-18",
+   "cycle_end": "2026-06-18",
+   "days_left": -56.0
+  },
+  {
+   "seq": "74",
+   "customer": "حسام عدلي عبود(قيصر)",
+   "balance": 70975.0,
+   "due_date": "2026-09-15",
+   "cycle_start": "2025-12-28",
+   "cycle_end": "2026-06-28",
+   "days_left": -46.0
+  },
+  {
+   "seq": "75",
+   "customer": "فايز دياب(مهدي بيه)",
+   "balance": 6450.0,
+   "due_date": "2026-08-20",
+   "cycle_start": "2026-06-21",
+   "cycle_end": "2026-12-21",
+   "days_left": 130.0
+  },
+  {
+   "seq": "76",
+   "customer": "العمدة / مبارك الديب - الميمون بني سويف",
+   "balance": 0.0,
+   "due_date": "2026-03-21",
+   "cycle_start": "",
+   "cycle_end": "",
+   "days_left": null
+  },
+  {
+   "seq": "77",
+   "customer": "مراد عبد القادر",
+   "balance": -290.0,
+   "due_date": "2026-08-20",
+   "cycle_start": "2026-02-10",
+   "cycle_end": "2026-08-10",
+   "days_left": -3.0
+  },
+  {
+   "seq": "",
+   "customer": "اسلام عيد رضوان - منشية دمو",
+   "balance": 0.0,
+   "due_date": "2026-05-30",
+   "cycle_start": "",
+   "cycle_end": "",
+   "days_left": null
+  },
+  {
+   "seq": "",
+   "customer": "احمد حلمي هليل عبدالحليم",
+   "balance": 56415.0,
+   "due_date": "2026-09-16",
+   "cycle_start": "2026-03-18",
+   "cycle_end": "2026-09-18",
+   "days_left": 36.0
+  },
+  {
+   "seq": "",
+   "customer": "احمد سعيد محمود (اسعد نصيف)",
+   "balance": 850.0,
+   "due_date": "2027-02-02",
+   "cycle_start": "2026-08-05",
+   "cycle_end": "2027-02-05",
+   "days_left": 176.0
+  },
+  {
+   "seq": "",
+   "customer": "محمد جابر عبدالحميد(قيصر)",
+   "balance": 72045.0,
+   "due_date": "2026-11-07",
+   "cycle_start": "2026-06-03",
+   "cycle_end": "2026-12-03",
+   "days_left": 112.0
+  },
+  {
+   "seq": "",
+   "customer": "نزيه حسني (الخرابة)",
+   "balance": 19950.0,
+   "due_date": "2026-08-31",
+   "cycle_start": "2026-07-21",
+   "cycle_end": "2027-01-21",
+   "days_left": 161.0
+  }
+ ]
 }
