@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-13 14:23:46",
+  "generated_at": "2026-08-13 14:24:46",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9728,6 +9728,28 @@
    "notes": ""
   },
   {
+   "customer": "محمد يونس عبد اللطيف(قلمشاه)",
+   "balance": 422393.30000000075,
+   "expected": 100000.0,
+   "collected": 100000.0,
+   "due": "2026-06-01",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "عبد التواب احمد( ميدوم )",
+   "balance": 115975.0,
+   "expected": 60000.0,
+   "collected": 60000.0,
+   "due": "2026-08-17",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
    "customer": "عدلي عبدالهادي (ابو شويقي)",
    "balance": 213395.0,
    "expected": 100000.0,
@@ -9747,28 +9769,6 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 150000.0,
-   "notes": ""
-  },
-  {
-   "customer": "محمد يونس عبد اللطيف(قلمشاه)",
-   "balance": 422393.30000000075,
-   "expected": 100000.0,
-   "collected": 0.0,
-   "due": "2026-06-01",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 100000.0,
-   "notes": ""
-  },
-  {
-   "customer": "عبد التواب احمد( ميدوم )",
-   "balance": 115975.0,
-   "expected": 60000.0,
-   "collected": 0.0,
-   "due": "2026-08-17",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 60000.0,
    "notes": ""
   },
   {
