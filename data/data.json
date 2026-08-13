@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-13 15:41:54",
+  "generated_at": "2026-08-13 16:06:22",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9882,17 +9882,6 @@
    "notes": ""
   },
   {
-   "customer": "عارف صلاح قيصر",
-   "balance": 96965.0,
-   "expected": 60000.0,
-   "collected": 0.0,
-   "due": "2026-08-06",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 60000.0,
-   "notes": ""
-  },
-  {
    "customer": "مزرعة بيور",
    "balance": 634910.0999999996,
    "expected": 200000.0,
@@ -9934,6 +9923,17 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 52000.0,
+   "notes": ""
+  },
+  {
+   "customer": "عارف صلاح قيصر",
+   "balance": 96965.0,
+   "expected": 60000.0,
+   "collected": 50000.0,
+   "due": "2026-08-06",
+   "pay_ratio": "0.83333333333333337",
+   "pay_status": "جزئي",
+   "remaining": 10000.0,
    "notes": ""
   },
   {
