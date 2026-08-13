@@ -289,6 +289,18 @@ table.route-table { table-layout: fixed; min-width: 980px; }
 .sort-bar button.active { background: var(--primary); color: #fff; opacity: 1; box-shadow: var(--shadow-sm); }
 .sort-bar button:hover:not(.active) { opacity: 1; }
 
+.clear-sort {
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted-foreground);
+  padding: 6px 13px; border-radius: 9px; font-weight: 700; font-size: .8rem; cursor: pointer;
+  transition: all .15s; margin-inline-start: auto;
+}
+.clear-sort:hover { color: var(--primary); border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+th[data-sortable] { cursor: pointer; user-select: none; white-space: nowrap; }
+th[data-sortable]:hover { color: var(--primary); }
+th[data-sortable].sorted { color: var(--primary); }
+.th-arrow { display: inline-block; margin-inline-start: 5px; font-size: .7rem; opacity: .75; vertical-align: middle; }
+
 /* ============ Buttons ============ */
 .btn {
   border: none; border-radius: var(--radius-sm); padding: 9px 18px;

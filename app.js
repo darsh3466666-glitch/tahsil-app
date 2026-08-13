@@ -7,7 +7,7 @@ const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو
 const fmt = (n) => (n ?? 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
 
-const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {} };
+const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {}, filters: {} };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -29,30 +29,62 @@ function daysTo(due) {
   return Math.round((target - now) / 86400000);
 }
 
-/* ---------- ترتيب موحّد (فرز) ---------- */
-const SORT_MODES = { sheet: "ترتيب الشيت", bal: "الرصيد الأعلى", old: "الأقدم أولاً", new: "الأحدث أولاً" };
-function sortBarMarkup(id, active) {
-  return `<div class="sort-bar" id="${id}" role="group" aria-label="ترتيب">
-    ${Object.entries(SORT_MODES).map(([k, l]) => `<button data-s="${k}" class="${k === active ? "active" : ""}">${l}</button>`).join("")}
-  </div>`;
+/* ---------- فرز من رؤوس الأعمدة ---------- */
+const RATE_ORDER = { "خطر 🔴 (متوقف/راكد)": 0, "سيء ⚫ (بطيء جداً)": 1, "جيد 🟡 (منتظم)": 2, "ممتاز 🟢 (سريع الدوران)": 3 };
+function sortTh(key, col, type, label, cls) {
+  const s = state.sort[key] || null;
+  const on = s && s.col === col;
+  const arrow = on ? (s.dir === 1 ? "▲" : "▼") : "⇅";
+  return `<th class="${(cls || "")} ${on ? "sorted" : ""}" data-sortable="${key}" data-k="${col}" data-t="${type}" title="اضغط للترتيب">${label}<span class="th-arrow">${arrow}</span></th>`;
 }
-function bindSortBar(id, key, rows, opts, draw) {
-  const bar = $(id);
-  if (!bar) return;
-  bar.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-    state.sort[key] = b.dataset.s;
-    const s = state.sort[key];
-    bar.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x.dataset.s === s));
-    draw();
-  }));
-}
-function sortedBy(rows, mode, numKey, dateKey) {
-  if (!mode || mode === "sheet") return rows;
+function sortArray(rows, key, get) {
+  const s = state.sort[key];
+  if (!s) return rows;
+  const { col, dir, type } = s;
   const r = rows.slice();
-  if (mode === "bal") r.sort((a, b) => (b[numKey] || 0) - (a[numKey] || 0));
-  if (mode === "old") r.sort((a, b) => (a[dateKey] || "").localeCompare(b[dateKey] || ""));
-  if (mode === "new") r.sort((a, b) => (b[dateKey] || "").localeCompare(a[dateKey] || ""));
+  const v = (x) => (get ? get(x, col) : x[col]);
+  r.sort((a, b) => {
+    let av = v(a), bv = v(b);
+    if (type === "num") { av = Number(av) || 0; bv = Number(bv) || 0; return (av - bv) * dir; }
+    if (type === "rate") { av = RATE_ORDER[av] ?? 9; bv = RATE_ORDER[bv] ?? 9; return (av - bv) * dir; }
+    av = String(av ?? ""); bv = String(bv ?? "");
+    return av.localeCompare(bv, "ar") * dir;
+  });
   return r;
+}
+function markSortable(key) {
+  document.querySelectorAll(`th[data-sortable="${key}"]`).forEach((th) => {
+    const s = state.sort[key];
+    const on = s && s.col === th.dataset.k;
+    th.classList.toggle("sorted", on);
+    const arrow = th.querySelector(".th-arrow");
+    if (arrow) arrow.textContent = on ? (s.dir === 1 ? "▲" : "▼") : "⇅";
+  });
+}
+function clearSortBtn(key) {
+  return `<button class="clear-sort" data-clear-sort="${key}" title="الرجوع لترتيب الشيت الأصلي">↺ ترتيب الشيت</button>`;
+}
+
+function viewFn(name) {
+  return { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle }[name];
+}
+
+function onTableClick(e) {
+  const th = e.target.closest("th[data-sortable]");
+  if (th) {
+    const key = th.dataset.sortable;
+    const col = th.dataset.k;
+    const cur = state.sort[key];
+    if (cur && cur.col === col) state.sort[key] = cur.dir === 1 ? { col, dir: -1, type: th.dataset.t } : null;
+    else state.sort[key] = { col, dir: 1, type: th.dataset.t };
+    viewFn(state.view)();
+    return;
+  }
+  const clr = e.target.closest("[data-clear-sort]");
+  if (clr) {
+    state.sort[clr.dataset.clearSort] = null;
+    viewFn(state.view)();
+  }
 }
 
 /* ---------- Syncing ---------- */
@@ -259,10 +291,18 @@ function viewDashboard() {
     <div class="two-col">
       <div class="card">
         <div class="card-head"><span class="card-title">🎯 أهداف اليوم — خط السير</span>
-          ${sortBarMarkup("sort-dash", state.sort.dash)}
+          ${clearSortBtn("dash")}
         </div>
         ${targets.length ? `<div class="table-wrap"><table>
-          <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>الرصيد</th><th>آخر سداد</th><th>آخر زيارة</th><th>حالة</th></tr></thead>
+          <thead><tr>
+            ${sortTh("dash", "customer", "str", "العميل")}
+            ${sortTh("dash", "collector", "str", "المحصل")}
+            ${sortTh("dash", "area", "str", "المنطقة")}
+            ${sortTh("dash", "balance", "num", "الرصيد")}
+            ${sortTh("dash", "last_payment", "date", "آخر سداد")}
+            ${sortTh("dash", "last_visit", "date", "آخر زيارة")}
+            <th>حالة</th>
+          </tr></thead>
           <tbody id="dashTargetsBody"></tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف اليوم</div>`}
       </div>
       <div class="card">
@@ -298,14 +338,13 @@ function viewDashboard() {
     </div>`;
   const drawTargets = () => {
     if (!$("dashTargetsBody")) return;
-    const list = sortedBy(targets, state.sort.dash, "balance", "due");
+    const list = sortArray(targets, "dash");
     $("dashTargetsBody").innerHTML = list.slice(0, 14).map((t) => `<tr>
       <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
       <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
       <td>${dueLabel(t.last_visit)}</td>
       <td><span class="chip chip-red">مستحق</span></td></tr>`).join("");
   };
-  bindSortBar("sort-dash", "dash", targets, {}, drawTargets);
   drawTargets();
 }
 
@@ -324,19 +363,19 @@ function viewRoute() {
         <button data-f="مصطفى">مصطفى</button>
         <button data-f="محمد شعبان">محمد شعبان</button>
       </div>
-      ${sortBarMarkup("sort-route", state.sort.route)}
+      ${clearSortBtn("route")}
     </div>
     <div class="table-wrap"><table class="route-table" id="routeTable">
       <thead><tr>
-        <th class="c-zone">المنطقة</th>
-        <th class="c-name">العميل</th>
-        <th class="c-bal">الرصيد</th>
-        <th class="c-date">آخر سداد</th>
-        <th class="c-date">آخر زيارة</th>
-        <th class="c-date">مستحق</th>
-        <th class="c-cls">التصنيف</th>
-        <th class="c-rating">التقييم</th>
-        <th class="c-note">آخر رد / ملاحظة</th>
+        ${sortTh("route", "area", "str", "المنطقة", "c-zone")}
+        ${sortTh("route", "customer", "str", "العميل", "c-name")}
+        ${sortTh("route", "balance", "num", "الرصيد", "c-bal")}
+        ${sortTh("route", "last_payment", "date", "آخر سداد", "c-date")}
+        ${sortTh("route", "last_visit", "date", "آخر زيارة", "c-date")}
+        ${sortTh("route", "due", "date", "مستحق", "c-date")}
+        ${sortTh("route", "classification", "str", "التصنيف", "c-cls")}
+        ${sortTh("route", "rating", "rate", "التقييم", "c-rating")}
+        ${sortTh("route", "notes", "str", "آخر رد / ملاحظة", "c-note")}
       </tr></thead>
       <tbody id="routeBody"></tbody>
     </table></div>
@@ -349,12 +388,14 @@ function viewRoute() {
     return { t, rl, rating, rChip };
   });
   const applyFilter = (f) => {
+    state.filters.route = f;
     let items = rows.filter(({ t }) => f === "all" || t.collector === f);
-    const s = state.sort.route;
-    if (!s || s === "sheet") items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
-    else if (s === "bal") items.sort((a, b) => b.t.balance - a.t.balance);
-    else if (s === "old") items.sort((a, b) => (a.t.due || "").localeCompare(b.t.due || ""));
-    else if (s === "new") items.sort((a, b) => (b.t.due || "").localeCompare(a.t.due || ""));
+    items = sortArray(items, "route", (x, col) => {
+      if (col === "rating") return x.rating;
+      if (col === "notes") return x.rl ? x.rl.last_response : (x.t.notes || "");
+      return x.t[col];
+    });
+    if (!state.sort.route) items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
     $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }) => `<tr>
       <td class="c-zone">${esc(t.area || "—")}</td>
       <td class="c-name"><b>${esc(t.customer)}</b></td>
@@ -368,8 +409,9 @@ function viewRoute() {
     document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
   };
   document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
-  bindSortBar("sort-route", "route", rows, {}, () => applyFilter(document.querySelector("#routeSeg .active").dataset.f));
-  applyFilter("all");
+  const saved = state.filters.route || "all";
+  document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === saved));
+  applyFilter(saved);
 }
 
 /* ---------- COLLECTORS (تقييم المحصلين) ---------- */
@@ -434,30 +476,34 @@ function viewCollectors() {
     <div class="card">
       <div class="card-head"><span class="card-title">تقييم العملاء — مرتب من الأخطر للأفضل (خط سير)</span>
         <div class="legend"><span><i style="background:var(--danger)"></i>خطر</span><span><i style="background:var(--warning)"></i>سيء</span><span><i style="background:var(--info)"></i>جيد</span><span><i style="background:var(--success)"></i>ممتاز</span></div>
-        ${sortBarMarkup("sort-collectors", state.sort.collectors)}
+        ${clearSortBtn("collectors")}
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>المديونية</th><th>معدل الدوران</th><th>التقييم</th><th>آخر رد</th></tr></thead>
+        <thead><tr>
+          ${sortTh("collectors", "customer", "str", "العميل")}
+          ${sortTh("collectors", "rep", "str", "المحصل")}
+          ${sortTh("collectors", "area", "str", "المنطقة")}
+          ${sortTh("collectors", "target_debt", "num", "المديونية")}
+          ${sortTh("collectors", "turnover", "num", "معدل الدوران")}
+          ${sortTh("collectors", "rating", "rate", "التقييم")}
+          ${sortTh("collectors", "last_response", "str", "آخر رد")}
+        </tr></thead>
         <tbody id="collectBody"></tbody></table></div>
     </div>`;
-  $("collectBody").innerHTML = rows.map(({ r, rep }) => {
-    const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
-    const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-    return `<tr data-rating="${r.rating}" data-bal="${r.target_debt}" data-pay="${r.last_payment}"><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
-      <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
-      <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-      <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;
-  }).join("") || '<tr><td colspan="7" class="empty-state">لا توجد تقييمات</td></tr>';
-  bindSortBar("sort-collectors", "collectors", rows, {}, () => {
-    const s = state.sort.collectors;
-    const trs = Array.from($("collectBody").querySelectorAll("tr"));
-    const get = (tr, k) => tr.getAttribute(k);
-    if (s === "sheet") trs.sort((a, b) => (rateOrder[a.dataset.rating] ?? 0) - (rateOrder[b.dataset.rating] ?? 0));
-    else if (s === "bal") trs.sort((a, b) => (b.dataset.bal || 0) - (a.dataset.bal || 0));
-    else if (s === "old") trs.sort((a, b) => (a.dataset.pay || "").localeCompare(b.dataset.pay || ""));
-    else if (s === "new") trs.sort((a, b) => (b.dataset.pay || "").localeCompare(a.dataset.pay || ""));
-    trs.forEach((tr) => $("collectBody").appendChild(tr));
-  });
+  const drawCollect = () => {
+    if (!$("collectBody")) return;
+    let list = sortArray(rows, "collectors", (x, col) => (col === "rep" ? x.rep : x.r[col]));
+    if (!state.sort.collectors) list = rows.slice().sort((a, b) => (rateOrder[a.r.rating] ?? 0) - (rateOrder[b.r.rating] ?? 0));
+    $("collectBody").innerHTML = list.map(({ r, rep }) => {
+      const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
+      const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
+      return `<tr><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
+        <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
+        <td><span class="chip ${c}">${esc(r.rating)}</span></td>
+        <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;
+    }).join("") || '<tr><td colspan="7" class="empty-state">لا توجد تقييمات</td></tr>';
+  };
+  drawCollect();
 }
 
 /* ---------- RESPONSES (ردود العملاء) ---------- */
@@ -469,20 +515,29 @@ function viewResponses() {
     <div class="card">
       <div class="card-head"><span class="card-title">آخر ردود العملاء — ${rows.length} رد</span>
         <div class="filters">
-          <input class="search-input" id="respSearch" placeholder="ابحث باسم عميل…">
-          <select class="select" id="respArea"><option value="">كل المناطق</option>${byArea.map((a) => `<option>${esc(a)}</option>`).join("")}</select>
+          <input class="search-input" id="respSearch" placeholder="ابحث باسم عميل…" value="${esc(state.filters.respSearch || "")}">
+          <select class="select" id="respArea"><option value="">كل المناطق</option>${byArea.map((a) => `<option ${state.filters.respArea === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select>
         </div>
-        ${sortBarMarkup("sort-resp", state.sort.resp)}
+        ${clearSortBtn("resp")}
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>العميل</th><th>المنطقة</th><th>المديونية المستهدفة</th><th>آخر سداد</th><th>آخر فاتورة</th><th>آخر رد من العميل</th></tr></thead>
+        <thead><tr>
+          ${sortTh("resp", "customer", "str", "العميل")}
+          ${sortTh("resp", "area", "str", "المنطقة")}
+          ${sortTh("resp", "target_debt", "num", "المديونية المستهدفة")}
+          ${sortTh("resp", "last_payment", "date", "آخر سداد")}
+          ${sortTh("resp", "last_invoice", "date", "آخر فاتورة")}
+          ${sortTh("resp", "last_response", "str", "آخر رد من العميل")}
+        </tr></thead>
         <tbody id="respBody"></tbody></table></div>
     </div>`;
   const draw = () => {
     const q = $("respSearch").value.trim();
     const area = $("respArea").value;
+    state.filters.respSearch = q;
+    state.filters.respArea = area;
     let list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
-    list = sortedBy(list, state.sort.resp, "target_debt", "last_payment");
+    list = sortArray(list, "resp");
     $("respBody").innerHTML = list.map((r) => `<tr>
       <td><b>${esc(r.customer)}</b></td><td>${esc(r.area || "—")}</td>
       <td class="tbl-amount neg">${money(r.target_debt)}</td>
@@ -492,7 +547,6 @@ function viewResponses() {
   };
   $("respSearch").addEventListener("input", draw);
   $("respArea").addEventListener("change", draw);
-  bindSortBar("sort-resp", "resp", rows, {}, draw);
   draw();
 }
 
@@ -522,10 +576,20 @@ function viewCashflow() {
     <div class="card">
       <div class="card-head"><span class="card-title">خطة السداد اليومية — ${cf.length} عميل</span>
         <div class="legend"><span><i style="background:var(--success)"></i>مكتمل</span><span><i style="background:var(--warning)"></i>جزئي</span><span><i style="background:var(--danger)"></i>لم يسدد</span></div>
-        ${sortBarMarkup("sort-cash", state.sort.cash)}
+        ${clearSortBtn("cash")}
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>العميل</th><th>الرصيد</th><th>المتوقع</th><th>المحصّل</th><th>النسبة</th><th>موعد السداد</th><th>الحالة</th><th>المتبقي</th><th>ملاحظات</th></tr></thead>
+        <thead><tr>
+          ${sortTh("cash", "customer", "str", "العميل")}
+          ${sortTh("cash", "balance", "num", "الرصيد")}
+          ${sortTh("cash", "expected", "num", "المتوقع")}
+          ${sortTh("cash", "collected", "num", "المحصّل")}
+          ${sortTh("cash", "pay_ratio", "num", "النسبة")}
+          ${sortTh("cash", "due", "date", "موعد السداد")}
+          ${sortTh("cash", "pay_status", "str", "الحالة")}
+          ${sortTh("cash", "remaining", "num", "المتبقي")}
+          ${sortTh("cash", "notes", "str", "ملاحظات")}
+        </tr></thead>
         <tbody id="cashBody"></tbody></table></div>
     </div>`;
   const cashRow = (c) => `<tr>
@@ -540,10 +604,9 @@ function viewCashflow() {
       <td class="note-text">${esc(c.notes || "—")}</td></tr>`;
   const drawCash = () => {
     if (!$("cashBody")) return;
-    const list = sortedBy(cf, state.sort.cash, "expected", "due");
+    const list = sortArray(cf, "cash");
     $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="9" class="empty-state">لا توجد خطة سداد</td></tr>';
   };
-  bindSortBar("sort-cash", "cash", cf, {}, drawCash);
   drawCash();
 }
 
@@ -567,27 +630,31 @@ function viewCycle() {
       <div class="card-head">
         <span class="card-title">عملاء بالدورة — ${cc.length} عميل</span>
         <div class="filters">
-          <input class="search-input" id="cycleSearch" placeholder="ابحث باسم عميل…">
+          <input class="search-input" id="cycleSearch" placeholder="ابحث باسم عميل…" value="${esc(state.filters.cycleSearch || "")}">
           <select class="select" id="cycleState">
-            <option value="">كل الحالات</option><option value="active">دورة كاملة (مستمرة)</option><option value="overdue">انتهت الدورة</option><option value="soon">تستحق خلال أسبوع</option>
+            <option value="">كل الحالات</option><option value="active" ${state.filters.cycleState === "active" ? "selected" : ""}>دورة كاملة (مستمرة)</option><option value="overdue" ${state.filters.cycleState === "overdue" ? "selected" : ""}>انتهت الدورة</option><option value="soon" ${state.filters.cycleState === "soon" ? "selected" : ""}>تستحق خلال أسبوع</option>
           </select>
         </div>
-      </div>
-      <div class="card-head" style="border-top:none;padding-top:0">
-        <span class="card-title" style="font-weight:600;font-size:.82rem">ترتيب العملاء</span>
-        ${sortBarMarkup("sort-cycle", state.sort.cycle)}
+        ${clearSortBtn("cycle")}
       </div>
       <div class="table-wrap"><table class="cycle-table" id="cycleTable">
         <thead><tr>
-          <th>م</th><th class="c-name">العميل</th><th class="c-bal">الرصيد</th>
-          <th class="c-date">موعد التحصيل</th><th class="c-date">بداية الدورة</th><th class="c-date">نهاية الدورة</th>
-          <th>الأيام المتبقية</th><th>حالة الدورة</th>
+          <th>م</th>
+          ${sortTh("cycle", "customer", "str", "العميل", "c-name")}
+          ${sortTh("cycle", "balance", "num", "الرصيد", "c-bal")}
+          ${sortTh("cycle", "due_date", "date", "موعد التحصيل", "c-date")}
+          ${sortTh("cycle", "cycle_start", "date", "بداية الدورة", "c-date")}
+          ${sortTh("cycle", "cycle_end", "date", "نهاية الدورة", "c-date")}
+          ${sortTh("cycle", "days_left", "num", "الأيام المتبقية")}
+          <th>حالة الدورة</th>
         </tr></thead>
         <tbody id="cycleBody"></tbody></table></div>
     </div>`;
   const draw = () => {
     const q = $("cycleSearch").value.trim();
     const st = $("cycleState").value;
+    state.filters.cycleSearch = q;
+    state.filters.cycleState = st;
     let list = cc.filter((c) => {
       if (q && !c.customer.includes(q)) return false;
       const days = c.days_left || 0;
@@ -596,7 +663,7 @@ function viewCycle() {
       if (st === "soon" && (days < 0 || days > 7)) return false;
       return true;
     });
-    list = sortedBy(list, state.sort.cycle, "balance", "due_date");
+    list = sortArray(list, "cycle");
     $("cycleBody").innerHTML = list.map((c, i) => {
       const days = c.days_left || 0;
       const end = days >= 0 ? "chip-green" : "chip-red";
@@ -616,7 +683,6 @@ function viewCycle() {
   };
   $("cycleSearch").addEventListener("input", draw);
   $("cycleState").addEventListener("change", draw);
-  bindSortBar("sort-cycle", "cycle", cc, { num: "balance", date: "due_date" }, draw);
   draw();
 }
 
@@ -636,6 +702,7 @@ function initTheme() {
 /* ---------- Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  document.addEventListener("click", onTableClick);
   $("themeBtn").addEventListener("click", () => {
     const isDark = document.documentElement.classList.contains("dark");
     applyTheme(isDark ? "light" : "dark");
