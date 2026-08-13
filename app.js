@@ -291,7 +291,7 @@ function viewRoute() {
       <div class="seg" id="routeSeg">
         <button data-f="all" class="active">الكل</button>
         <button data-f="مصطفى">مصطفى</button>
-        <button data-f="عبد الرحمن">عبد الرحمن</button>
+        <button data-f="محمد شعبان">محمد شعبان</button>
       </div>
     </div>
     <div id="routeList"></div>
@@ -336,7 +336,8 @@ function viewCollectors() {
   const d = state.data;
   const master = d.master || [];
   const cf = d.cash_flow || [];
-  const reps = ["مصطفى", "عبد الرحمن"];
+  const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
+  const reps = ["مصطفى", "محمد شعبان"];
   const cards = reps.map((rep) => {
     const clients = master.filter((m) => m.collector === rep);
     const active = clients.filter((m) => m.status === "نشط");
@@ -349,11 +350,21 @@ function viewCollectors() {
     const rateOf = new Map(rates.map((r) => [r.customer, r.rating]));
     const dist = { "ممتاز 🟢 (سريع الدوران)": 0, "جيد 🟡 (منتظم)": 0, "سيء ⚫ (بطيء جداً)": 0, "خطر 🔴 (متوقف/راكد)": 0 };
     clients.forEach((m) => { const r = rateOf.get(m.name); if (r && dist[r] !== undefined) dist[r]++; });
+    const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
+    const expCol = cfRep.reduce((s, c) => s + c.expected, 0);
+    const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
     const cfAll = cf.reduce((s, c) => s + c.expected, 0);
     const cfCol = cf.reduce((s, c) => s + c.collected, 0);
+    const pct = expCol > 0 ? Math.round(colCol / expCol * 100) : 0;
+    const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
     return `<div class="card collector-card">
       <div class="col-head"><div class="col-avatar">${esc(rep.substring(0, 1))}</div>
         <div><div class="col-name">${esc(rep)}</div><div class="col-role">محصل ميداني</div></div>
+      </div>
+      <div class="collector-progress">
+        <div class="prog-head"><span>الإنجاز اليومي (المُحصّل)</span><b>${pct}%</b></div>
+        <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100, pct)}%;background:${pctColor}"></div></div>
+        <div class="prog-sub">تم تحصيل ${money(colCol)} من أصل ${money(expCol)} متوقع</div>
       </div>
       <div class="col-stats">
         <div class="col-stat"><b>${money(bal)}</b><span>إجمالي المديونية</span></div>
@@ -469,30 +480,6 @@ function viewCashflow() {
           <td><span class="chip ${chipOf(c.pay_status)}">${statusOf(c.pay_status)}</span></td>
           <td class="tbl-amount ${c.remaining ? "neg" : ""}">${money(c.remaining)}</td>
           <td class="note-text">${esc(c.notes || "—")}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد خطة سداد</td></tr>'}
-        </tbody></table></div>
-    </div>`;
-}
-
-/* ---------- LEDGER (سجل السداد والفواتير) ---------- */
-function viewLedger() {
-  const d = state.data;
-  const pays = (d.payments || []).slice().reverse();
-  const invs = (d.invoices || []).slice().reverse();
-  const payTotal = pays.reduce((s, p) => s + p.amount, 0);
-  const invTotal = invs.reduce((s, i) => s + i.amount, 0);
-  $("view-ledger").innerHTML = `
-    <div class="card">
-      <div class="card-head"><span class="card-title">💰 السدادات (قبض) — ${pays.length} حركة • ${money(payTotal)}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>العميل</th><th>التاريخ</th><th>المبلغ</th></tr></thead>
-        <tbody>${pays.map((p) => `<tr><td><b>${esc(p.customer)}</b></td><td>${dueLabel(p.date)}</td><td class="tbl-amount pos">+${money(p.amount)}</td></tr>`).join("") || '<tr><td colspan="3" class="empty-state">لا توجد سدادات</td></tr>'}
-        </tbody></table></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">🧾 الفواتير — ${invs.length} فاتورة • ${money(invTotal)}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>رقم الفاتورة</th><th>العميل</th><th>التاريخ</th><th>الإجمالي</th></tr></thead>
-        <tbody>${invs.map((i) => `<tr><td>${esc(i.num)}</td><td><b>${esc(i.customer)}</b></td><td>${dueLabel(i.date)}</td><td class="tbl-amount neg">${money(i.amount)}</td></tr>`).join("") || '<tr><td colspan="4" class="empty-state">لا توجد فواتير</td></tr>'}
         </tbody></table></div>
     </div>`;
 }
