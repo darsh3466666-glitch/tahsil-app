@@ -3,7 +3,13 @@
 # ويدفع التحديث لـ GitHub (git add + commit + push) فيتحدث الموقع لايف.
 import os, sys, time, hashlib, subprocess
 
-sys.stdout.reconfigure(encoding="utf-8")
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    if sys.stdout is None:
+        sys.stdout = open(os.devnull, "w")
+    if sys.stderr is None:
+        sys.stderr = open(os.devnull, "w")
 
 SHEET_PATH = r"D:\Mostafa Ibrahim\شيت تحصيل.xlsm"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
