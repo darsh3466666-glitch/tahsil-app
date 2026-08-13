@@ -237,10 +237,11 @@ function viewDashboard() {
           <div class="legend"><span><i style="background:var(--danger)"></i> مستحق اليوم</span></div>
         </div>
         ${targets.length ? `<div class="table-wrap"><table>
-          <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>الرصيد</th><th>آخر سداد</th><th>حالة</th></tr></thead>
+          <thead><tr><th>العميل</th><th>المحصل</th><th>المنطقة</th><th>الرصيد</th><th>آخر سداد</th><th>آخر زيارة</th><th>حالة</th></tr></thead>
           <tbody>${targets.slice(0, 14).map((t) => `<tr>
             <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
             <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
+            <td>${dueLabel(t.last_visit)}</td>
             <td><span class="chip chip-red">مستحق</span></td></tr>`).join("")}
           </tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف اليوم</div>`}
       </div>

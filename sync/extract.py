@@ -208,6 +208,7 @@ def main():
                 "customer": m["name"], "balance": bal, "collector": m["collector"],
                 "area": m["area"], "due": m["due_date"], "classification": m["classification"],
                 "notes": m["notes"], "last_payment": m["last_payment"],
+                "last_visit": m["last_visit"],
             })
     daily.sort(key=lambda x: x["balance"], reverse=True)
 
