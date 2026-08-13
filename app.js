@@ -7,7 +7,38 @@ const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو
 const fmt = (n) => (n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
 
-const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {}, filters: {} };
+/* ---------- سداد يدوي (يخزن محلياً على الجهاز) ---------- */
+const LS_PAYS = "tahsil_manual_pays";
+function loadManualPays() {
+  try { return JSON.parse(localStorage.getItem(LS_PAYS)) || []; } catch (e) { return []; }
+}
+function saveManualPays() {
+  try { localStorage.setItem(LS_PAYS, JSON.stringify(state.manualPays)); } catch (e) {}
+}
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function manualToday(collector) {
+  const t = todayISO();
+  return state.manualPays.filter((p) => p.date === t && (!collector || p.collector === collector));
+}
+function addManualPay(customer, amount, collector) {
+  const p = {
+    id: Date.now() + Math.random(),
+    customer,
+    amount: Number(amount) || 0,
+    collector,
+    date: todayISO(),
+    time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
+  };
+  state.manualPays.push(p);
+  saveManualPays();
+  alertSound("pay");
+  return p;
+}
+
+const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {}, filters: {}, manualPays: loadManualPays() };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -242,6 +273,7 @@ function render() {
 
 function switchView(name, force) {
   state.view = name;
+  if (location.hash !== "#" + name) { try { location.hash = name; } catch (e) {} }
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
   const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
   $("pageTitle").textContent = titles[name];
@@ -256,8 +288,6 @@ function viewDashboard() {
   const d = state.data;
   const master = d.master || [];
   const cf = d.cash_flow || [];
-  const pays = d.payments || [];
-  const invs = d.invoices || [];
   const totalBal = master.reduce((s, m) => s + m.balance, 0);
   const active = master.filter((m) => m.status === "نشط");
   const activeBal = active.reduce((s, m) => s + m.balance, 0);
@@ -265,8 +295,8 @@ function viewDashboard() {
   const targetsMoney = targets.reduce((s, t) => s + t.balance, 0);
   const expToday = cf.reduce((s, c) => s + c.expected, 0);
   const colToday = cf.reduce((s, c) => s + c.collected, 0);
-  const invToday = invs.reduce((s, i) => s + i.amount, 0);
-  const payToday = pays.reduce((s, p) => s + p.amount, 0);
+  const manualPays = manualToday();
+  const payToday = manualPays.reduce((s, p) => s + p.amount, 0);
   const repBal = {};
   master.forEach((m) => { if (m.collector) repBal[m.collector] = (repBal[m.collector] || 0) + m.balance; });
   const repCount = {};
@@ -286,7 +316,7 @@ function viewDashboard() {
       ${kp("أهداف اليوم (خط سير)", money(targetsMoney), `${targets.length} عميل مستحق`, "c-accent")}
       ${kp("المتوقع اليوم — كاش فلو", money(expToday), "خطة السداد", "c-info")}
       ${kp("المُحصّل اليوم", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
-      ${kp("سداد اليوم (قبض)", money(payToday), `فواتير اليوم: ${money(invToday)}`, "c-info")}
+      ${kp("سداد اليوم (قبض)", money(payToday), `${manualPays.length} عملية سداد يدوي`, "c-info")}
     </div>
     <div class="two-col">
       <div class="card">
@@ -295,6 +325,7 @@ function viewDashboard() {
         </div>
         ${targets.length ? `<div class="table-wrap"><table>
           <thead><tr>
+            <th class="row-num">م</th>
             ${sortTh("dash", "customer", "str", "العميل")}
             ${sortTh("dash", "collector", "str", "المحصل")}
             ${sortTh("dash", "area", "str", "المنطقة")}
@@ -315,31 +346,12 @@ function viewDashboard() {
           <div class="bar-track"><div class="bar-fill" style="width:${Math.max(2, bal / maxArea * 100)}%;background:linear-gradient(90deg,var(--primary),var(--secondary))"></div></div>
           <div class="bar-val">${money(bal)}</div></div>`).join("")}
       </div>
-    </div>
-    <div class="two-col">
-      <div class="card">
-        <div class="card-head"><span class="card-title">💸 آخر السدادات (قبض)</span></div>
-        <div class="feed">
-          ${pays.slice().reverse().slice(-8).map((p) => `<div class="feed-item">
-            <div class="feed-icon pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></div>
-            <div class="feed-info"><div class="f-name">${esc(p.customer)}</div><div class="f-sub">${dueLabel(p.date)}</div></div>
-            <div class="feed-amt pos">+${money(p.amount)}</div></div>`).join("") || '<div class="empty-state">لا توجد سدادات مسجلة</div>'}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title">🧾 آخر الفواتير</span></div>
-        <div class="feed">
-          ${invs.slice().reverse().slice(-8).map((i) => `<div class="feed-item">
-            <div class="feed-icon inv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
-            <div class="feed-info"><div class="f-name">${esc(i.customer)}</div><div class="f-sub">فاتورة ${esc(i.num)} • ${dueLabel(i.date)}</div></div>
-            <div class="feed-amt neg">${money(i.amount)}</div></div>`).join("") || '<div class="empty-state">لا توجد فواتير</div>'}
-        </div>
-      </div>
     </div>`;
   const drawTargets = () => {
     if (!$("dashTargetsBody")) return;
     const list = sortArray(targets, "dash");
-    $("dashTargetsBody").innerHTML = list.slice(0, 14).map((t) => `<tr>
+    $("dashTargetsBody").innerHTML = list.slice(0, 14).map((t, i) => `<tr>
+      <td class="row-num">${i + 1}</td>
       <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
       <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
       <td>${dueLabel(t.last_visit)}</td>
@@ -367,6 +379,7 @@ function viewRoute() {
     </div>
     <div class="table-wrap"><table class="route-table" id="routeTable">
       <thead><tr>
+        <th class="row-num">م</th>
         ${sortTh("route", "area", "str", "المنطقة", "c-zone")}
         ${sortTh("route", "customer", "str", "العميل", "c-name")}
         ${sortTh("route", "balance", "num", "الرصيد", "c-bal")}
@@ -395,7 +408,8 @@ function viewRoute() {
       return x.t[col];
     });
     if (!state.sort.route) items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
-    $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }) => `<tr>
+    $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }, i) => `<tr>
+      <td class="row-num">${i + 1}</td>
       <td class="c-zone">${esc(t.area || "—")}</td>
       <td class="c-name"><b>${esc(t.customer)}</b></td>
       <td class="c-bal tbl-amount neg">${money(t.balance)}</td>
@@ -403,7 +417,7 @@ function viewRoute() {
       <td class="c-date">${dueLabel(t.last_visit)}</td>
       <td class="c-date">${dueLabel(t.due)}</td>
       <td class="c-rating">${rating ? `<span class="chip ${rChip}">${esc(rating)}</span>` : "—"}</td>
-      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="8" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
+      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
     document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
   };
   document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
@@ -436,7 +450,10 @@ function viewCollectors() {
     const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
     const expCol = cfRep.reduce((s, c) => s + c.expected, 0);
     const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
-    const pct = expCol > 0 ? Math.round(colCol / expCol * 100) : 0;
+    const repPays = manualToday(rep);
+    const repManual = repPays.reduce((s, p) => s + p.amount, 0);
+    const effCol = colCol + repManual;
+    const pct = expCol > 0 ? Math.round(effCol / expCol * 100) : 0;
     const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
     return `<div class="card collector-card">
       <div class="col-head"><div class="col-avatar">${esc(rep.substring(0, 1))}</div>
@@ -445,7 +462,7 @@ function viewCollectors() {
       <div class="collector-progress">
         <div class="prog-head"><span>الإنجاز اليومي (المُحصّل)</span><b>${pct}%</b></div>
         <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100, pct)}%;background:${pctColor}"></div></div>
-        <div class="prog-sub">تم تحصيل ${money(colCol)} من أصل ${money(expCol)} متوقع</div>
+        <div class="prog-sub">تم تحصيل ${money(effCol)} من أصل ${money(expCol)} متوقع</div>
       </div>
       <div class="col-stats">
         <div class="col-stat"><b>${money(bal)}</b><span>إجمالي مديونية Daily_Route</span></div>
@@ -453,6 +470,11 @@ function viewCollectors() {
         <div class="col-stat"><b>${money(oBal)}</b><span>المتأخرات (${overdueClients.length})</span></div>
         <div class="col-stat"><b>${money(dueBal)}</b><span>مستحق اليوم</span></div>
         <div class="col-stat"><b>${due.length}</b><span>عملاء اليوم (خط سير)</span></div>
+        <div class="col-stat"><b class="pos">${money(repManual)}</b><span>سداد يدوي اليوم (${repPays.length})</span></div>
+      </div>
+      <div style="margin-top:16px;font-weight:800;font-size:.9rem">سداد اليوم (يدوي)</div>
+      <div class="mini-feed" style="margin-top:10px">
+        ${repPays.slice().reverse().slice(-5).map((p) => `<div class="mini-item"><span>${esc(p.customer)}</span><b class="pos">+${money(p.amount)}</b><em>${esc(p.time)}</em></div>`).join("") || '<div class="mini-item muted">لا توجد سدادات مسجلة</div>'}
       </div>
       <div style="margin-top:16px;font-weight:800;font-size:.9rem">تصنيف العملاء (خط سير)</div>
       <div class="rating-strip" style="margin-top:10px">
@@ -470,6 +492,27 @@ function viewCollectors() {
     return { r, rep: m ? m.collector : "" };
   }).sort((a, b) => (rateOrder[a.r.rating] ?? 0) - (rateOrder[b.r.rating] ?? 0));
   $("view-collectors").innerHTML = `
+    <div class="card">
+      <div class="card-head"><span class="card-title">💰 سداد جديد (يدوي)</span><span class="card-sub">سيسجل تحت اسم المحصل ويظهر في تقييمه</span></div>
+      <form id="payForm" class="pay-form">
+        <div class="pay-field">
+          <label>المحصل</label>
+          <select id="payCollector" class="select">${reps.map((r) => `<option>${esc(r)}</option>`).join("")}</select>
+        </div>
+        <div class="pay-field">
+          <label>العميل</label>
+          <input id="payCustomer" class="search-input" list="payCustomerList" placeholder="اكتب اسم العميل…" autocomplete="off">
+          <datalist id="payCustomerList">${master.map((m) => `<option value="${esc(m.name)}"></option>`).join("")}</datalist>
+        </div>
+        <div class="pay-field">
+          <label>المبلغ</label>
+          <input id="payAmount" class="search-input" type="number" min="1" step="any" placeholder="0">
+        </div>
+        <div class="pay-field pay-actions">
+          <button type="submit" class="btn btn-primary">تسجيل السداد ✓</button>
+        </div>
+      </form>
+    </div>
     <div class="collector-grid">${cards}</div>
     <div class="card">
       <div class="card-head"><span class="card-title">تقييم العملاء — مرتب من الأخطر للأفضل (خط سير)</span>
@@ -478,6 +521,7 @@ function viewCollectors() {
       </div>
       <div class="table-wrap"><table>
         <thead><tr>
+          <th class="row-num">م</th>
           ${sortTh("collectors", "customer", "str", "العميل")}
           ${sortTh("collectors", "rep", "str", "المحصل")}
           ${sortTh("collectors", "area", "str", "المنطقة")}
@@ -495,13 +539,27 @@ function viewCollectors() {
     $("collectBody").innerHTML = list.map(({ r, rep }) => {
       const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
       const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-      return `<tr><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
+      return `<tr><td class="row-num">${i + 1}</td><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
         <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
         <td><span class="chip ${c}">${esc(r.rating)}</span></td>
         <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;
-    }).join("") || '<tr><td colspan="7" class="empty-state">لا توجد تقييمات</td></tr>';
+    }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
   };
   drawCollect();
+  const payForm = $("payForm");
+  if (payForm) {
+    payForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const collector = $("payCollector").value;
+      const customer = $("payCustomer").value.trim();
+      const amount = Number($("payAmount").value);
+      if (!customer) return toast("اكتب اسم العميل أولاً", "err");
+      if (!amount || amount <= 0) return toast("أدخل مبلغاً صحيحاً", "err");
+      addManualPay(customer, amount, collector);
+      toast(`تم تسجيل سداد ${money(amount)} من ${customer} تحت ${collector}`, "ok");
+      viewCollectors();
+    });
+  }
 }
 
 /* ---------- RESPONSES (ردود العملاء) ---------- */
@@ -520,6 +578,7 @@ function viewResponses() {
       </div>
       <div class="table-wrap"><table>
         <thead><tr>
+          <th class="row-num">م</th>
           ${sortTh("resp", "customer", "str", "العميل")}
           ${sortTh("resp", "area", "str", "المنطقة")}
           ${sortTh("resp", "target_debt", "num", "المديونية المستهدفة")}
@@ -536,12 +595,12 @@ function viewResponses() {
     state.filters.respArea = area;
     let list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
     list = sortArray(list, "resp");
-    $("respBody").innerHTML = list.map((r) => `<tr>
-      <td><b>${esc(r.customer)}</b></td><td>${esc(r.area || "—")}</td>
+    $("respBody").innerHTML = list.map((r, i) => `<tr>
+      <td class="row-num">${i + 1}</td><td><b>${esc(r.customer)}</b></td><td>${esc(r.area || "—")}</td>
       <td class="tbl-amount neg">${money(r.target_debt)}</td>
       <td>${dueLabel(r.last_payment)}</td><td>${dueLabel(r.last_invoice)}</td>
       <td class="note-text"><span class="chip chip-amber">رد العميل</span> ${esc(r.last_response)}</td></tr>`).join("") ||
-      '<tr><td colspan="6" class="empty-state">لا نتائج مطابقة</td></tr>';
+      '<tr><td colspan="7" class="empty-state">لا نتائج مطابقة</td></tr>';
   };
   $("respSearch").addEventListener("input", draw);
   $("respArea").addEventListener("change", draw);
@@ -578,6 +637,7 @@ function viewCashflow() {
       </div>
       <div class="table-wrap"><table>
         <thead><tr>
+          <th class="row-num">م</th>
           ${sortTh("cash", "customer", "str", "العميل")}
           ${sortTh("cash", "balance", "num", "الرصيد")}
           ${sortTh("cash", "expected", "num", "المتوقع")}
@@ -590,7 +650,8 @@ function viewCashflow() {
         </tr></thead>
         <tbody id="cashBody"></tbody></table></div>
     </div>`;
-  const cashRow = (c) => `<tr>
+  const cashRow = (c, i) => `<tr>
+      <td class="row-num">${i + 1}</td>
       <td><b>${esc(c.customer)}</b></td>
       <td class="tbl-amount">${money(c.balance)}</td>
       <td class="tbl-amount">${money(c.expected)}</td>
@@ -603,7 +664,7 @@ function viewCashflow() {
   const drawCash = () => {
     if (!$("cashBody")) return;
     const list = sortArray(cf, "cash");
-    $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="9" class="empty-state">لا توجد خطة سداد</td></tr>';
+    $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="10" class="empty-state">لا توجد خطة سداد</td></tr>';
   };
   drawCash();
 }
@@ -669,7 +730,7 @@ function viewCycle() {
       const dChip = days < 0 ? "chip-red" : days <= 7 ? "chip-amber" : "chip-green";
       const dTxt = days < 0 ? `منذ ${Math.abs(days)} يوم` : days === 0 ? "اليوم" : `${days} يوم`;
       return `<tr>
-        <td>${esc(c.seq)}</td>
+        <td class="row-num">${i + 1}</td>
         <td class="c-name"><b>${esc(c.customer)}</b></td>
         <td class="c-bal tbl-amount neg">${money(c.balance)}</td>
         <td class="c-date">${dueLabel(c.due_date)}</td>
@@ -708,6 +769,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   $("dateToday").textContent = todayStr();
   document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => switchView(b.dataset.view)));
+  window.addEventListener("hashchange", () => {
+    const name = location.hash.replace("#", "");
+    const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
+    if (views.includes(name)) switchView(name, true);
+  });
   $("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));
   $("refreshBtn").addEventListener("click", () => fetchData());
   $("modalClose").addEventListener("click", closeModal);
@@ -724,6 +790,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else toast("غير مدعوم", "المتصفح لا يدعم الإشعارات", "warn");
   });
   $("brandLogo").addEventListener("click", () => switchView("dashboard"));
+  const initHash = location.hash.replace("#", "");
+  const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
+  if (views.includes(initHash)) switchView(initHash, true);
   fetchData();
   setInterval(() => fetchData(true), POLL_MS);
 });

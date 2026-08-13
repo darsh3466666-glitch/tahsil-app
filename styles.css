@@ -212,6 +212,33 @@ tbody tr:last-child td { border-bottom: none; }
 .pos { color: var(--success); }
 .neg { color: var(--danger); }
 
+/* عمود الترقيم */
+th.row-num, td.row-num { width: 44px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted-text, #8a94a6); font-weight: 600; }
+td.row-num { font-size: .82rem; }
+
+/* نموذج سداد جديد */
+.pay-form { display: grid; grid-template-columns: 1fr 2fr 1fr auto; gap: 12px; align-items: end; }
+.pay-field { display: flex; flex-direction: column; gap: 6px; }
+.pay-field label { font-size: .78rem; font-weight: 700; color: var(--muted-text, #8a94a6); }
+.pay-field .select, .pay-field .search-input { width: 100%; }
+.pay-actions .btn { white-space: nowrap; }
+@media (max-width: 900px) { .pay-form { grid-template-columns: 1fr; } }
+
+/* سدادات المحصل داخل البطاقة */
+.mini-feed { display: flex; flex-direction: column; gap: 6px; }
+.mini-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; border-radius: 10px; background: var(--muted);
+  font-size: .82rem;
+}
+.mini-item span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-item b { white-space: nowrap; }
+.mini-item em { font-style: normal; font-size: .72rem; color: var(--muted-text, #8a94a6); white-space: nowrap; }
+.mini-item.muted { color: var(--muted-text, #8a94a6); justify-content: center; }
+
+/* عنوان فرعي للبطاقات */
+.card-sub { font-size: .8rem; color: var(--muted-text, #8a94a6); font-weight: 600; }
+
 /* جدول خط سير اليوم: أعمدة ثابتة متناسقة على سطر واحد */
 table.route-table { table-layout: fixed; min-width: 920px; }
 .route-table th, .route-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
