@@ -179,7 +179,7 @@ function render() {
   $("navRouteCount").hidden = targets.length === 0;
   $("navRouteCount").textContent = targets.length;
   switchView(state.view, true);
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, ledger: viewLedger };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow };
   fns[state.view]();
 }
 
