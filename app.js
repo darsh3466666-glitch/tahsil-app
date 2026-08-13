@@ -143,11 +143,12 @@ function showToast(a) {
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5.5H9.8a2.8 2.8 0 0 0 0 5.6h4.4a2.8 2.8 0 0 1 0 5.6H7"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>';
   const title = a.type === "pay" ? a.title.replace("💸 ", "") : a.title.replace("🧾 ", "");
-  el.innerHTML = `${icon}<div><div class="toast-title">${esc(title)}</div><div class="toast-body">${esc(a.body)}</div></div>`;
+  el.innerHTML = `${icon}<div style="flex:1;min-width:0"><div class="toast-title">${esc(title)}</div><div class="toast-body">${esc(a.body)}</div></div><button class="toast-close" aria-label="إغلاق">×</button>`;
+  el.querySelector(".toast-close").addEventListener("click", () => el.remove());
   $("toastArea").appendChild(el);
   setTimeout(() => el.remove(), 7000);
   if (a.type === "pay") {
-    el.addEventListener("click", () => switchView("ledger"));
+    el.addEventListener("click", (e) => { if (e.target.classList.contains("toast-close")) return; switchView("ledger"); });
   }
 }
 
