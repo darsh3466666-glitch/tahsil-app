@@ -373,7 +373,6 @@ function viewRoute() {
         ${sortTh("route", "last_payment", "date", "آخر سداد", "c-date")}
         ${sortTh("route", "last_visit", "date", "آخر زيارة", "c-date")}
         ${sortTh("route", "due", "date", "مستحق", "c-date")}
-        ${sortTh("route", "classification", "str", "التصنيف", "c-cls")}
         ${sortTh("route", "rating", "rate", "التقييم", "c-rating")}
         ${sortTh("route", "notes", "str", "آخر رد / ملاحظة", "c-note")}
       </tr></thead>
@@ -403,9 +402,8 @@ function viewRoute() {
       <td class="c-date">${dueLabel(t.last_payment)}</td>
       <td class="c-date">${dueLabel(t.last_visit)}</td>
       <td class="c-date">${dueLabel(t.due)}</td>
-      <td class="c-cls"><span class="chip chip-gray">${esc(t.classification || "—")}</span></td>
       <td class="c-rating">${rating ? `<span class="chip ${rChip}">${esc(rating)}</span>` : "—"}</td>
-      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
+      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="8" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
     document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
   };
   document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
