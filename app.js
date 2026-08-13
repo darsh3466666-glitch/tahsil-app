@@ -294,37 +294,41 @@ function viewRoute() {
         <button data-f="محمد شعبان">محمد شعبان</button>
       </div>
     </div>
-    <div id="routeList"></div>
+    <div class="table-wrap"><table class="route-table" id="routeTable">
+      <thead><tr>
+        <th class="c-zone">المنطقة</th>
+        <th class="c-name">العميل</th>
+        <th class="c-bal">الرصيد</th>
+        <th class="c-date">آخر سداد</th>
+        <th class="c-date">آخر زيارة</th>
+        <th class="c-date">مستحق</th>
+        <th class="c-cls">التصنيف</th>
+        <th class="c-rating">التقييم</th>
+        <th class="c-note">آخر رد / ملاحظة</th>
+      </tr></thead>
+      <tbody id="routeBody"></tbody>
+    </table></div>
   </div>`;
   $("view-route").innerHTML = seg.innerHTML;
+  const rows = targets.map((t) => {
+    const rl = ratingOf.get(t.customer);
+    const rating = rl ? rl.rating : "";
+    const rChip = rating.includes("ممتاز") ? "chip-green" : rating.includes("جيد") ? "chip-blue" : rating.includes("سيء") ? "chip-amber" : "chip-red";
+    return { t, rl, rating, rChip };
+  });
   const applyFilter = (f) => {
-    const items = targets.filter((t) => f === "all" || t.collector === f);
-    const groups = new Map();
-    items.forEach((t) => {
-      const area = t.area || "بدون منطقة";
-      if (!groups.has(area)) groups.set(area, []);
-      groups.get(area).push(t);
-    });
-    const sorted = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
-    $("routeList").innerHTML = sorted.map(([area, list]) => `
-      <div class="route-group">
-        <div class="route-group-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-          ${esc(area)} <span class="route-count">${list.length} عميل</span></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>العميل</th><th>الرصيد</th><th>آخر سداد</th><th>آخر زيارة</th><th>التصنيف</th><th>التقييم</th><th>آخر رد / ملاحظة</th></tr></thead>
-          <tbody>${list.map((t) => {
-            const rl = ratingOf.get(t.customer);
-            const rating = rl ? rl.rating : "";
-            const rChip = rating.includes("ممتاز") ? "chip-green" : rating.includes("جيد") ? "chip-blue" : rating.includes("سيء") ? "chip-amber" : "chip-red";
-            return `<tr>
-              <td><b>${esc(t.customer)}</b></td>
-              <td class="tbl-amount neg">${money(t.balance)}</td>
-              <td>${dueLabel(t.last_payment)}</td><td>${dueLabel(t.last_visit)}</td>
-              <td><span class="chip chip-gray">${esc(t.classification || "—")}</span></td>
-              <td>${rating ? `<span class="chip ${rChip}">${esc(rating)}</span>` : "—"}</td>
-              <td class="note-text">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`;}).join("")}
-          </tbody></table></div>
-      </div>`).join("") || '<div class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</div>';
+    const items = rows.filter(({ t }) => f === "all" || t.collector === f);
+    items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
+    $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }) => `<tr>
+      <td class="c-zone">${esc(t.area || "—")}</td>
+      <td class="c-name"><b>${esc(t.customer)}</b></td>
+      <td class="c-bal tbl-amount neg">${money(t.balance)}</td>
+      <td class="c-date">${dueLabel(t.last_payment)}</td>
+      <td class="c-date">${dueLabel(t.last_visit)}</td>
+      <td class="c-date">${dueLabel(t.due)}</td>
+      <td class="c-cls"><span class="chip chip-gray">${esc(t.classification || "—")}</span></td>
+      <td class="c-rating">${rating ? `<span class="chip ${rChip}">${esc(rating)}</span>` : "—"}</td>
+      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
     document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
   };
   document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
@@ -339,22 +343,22 @@ function viewCollectors() {
   const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
   const reps = ["مصطفى", "محمد شعبان"];
   const cards = reps.map((rep) => {
-    const clients = master.filter((m) => m.collector === rep);
-    const active = clients.filter((m) => m.status === "نشط");
-    const bal = clients.reduce((s, m) => s + m.balance, 0);
-    const actBal = active.reduce((s, m) => s + m.balance, 0);
+    const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
+    const todayClients = sheet.today || [];
+    const overdueClients = sheet.overdue || [];
+    const tBal = todayClients.reduce((s, c) => s + c.balance, 0);
+    const oBal = overdueClients.reduce((s, c) => s + c.balance, 0);
+    const bal = tBal + oBal;
     const due = d.daily_targets.filter((t) => t.collector === rep);
     const dueBal = due.reduce((s, t) => s + t.balance, 0);
-    const paid = master.filter((m) => m.collector === rep && m.status === "عميل خالص");
     const rates = (d.route_line || []).filter((r) => r.rating);
     const rateOf = new Map(rates.map((r) => [r.customer, r.rating]));
+    const clients = master.filter((m) => m.collector === rep);
     const dist = { "ممتاز 🟢 (سريع الدوران)": 0, "جيد 🟡 (منتظم)": 0, "سيء ⚫ (بطيء جداً)": 0, "خطر 🔴 (متوقف/راكد)": 0 };
     clients.forEach((m) => { const r = rateOf.get(m.name); if (r && dist[r] !== undefined) dist[r]++; });
     const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
     const expCol = cfRep.reduce((s, c) => s + c.expected, 0);
     const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
-    const cfAll = cf.reduce((s, c) => s + c.expected, 0);
-    const cfCol = cf.reduce((s, c) => s + c.collected, 0);
     const pct = expCol > 0 ? Math.round(colCol / expCol * 100) : 0;
     const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
     return `<div class="card collector-card">
@@ -367,12 +371,11 @@ function viewCollectors() {
         <div class="prog-sub">تم تحصيل ${money(colCol)} من أصل ${money(expCol)} متوقع</div>
       </div>
       <div class="col-stats">
-        <div class="col-stat"><b>${money(bal)}</b><span>إجمالي المديونية</span></div>
-        <div class="col-stat"><b>${money(actBal)}</b><span>مديونية نشطاء فقط</span></div>
-        <div class="col-stat"><b>${clients.length}</b><span>إجمالي العملاء</span></div>
-        <div class="col-stat"><b>${active.length}</b><span>عملاء نشطاء</span></div>
-        <div class="col-stat"><b>${dueBal > 0 ? money(dueBal) : 0}</b><span>مستحق اليوم</span></div>
-        <div class="col-stat"><b>${due.length}</b><span>عملاء اليوم</span></div>
+        <div class="col-stat"><b>${money(bal)}</b><span>إجمالي مديونية Daily_Route</span></div>
+        <div class="col-stat"><b>${money(tBal)}</b><span>عملاء اليوم (${todayClients.length})</span></div>
+        <div class="col-stat"><b>${money(oBal)}</b><span>المتأخرات (${overdueClients.length})</span></div>
+        <div class="col-stat"><b>${money(dueBal)}</b><span>مستحق اليوم</span></div>
+        <div class="col-stat"><b>${due.length}</b><span>عملاء اليوم (خط سير)</span></div>
       </div>
       <div style="margin-top:16px;font-weight:800;font-size:.9rem">تصنيف العملاء (خط سير)</div>
       <div class="rating-strip" style="margin-top:10px">

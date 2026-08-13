@@ -211,6 +211,23 @@ tbody tr:last-child td { border-bottom: none; }
 .pos { color: var(--success); }
 .neg { color: var(--danger); }
 
+/* جدول خط سير اليوم: أعمدة ثابتة متناسقة على سطر واحد */
+table.route-table { table-layout: fixed; min-width: 980px; }
+.route-table th, .route-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+.route-table .c-zone { width: 13%; }
+.route-table .c-name { width: 20%; }
+.route-table .c-bal { width: 11%; text-align: end; }
+.route-table .c-date { width: 9%; text-align: center; }
+.route-table .c-cls { width: 12%; }
+.route-table .c-rating { width: 13%; }
+.route-table .c-note { width: 13%; }
+.route-table thead th { white-space: normal; text-align: center; }
+.route-table .c-name, .route-table .c-zone, .route-table .c-cls, .route-table .c-rating, .route-table .c-note { text-align: start; }
+.route-table tbody tr:hover { background: var(--muted); opacity: 1; }
+@media (max-width: 1080px) {
+  table.route-table { min-width: 820px; }
+}
+
 /* ============ Chips & badges ============ */
 .chip {
   display: inline-flex; align-items: center; gap: 5px;

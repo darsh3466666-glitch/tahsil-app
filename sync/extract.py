@@ -198,7 +198,7 @@ def main():
         })
 
     # خط سير اليوم لكل محصل (من Master_Data بنفس منطق الشيت: <= TODAY وليس خالص)
-    # تجاهل أي عميل رصيده أقل من 100 ج
+    # تجاهل أي عميل رصيده أقل من 110 ج
     today = today_serial()
     daily = []
     for m in master:
@@ -212,7 +212,7 @@ def main():
                 bal = float(m["balance"])
             except (TypeError, ValueError):
                 bal = 0
-            if bal < 100:
+            if bal < 110:
                 continue
             daily.append({
                 "customer": m["name"], "balance": bal, "collector": m["collector"],
@@ -221,6 +221,33 @@ def main():
                 "last_visit": m["last_visit"],
             })
     daily.sort(key=lambda x: x["balance"], reverse=True)
+
+    # شيتا Daily_Route (محمد شعبان) و Daily_Route_Mostafa (مصطفى)
+    # كل شيت فيه كتلتان: "عملاء اليوم" (أعمدة B/C) و "المتأخرات" (أعمدة H/I)
+    # الرواتب/التواريخ/الأعمدة كما هي في الشيت (نفس منطق الشيت بالضبط)
+    def parse_daily_route(sheetname):
+        today_block, overdue_block = [], []
+        for rn, c in parse(sheetname):
+            if rn <= 2:
+                continue
+            if c.get("B"):
+                today_block.append({
+                    "customer": c.get("B").strip(),
+                    "balance": float(c.get("C") or 0),
+                    "last_invoice": xl_date(c.get("D")),
+                    "last_payment": xl_date(c.get("E")),
+                })
+            if c.get("H"):
+                overdue_block.append({
+                    "customer": c.get("H").strip(),
+                    "balance": float(c.get("I") or 0),
+                    "last_invoice": xl_date(c.get("J")),
+                    "last_payment": xl_date(c.get("K")),
+                })
+        return {"today": today_block, "overdue": overdue_block}
+
+    daily_route = parse_daily_route("Daily_Route")            # محمد شعبان
+    daily_route_mostafa = parse_daily_route("Daily_Route_Mostafa")  # مصطفى
 
     data = {
         "meta": {
@@ -236,6 +263,10 @@ def main():
         "follow_up": follow_up,
         "collector_follow": collector_follow,
         "daily_targets": daily,
+        "route_sheets": {
+            "محمد شعبان": daily_route,
+            "مصطفى": daily_route_mostafa,
+        },
     }
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
