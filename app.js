@@ -4,7 +4,7 @@
 const DATA_URL = "data/data.json";
 const POLL_MS = 30000;
 const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-const fmt = (n) => (n ?? 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 });
+const fmt = (n) => (n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
 
 const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {}, filters: {} };
