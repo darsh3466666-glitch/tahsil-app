@@ -198,6 +198,7 @@ def main():
         })
 
     # خط سير اليوم لكل محصل (من Master_Data بنفس منطق الشيت: <= TODAY وليس خالص)
+    # تجاهل أي عميل رصيده أقل من 100 ج
     today = today_serial()
     daily = []
     for m in master:
@@ -211,6 +212,8 @@ def main():
                 bal = float(m["balance"])
             except (TypeError, ValueError):
                 bal = 0
+            if bal < 100:
+                continue
             daily.append({
                 "customer": m["name"], "balance": bal, "collector": m["collector"],
                 "area": m["area"], "due": m["due_date"], "classification": m["classification"],

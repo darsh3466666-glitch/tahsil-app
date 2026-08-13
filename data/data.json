@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-13 14:31:14",
+  "generated_at": "2026-08-13 14:31:53",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10862,127 +10862,6 @@
    "notes": "الاربعاء 8/7/2026",
    "last_payment": "2026-07-08",
    "last_visit": "2026-07-05"
-  },
-  {
-   "customer": "حسين عبد الحميد حسين (قيصر)",
-   "balance": 80.0,
-   "collector": "محمد شعبان",
-   "area": "قيصر",
-   "due": "2026-07-14",
-   "classification": "عملاء بالدورة",
-   "notes": "الثلاثاء 14/7/2026",
-   "last_payment": "2026-07-13",
-   "last_visit": "2026-07-11"
-  },
-  {
-   "customer": "عبدالقادر حسين داود",
-   "balance": 70.0,
-   "collector": "محمد شعبان",
-   "area": "محمد علي",
-   "due": "2026-07-20",
-   "classification": "فاتورة بفاتورة",
-   "notes": "بكرا اخ النهار 20/7   مع جمادة ابو خضرا ",
-   "last_payment": "2026-07-21",
-   "last_visit": "2026-07-19"
-  },
-  {
-   "customer": "شعبان عويس عبدالعزيز (الخرابة)",
-   "balance": 55.0,
-   "collector": "محمد شعبان",
-   "area": "الخرابه",
-   "due": "2026-04-22",
-   "classification": "فاتورة بفاتورة",
-   "notes": "خالص",
-   "last_payment": "2026-05-20",
-   "last_visit": "2026-04-15"
-  },
-  {
-   "customer": "احمد حسين بريك (مرعب)",
-   "balance": 50.0,
-   "collector": "محمد شعبان",
-   "area": "مرعب",
-   "due": "2026-06-07",
-   "classification": "فاتورة بفاتورة",
-   "notes": "بعد العيد ب اسبوع",
-   "last_payment": "2026-05-31",
-   "last_visit": "2026-05-24"
-  },
-  {
-   "customer": "توفيق محمد - اللاطه",
-   "balance": 50.0,
-   "collector": "محمد شعبان",
-   "area": "اللاطه",
-   "due": "2026-08-09",
-   "classification": "عملاء كاش",
-   "notes": "",
-   "last_payment": "",
-   "last_visit": "2026-08-09"
-  },
-  {
-   "customer": "محمود دبور",
-   "balance": 40.0,
-   "collector": "مصطفى",
-   "area": "القاهره",
-   "due": "2026-06-08",
-   "classification": "عملاء كاش ",
-   "notes": "",
-   "last_payment": "2026-08-09",
-   "last_visit": "2026-06-06"
-  },
-  {
-   "customer": "رجب بكري - ابو شويقي",
-   "balance": 30.0,
-   "collector": "محمد شعبان",
-   "area": "ابو شويقي",
-   "due": "2026-04-18",
-   "classification": "فاتورة بفاتورة",
-   "notes": "بيقبض يوم 18 ف الشهر",
-   "last_payment": "2026-05-19",
-   "last_visit": "2026-04-16"
-  },
-  {
-   "customer": "سيد الهواري - كوم أبو راضي",
-   "balance": 30.0,
-   "collector": "محمد شعبان",
-   "area": "كوم أبو راضي",
-   "due": "2026-07-27",
-   "classification": "عملاء كاش ",
-   "notes": "",
-   "last_payment": "2026-08-09",
-   "last_visit": "2026-06-27"
-  },
-  {
-   "customer": "يونس علي (الشيخ علي)",
-   "balance": 25.0,
-   "collector": "محمد شعبان",
-   "area": "الشيخ علي",
-   "due": "2026-07-08",
-   "classification": "عملاء كاش ",
-   "notes": "بعد بكرا 8/7/2026",
-   "last_payment": "2026-07-08",
-   "last_visit": "2026-07-06"
-  },
-  {
-   "customer": "ابو سريع اشرف البطل (الشوبك)",
-   "balance": 6.0,
-   "collector": "مصطفى",
-   "area": "الشوبك ",
-   "due": "2026-05-23",
-   "classification": "فاتورة بفاتورة",
-   "notes": "وكيل  + فاتورة بفاتورة ",
-   "last_payment": "2026-07-05",
-   "last_visit": "2026-05-23"
-  },
-  {
-   "customer": "محمد سيد جبالي",
-   "balance": 0.06999999999970896,
-   "collector": "محمد شعبان",
-   "area": "مهدي بيه",
-   "due": "2026-05-24",
-   "classification": "عملاء بالدورة",
-   "notes": "تم التصفية عن طريق اخوه",
-   "last_payment": "2026-05-23",
-   "last_visit": "2026-05-17"
   }
  ]
 }

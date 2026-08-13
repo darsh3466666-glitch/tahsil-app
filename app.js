@@ -105,7 +105,7 @@ function fireAlerts(alerts) {
     if (a.type === "pay" && "Notification" in window && Notification.permission === "granted") {
       try {
         const n = new Notification(a.title, { body: a.body, tag: "pay-" + Date.now() });
-        n.onclick = () => { window.focus(); switchView("ledger"); };
+        n.onclick = () => { window.focus(); switchView("dashboard"); };
       } catch (e) { /* ignore */ }
     }
   }
@@ -148,7 +148,7 @@ function showToast(a) {
   $("toastArea").appendChild(el);
   setTimeout(() => el.remove(), 7000);
   if (a.type === "pay") {
-    el.addEventListener("click", (e) => { if (e.target.classList.contains("toast-close")) return; switchView("ledger"); });
+    el.addEventListener("click", (e) => { if (e.target.classList.contains("toast-close")) return; switchView("dashboard"); });
   }
 }
 
@@ -186,11 +186,11 @@ function render() {
 function switchView(name, force) {
   state.view = name;
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي", ledger: "سجل السداد والفواتير" };
+  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي" };
   $("pageTitle").textContent = titles[name];
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
   if (force || !state.data) return;
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, ledger: viewLedger };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow };
   fns[name]();
 }
 
