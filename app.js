@@ -2085,7 +2085,7 @@ function viewMasterData() {
           ${clearSortBtn("master")}
         </div>
         <div id="masterFilteredCount" style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
-          عرض <b>${annotatedMaster.length}</b> من أصل <b>${totalCount}</b> عميل
+          عرض <b>${enrichedMaster.length}</b> من أصل <b>${totalCount}</b> عميل
         </div>
       </div>
     </div>
@@ -2148,7 +2148,7 @@ function viewMasterData() {
     const cls = state.filters.masterClass || "all";
     const bal = state.filters.masterBalance || "all";
 
-    let filtered = annotatedMaster.filter((m) => {
+    let filtered = enrichedMaster.filter((m) => {
       if (q && !matchSearch(`${m.code} ${m.name} ${m.collector} ${m.area} ${m.classification} ${m.notes || ""}`, q)) return false;
       if (st !== "all" && m.today_status !== st) return false;
       if (act !== "all" && m._activityKey !== act) return false;
