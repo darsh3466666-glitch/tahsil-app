@@ -110,6 +110,73 @@
   </div>
 </div>
 
+<!-- نافذة تعديل رد العميل السريع وقوالب الواتساب -->
+<div class="modal" id="responseModal" hidden>
+  <div class="modal-card response-modal-card">
+    <div class="modal-head">
+      <h2 id="respModalTitle">تحديث رد العميل</h2>
+      <button type="button" class="modal-close-btn" id="respModalCloseBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <p class="modal-subtitle" id="respModalCustomer"></p>
+    <div class="form-group" style="text-align: right; margin-bottom: 12px;">
+      <label style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">قوالب ردود جاهزة وسريعة:</label>
+      <div class="preset-chips" id="respPresetChips">
+        <button type="button" class="chip-btn" data-preset="وعد بالسداد غداً إن شاء الله">وعد غداً</button>
+        <button type="button" class="chip-btn" data-preset="سيسدد الأسبوع القادم">الأسبوع القادم</button>
+        <button type="button" class="chip-btn" data-preset="تم استلام دفعة نقداً">استلام دفعة</button>
+        <button type="button" class="chip-btn" data-preset="المحل مغلق / لم يتم العثور عليه">المحل مغلق</button>
+        <button type="button" class="chip-btn" data-preset="لا يرد على الهاتف / غير متاح">لا يرد</button>
+        <button type="button" class="chip-btn" data-preset="طلب مهلة حتى نهاية الشهر">طلب مهلة</button>
+        <button type="button" class="chip-btn" data-preset="يرفض السداد / نزاع فواتير">نزاع فواتير</button>
+      </div>
+    </div>
+    <div class="form-group" style="text-align: right; margin-bottom: 14px;">
+      <label for="respModalInput" style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">نص الرد (الوارد من المحصل عبر الواتساب):</label>
+      <textarea id="respModalInput" class="modal-textarea" rows="3" placeholder="الصق رد العميل هنا..."></textarea>
+    </div>
+    <div class="form-group" style="text-align: right; margin-bottom: 16px;">
+      <label for="respModalComm" style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">تحديث حالة التواصل:</label>
+      <select id="respModalComm" class="select" style="width: 100%;">
+        <option value="تم التواصل">تم التواصل</option>
+        <option value="عميل مستجيب">عميل مستجيب</option>
+        <option value="عميل غير مستجيب">عميل غير مستجيب</option>
+        <option value="لم يتم التواصل">لم يتم التواصل</option>
+        <option value="لم يذهب إليه المحصل">لم يذهب إليه المحصل ❌</option>
+      </select>
+    </div>
+    <div class="modal-actions" style="justify-content: flex-end;">
+      <button type="button" class="btn btn-ghost" id="respModalCancel">إلغاء</button>
+      <button type="button" class="btn btn-primary" id="respModalSave">حفظ الرد والتحديث ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة سداد سريع لعميل معين -->
+<div class="modal" id="quickPayModal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>تسجيل سداد سريع</h2>
+      <button type="button" class="modal-close-btn" id="quickPayCloseBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <p class="modal-subtitle" id="quickPayCustomerName"></p>
+    <div class="quick-pay-meta" id="quickPayMeta"></div>
+    <form id="quickPayForm" style="margin-top: 14px; text-align: right;">
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">المبلغ المسدد (ج.م):</label>
+        <input type="number" id="quickPayAmountInput" class="search-input" style="width: 100%; font-size: 1.1rem; font-weight: 700;" placeholder="0" min="1" step="any" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">المحصل القائم بالتحصيل:</label>
+        <select id="quickPayCollectorSelect" class="select" style="width: 100%;"></select>
+      </div>
+      <div class="modal-actions" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-ghost" id="quickPayCancel">إلغاء</button>
+        <button type="submit" class="btn btn-primary">تأكيد السداد ✓</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- نافذة ملخص خط السير للواتساب -->
 <div class="modal" id="whatsappModal" hidden>
   <div class="modal-card response-modal-card">
