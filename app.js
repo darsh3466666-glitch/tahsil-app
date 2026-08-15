@@ -138,10 +138,24 @@ function saveInteractiveRoute() {
   } catch (e) {}
 }
 
+function cleanResponse(val) {
+  if (val === null || val === undefined) return "";
+  const s = String(val).trim();
+  if (s === "0" || s === 0 || s === "null" || s === "undefined") return "";
+  return s;
+}
+
+function hasRealResponse(val) {
+  return cleanResponse(val).length > 0;
+}
+
 function initInteractiveRouteIfNeeded() {
   if (!state.data) return;
   const existing = loadInteractiveRoute();
   if (existing && Array.isArray(existing) && existing.length > 0) {
+    existing.forEach((x) => {
+      x.response = cleanResponse(x.response);
+    });
     state.interactiveRoute = existing;
     return;
   }
@@ -161,9 +175,8 @@ function initInteractiveRouteIfNeeded() {
     if (addedNames.has(t.customer)) return;
     addedNames.add(t.customer);
     const rl = ratingMap.get(t.customer);
-    const mm = masterMap.get(t.customer);
-    const rep = t.collector || (mm ? mm.collector : "") || "مصطفى";
-    const lastResp = rl ? rl.last_response : (t.notes || (mm ? mm.notes : ""));
+    const rawResp = rl ? rl.last_response : (t.notes || (mm ? mm.notes : ""));
+    const lastResp = cleanResponse(rawResp);
     const bal = Number(t.balance) || (mm ? Number(mm.balance) : 0) || 0;
 
     routeList.push({
@@ -173,8 +186,8 @@ function initInteractiveRouteIfNeeded() {
       balance: bal,
       paid: 0,
       status: "لم يسدد",
-      comm: "لم يتم التواصل",
-      response: lastResp || "",
+      comm: "قيد المتابعة",
+      response: lastResp,
       notVisited: false,
       last_payment: t.last_payment || (mm ? mm.last_payment : ""),
       last_visit: t.last_visit || (mm ? mm.last_visit : ""),
@@ -194,6 +207,7 @@ function initInteractiveRouteIfNeeded() {
       const rl = ratingMap.get(c.customer);
       const mm = masterMap.get(c.customer);
       const bal = Number(c.balance) || (mm ? Number(mm.balance) : 0) || 0;
+      const rawResp = rl ? rl.last_response : (mm ? mm.notes : "");
       routeList.push({
         customer: c.customer,
         collector: repName,
@@ -201,8 +215,8 @@ function initInteractiveRouteIfNeeded() {
         balance: bal,
         paid: 0,
         status: "لم يسدد",
-        comm: "لم يتم التواصل",
-        response: rl ? rl.last_response : (mm ? mm.notes : ""),
+        comm: "قيد المتابعة",
+        response: cleanResponse(rawResp),
         notVisited: false,
         last_payment: c.last_payment || (mm ? mm.last_payment : ""),
         last_visit: mm ? mm.last_visit : "",
@@ -789,8 +803,8 @@ function viewRoute() {
                     <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
                     <td style="min-width: 220px;">
                       <div class="resp-cell-content">
-                        <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
-                          ${c.response ? esc(c.response) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد مسجل</span>`}
+                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "لا يوجد رد"}">
+                          ${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
                         </div>
                         <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
                           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1163,8 +1177,8 @@ function viewCollectors() {
                       <td>
                         <span class="chip ${commChip}">${esc(normComm)}</span>
                       </td>
-                      <td class="note-text" style="max-width: 280px;" title="${esc(c.response || "لا يوجد رد مسجل")}">
-                        ${c.response ? esc(c.response) : `<span style="opacity:0.45; font-style:italic;">—</span>`}
+                      <td class="note-text" style="max-width: 280px;" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "لا يوجد رد"}">
+                        ${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
                       </td>
                     </tr>`;
                 }).join("") : `<tr><td colspan="7" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
@@ -1314,6 +1328,7 @@ function viewCollectors() {
       $("collectBody").innerHTML = list.map(({ r, rep }, idx) => {
         const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
         const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
+        const respTxt = hasRealResponse(r.last_response) ? esc(cleanResponse(r.last_response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`;
         return `<tr>
           <td class="row-num">${idx + 1}</td>
           <td><b>${esc(r.customer)}</b></td>
@@ -1322,7 +1337,7 @@ function viewCollectors() {
           <td class="tbl-amount neg">${money(r.target_debt)}</td>
           <td>${t}</td>
           <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-          <td class="note-text">${esc(r.last_response || "—")}</td>
+          <td class="note-text" style="max-width:250px;" title="${hasRealResponse(r.last_response) ? esc(cleanResponse(r.last_response)) : "لا يوجد رد"}">${respTxt}</td>
         </tr>`;
       }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
     };
@@ -1695,7 +1710,9 @@ function viewMasterData() {
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
                   <td style="text-align: center; font-weight: 700;">${m.agreement_days ? `${esc(m.agreement_days)} يوم` : "—"}</td>
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; ${m.due_date && m.due_date < todayISO() && !isZero ? "color:var(--danger);" : ""}">${esc(m.due_date || "—")}</td>
-                  <td class="note-text" style="max-width: 250px;" title="${esc(m.notes || "")}">${esc(m.notes || "—")}</td>
+                  <td class="note-text" style="max-width: 250px;" title="${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : "لا يوجد رد"}">
+                    ${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
+                  </td>
                 </tr>
               `;
             }).join("") : `<tr><td colspan="14" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`}
@@ -1743,11 +1760,11 @@ function openResponseModal(customerName) {
   const master = (state.data && state.data.master) || [];
   const mm = master.find((x) => x.name === customerName);
 
-  const currentResp = item ? item.response : (mm ? mm.notes : "");
+  const currentResp = cleanResponse(item ? item.response : (mm ? mm.notes : ""));
   const currentComm = normalizeComm(item ? item.comm : "قيد المتابعة");
 
   $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
-  $("respModalInput").value = currentResp || "";
+  $("respModalInput").value = currentResp;
   $("respModalComm").value = currentComm;
   $("responseModal").hidden = false;
   $("respModalInput").focus();
