@@ -736,7 +736,6 @@ function viewRoute() {
       <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
         <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
         <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
-        <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.notVisitedCount / stats.totalCount) * 100) : 0}% تقصير عن الزيارة</div>
       </div>
       <div class="kpi-card c-accent">
         <div class="kpi-label">⏳ قيد المتابعة</div>
@@ -1123,7 +1122,6 @@ function viewCollectors() {
           <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
             <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
             <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
-            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.notVisitedCount / stats.totalCount) * 100) : 0}% لم يزرهم المحصل</div>
           </div>
           <div class="kpi-card c-accent">
             <div class="kpi-label">⏳ قيد المتابعة</div>
