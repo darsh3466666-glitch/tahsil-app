@@ -1095,6 +1095,48 @@ function bindRouteEvents() {
   }
 }
 
+function bindCollectorClientEvents() {
+  const tbody = $("collectorClientTableBody");
+  if (!tbody) return;
+
+  tbody.addEventListener("change", (e) => {
+    const target = e.target;
+    const customer = target.dataset.customer;
+    if (!customer) return;
+
+    const item = state.interactiveRoute.find((x) => x.customer === customer);
+    if (!item) return;
+
+    if (target.dataset.action === "change-comm") {
+      item.comm = target.value;
+      item.notVisited = item.comm === "لم يذهب ولم يتصل";
+      item.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+      saveInteractiveRoute();
+      toast("تحديث التواصل", `تم تحديث الحالة لـ ${customer}`, "pay");
+      viewCollectors();
+    } else if (target.dataset.action === "edit-paid") {
+      const val = target.value.trim();
+      const numVal = val === "" ? 0 : Number(val);
+      setClientPayment(customer, isNaN(numVal) ? 0 : numVal);
+      viewCollectors();
+    }
+  });
+
+  tbody.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.dataset.action === "edit-paid") {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+
+  tbody.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (btn && btn.dataset.action === "edit-resp") {
+      openResponseModal(btn.dataset.customer);
+    }
+  });
+}
+
 /* ---------- 3. COLLECTORS (تقييم المحصلين المرتبط بالتفاعل اللحظي) ---------- */
 function viewCollectors() {
   const d = state.data;
@@ -1103,8 +1145,6 @@ function viewCollectors() {
   initInteractiveRouteIfNeeded();
   const allRoute = state.interactiveRoute || [];
   const master = d.master || [];
-  const cf = d.cash_flow || [];
-  const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
   const reps = ["مصطفى", "محمد شعبان"];
 
   const currentTab = state.filters.collectorTab || "all";
@@ -1115,8 +1155,7 @@ function viewCollectors() {
     const stats = calculateRouteStats(clients);
 
     const repPays = manualToday(rep);
-    const repManual = repPays.reduce((s, p) => s + p.amount, 0);
-    const totalCollected = stats.collected + repManual;
+    const totalCollected = stats.collected;
     const collectionPct = stats.totalDue > 0 ? Math.round((totalCollected / stats.totalDue) * 100) : 0;
     const coveragePct = stats.totalCount > 0 ? Math.round((stats.contactedCount / stats.totalCount) * 100) : 0;
 
@@ -1217,11 +1256,11 @@ function viewCollectors() {
         </div>
       </div>
 
-      <!-- كشف نشاط المحصل وتفاعل العملاء الميداني اليوم مع أسهم الترتيب -->
+      <!-- كشف نشاط المحصل وتفاعل العملاء الميداني اليوم مع أسهم الترتيب والتفاعل المباشر -->
       <div class="card" style="padding: var(--space-4); margin-top: var(--space-4);">
         <div class="card-head">
           <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
-          <span class="card-sub">اضغط على أي عمود لترتيب العملاء حسب الأولوية أو المبالغ أو الردود</span>
+          <span class="card-sub">يمكنك تعديل المبالغ وحالات التواصل والردود مباشرة وتتحدث كافة الكروت والنسب فورياً</span>
           ${clearSortBtn("collector_clients")}
         </div>
 
@@ -1233,43 +1272,89 @@ function viewCollectors() {
                 ${sortTh("collector_clients", "customer", "str", "العميل")}
                 ${sortTh("collector_clients", "area", "str", "المنطقة")}
                 ${sortTh("collector_clients", "balance", "num", "المطلوب")}
+                ${sortTh("collector_clients", "last_invoice", "str", "آخر فاتورة")}
+                ${sortTh("collector_clients", "last_payment", "str", "آخر سداد")}
+                ${sortTh("collector_clients", "response", "str", "رد العميل الوارد")}
                 ${sortTh("collector_clients", "paid", "num", "المسدد اليوم")}
-                ${sortTh("collector_clients", "comm", "str", "حالة الزيارة والتواصل")}
-                ${sortTh("collector_clients", "response", "str", "رد العميل الوارد من الواتساب")}
+                ${sortTh("collector_clients", "status", "str", "الحالة")}
+                ${sortTh("collector_clients", "comm", "str", "حالة التواصل والزيارة")}
               </tr>
             </thead>
-            <tbody>
+            <tbody id="collectorClientTableBody">
               ${(() => {
                 let sortedClients = sortArray(clients, "collector_clients", (x, col) => {
-                  if (col === "paid") return x.paid || 0;
-                  if (col === "balance") return x.balance || 0;
+                  if (col === "paid") return Number(x.paid) || 0;
+                  if (col === "balance") return Number(x.balance) || 0;
+                  if (col === "comm") return normalizeComm(x.comm);
                   return x[col] || "";
                 });
                 return sortedClients.length ? sortedClients.map((c, idx) => {
                   const normComm = normalizeComm(c.comm);
-                  const isDone = c.paid > 0;
+                  const isFullPaid = c.paid >= c.balance && c.balance > 0;
+                  const isPartial = c.paid > 0 && !isFullPaid;
                   const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
-                  const rowClass = isDone ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" ? "row-status-amber" : ""));
-                  const commChip = commChipClassOf(normComm);
+                  const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
+                  const commClass = commClassOf(normComm);
+                  const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
 
                   return `
-                    <tr class="${rowClass}">
+                    <tr class="${rowClass}" data-customer="${esc(c.customer)}">
                       <td class="row-num">${idx + 1}</td>
                       <td>
-                        <b style="font-size:0.92rem;">${esc(c.customer)}</b>
-                        ${c.status === "خالص" ? `<span class="chip chip-green" style="font-size:0.65rem; padding:1px 5px; margin-inline-start:4px;">خالص</span>` : ""}
+                        <b style="font-size:0.92rem; color:var(--foreground);">${esc(c.customer)}</b>
                       </td>
-                      <td>📍 ${esc(c.area || "—")}</td>
+                      <td>📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}</td>
                       <td class="tbl-amount neg">${money(c.balance)}</td>
-                      <td class="tbl-amount ${isDone ? "pos" : ""}">${isDone ? "+" + money(c.paid) : "0 ج.م"}</td>
-                      <td>
-                        <span class="chip ${commChip}">${esc(normComm)}</span>
+                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                        ${esc(c.last_invoice || "__")}
                       </td>
-                      <td class="note-text" style="max-width: 280px;" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
-                        ${formatNoteDisplay(c.response)}
+                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                        ${esc(c.last_payment || "__")}
+                      </td>
+                      <!-- رد العميل -->
+                      <td style="min-width: 200px;">
+                        <div class="resp-cell-content">
+                          <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                            ${formatNoteDisplay(c.response)}
+                          </div>
+                          <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            تعديل
+                          </button>
+                        </div>
+                      </td>
+                      <!-- المسدد اليوم (تعديل مباشر) -->
+                      <td style="min-width: 120px;">
+                        <div style="display: inline-flex; align-items: center; gap: 4px;">
+                          <input 
+                            type="number" 
+                            class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" 
+                            value="${c.paid ? c.paid : ""}" 
+                            placeholder="0" 
+                            min="0" 
+                            step="any"
+                            data-action="edit-paid" 
+                            data-customer="${esc(c.customer)}"
+                            title="عدّل المبلغ واضغط Enter للحفظ وتحديث الكروت فورياً"
+                          />
+                          <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
+                        </div>
+                      </td>
+                      <!-- الحالة -->
+                      <td>
+                        <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
+                      </td>
+                      <!-- حالة التواصل والزيارة -->
+                      <td style="min-width: 165px;">
+                        <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
+                          <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
+                          <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
+                          <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
+                          <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
+                        </select>
                       </td>
                     </tr>`;
-                }).join("") : `<tr><td colspan="7" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
+                }).join("") : `<tr><td colspan="10" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
               })()}
             </tbody>
           </table>
@@ -1301,6 +1386,8 @@ function viewCollectors() {
         </div>
       </div>
     `;
+
+    bindCollectorClientEvents();
   } else {
     // عرض المقارنة الشاملة (All Collectors Side-by-Side Comparison)
     const scorecards = repMetrics.map((data) => {
