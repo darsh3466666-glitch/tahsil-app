@@ -298,6 +298,10 @@ const state = {
     routeRep: "all",
     routeStatus: "all",
     routeSearch: "",
+    masterSearch: "",
+    masterCollector: "all",
+    masterClass: "all",
+    masterBalance: "all",
   },
   manualPays: loadManualPays(),
   interactiveRoute: null,
@@ -507,11 +511,11 @@ function switchView(name, force) {
   state.view = name;
   if (location.hash !== "#" + name) { try { location.hash = name; } catch (e) {} }
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
+  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة", master: "Master Data" };
   $("pageTitle").textContent = titles[name] || "لوحة التحكم";
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
   if (force || !state.data) return;
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle, master: viewMasterData };
   if (fns[name]) fns[name]();
 }
 
@@ -1521,6 +1525,217 @@ function viewCycle() {
   draw();
 }
 
+/* ---------- 7. MASTER DATA (عرض شيت البيانات الرئيسية لايف) ---------- */
+function viewMasterData() {
+  const d = state.data;
+  if (!d) return;
+
+  const master = d.master || [];
+  const reps = ["مصطفى", "محمد شعبان"];
+
+  // التصنيفات الفريدة في الماستر داتا
+  const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
+
+  // تطبيق الفلاتر
+  const fSearch = (state.filters.masterSearch || "").trim().toLowerCase();
+  const fCollector = state.filters.masterCollector || "all";
+  const fClass = state.filters.masterClass || "all";
+  const fBalance = state.filters.masterBalance || "all";
+
+  let filtered = master.filter((m) => {
+    if (fCollector !== "all") {
+      if (fCollector === "none" && m.collector) return false;
+      if (fCollector !== "none" && m.collector !== fCollector) return false;
+    }
+    if (fClass !== "all" && m.classification !== fClass) return false;
+    if (fBalance === "has_debt" && (!m.balance || m.balance <= 0)) return false;
+    if (fBalance === "zero_debt" && m.balance > 0) return false;
+    if (fSearch) {
+      const matchName = (m.name || "").toLowerCase().includes(fSearch);
+      const matchCode = String(m.code || "").toLowerCase().includes(fSearch);
+      const matchArea = (m.area || "").toLowerCase().includes(fSearch);
+      const matchNotes = (m.notes || "").toLowerCase().includes(fSearch);
+      if (!matchName && !matchCode && !matchArea && !matchNotes) return false;
+    }
+    return true;
+  });
+
+  // الفرز التفاعلي
+  filtered = sortArray(filtered, "master", (x, col) => {
+    if (col === "balance" || col === "agreement_days") return Number(x[col]) || 0;
+    return x[col] || "";
+  });
+
+  // حساب المؤشرات
+  const totalCount = master.length;
+  const totalBal = master.reduce((s, m) => s + (Number(m.balance) || 0), 0);
+  const cycleClients = master.filter((m) => m.classification === "عملاء بالدورة");
+  const idleClients = master.filter((m) => m.classification === "عملاء راكدون");
+  const zeroClients = master.filter((m) => (Number(m.balance) || 0) === 0 || m.status === "عميل خالص");
+
+  $("view-master").innerHTML = `
+    <!-- إحصائيات Master Data التنفيذية -->
+    <div class="kpi-grid" style="margin-bottom: var(--space-4);">
+      <div class="kpi-card c-danger">
+        <div class="kpi-label">إجمالي عملاء الشيت</div>
+        <div class="kpi-value">${totalCount} عميل</div>
+        <div class="kpi-sub">قاعدة البيانات الكاملة لايف</div>
+      </div>
+      <div class="kpi-card c-warning">
+        <div class="kpi-label">إجمالي المديونيات الحالية</div>
+        <div class="kpi-value">${money(totalBal)}</div>
+        <div class="kpi-sub">رصيد الشيت الإجمالي</div>
+      </div>
+      <div class="kpi-card c-info">
+        <div class="kpi-label">عملاء بالدورة</div>
+        <div class="kpi-value">${cycleClients.length}</div>
+        <div class="kpi-sub">${money(cycleClients.reduce((s, m) => s + (Number(m.balance) || 0), 0))}</div>
+      </div>
+      <div class="kpi-card c-accent">
+        <div class="kpi-label">عملاء راكدون</div>
+        <div class="kpi-value">${idleClients.length}</div>
+        <div class="kpi-sub">${money(idleClients.reduce((s, m) => s + (Number(m.balance) || 0), 0))}</div>
+      </div>
+      <div class="kpi-card c-success">
+        <div class="kpi-label">عملاء رصيدهم صفر (خالص)</div>
+        <div class="kpi-value">${zeroClients.length}</div>
+        <div class="kpi-sub">عملاء مسددون بالكامل</div>
+      </div>
+    </div>
+
+    <!-- شريط الفلاتر والبحث لشيت Master Data -->
+    <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1;">
+          <input 
+            class="search-input" 
+            id="masterSearchInput" 
+            placeholder="بحث بالاسم، الكود، المنطقة، الملاحظات…" 
+            value="${esc(state.filters.masterSearch || "")}" 
+            style="min-width: 240px; flex: 1;"
+          />
+          <select id="masterCollectorSelect" class="select">
+            <option value="all" ${fCollector === "all" ? "selected" : ""}>كل المحصلين</option>
+            ${reps.map((r) => `<option value="${esc(r)}" ${fCollector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
+            <option value="none" ${fCollector === "none" ? "selected" : ""}>بدون محصل محدد</option>
+          </select>
+          <select id="masterClassSelect" class="select">
+            <option value="all" ${fClass === "all" ? "selected" : ""}>كل التصنيفات</option>
+            ${classifications.map((c) => `<option value="${esc(c)}" ${fClass === c ? "selected" : ""}>${esc(c)}</option>`).join("")}
+          </select>
+          <select id="masterBalanceSelect" class="select">
+            <option value="all" ${fBalance === "all" ? "selected" : ""}>كل الأرصدة</option>
+            <option value="has_debt" ${fBalance === "has_debt" ? "selected" : ""}>عليهم مديونية (> 0)</option>
+            <option value="zero_debt" ${fBalance === "zero_debt" ? "selected" : ""}>خالص (الرصيد 0)</option>
+          </select>
+          ${clearSortBtn("master")}
+        </div>
+        <div style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
+          عرض <b>${filtered.length}</b> من أصل <b>${totalCount}</b> عميل
+        </div>
+      </div>
+    </div>
+
+    <!-- جدول شيت Master Data الكامل لايف -->
+    <div class="card" style="padding: var(--space-4);">
+      <div class="card-head" style="margin-bottom: var(--space-3);">
+        <span class="card-title">📄 شيت Master Data (البيانات الرئيسية المحدثة لايف)</span>
+        <span class="card-sub">عرض مباشر لكافة سجلات العملاء وحساباتهم ومواعيد الزيارات والاستحقاقات</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="interactive-table" style="font-size: 0.84rem;">
+          <thead>
+            <tr>
+              <th class="row-num">م</th>
+              ${sortTh("master", "code", "str", "كود العميل")}
+              ${sortTh("master", "name", "str", "اسم العميل")}
+              ${sortTh("master", "collector", "str", "المحصل")}
+              ${sortTh("master", "area", "str", "المنطقة")}
+              ${sortTh("master", "balance", "num", "المديونية الحالية")}
+              ${sortTh("master", "today_status", "str", "موقف اليوم")}
+              ${sortTh("master", "classification", "str", "التصنيف")}
+              ${sortTh("master", "last_invoice", "str", "آخر فاتورة")}
+              ${sortTh("master", "last_payment", "str", "آخر سداد")}
+              ${sortTh("master", "last_visit", "str", "آخر زيارة")}
+              ${sortTh("master", "agreement_days", "num", "مدة الاتفاق")}
+              ${sortTh("master", "due_date", "str", "تاريخ الاستحقاق")}
+              ${sortTh("master", "notes", "str", "الملاحظات")}
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.length ? filtered.map((m, idx) => {
+              const isZero = (Number(m.balance) || 0) === 0;
+              const rowClass = isZero ? "row-status-green" : "";
+              const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("متأخر") ? "chip-red" : "chip-gray";
+              const classChip = m.classification === "عملاء بالدورة" ? "chip-blue" : m.classification === "عملاء راكدون" ? "chip-amber" : "chip-gray";
+
+              return `
+                <tr class="${rowClass}">
+                  <td class="row-num">${idx + 1}</td>
+                  <td style="font-family:monospace; font-weight:800; color:var(--primary); font-size:0.88rem;">${esc(m.code || "—")}</td>
+                  <td>
+                    <b style="font-size:0.92rem; color:var(--foreground);">${esc(m.name)}</b>
+                  </td>
+                  <td>
+                    <span class="chip chip-gray" style="font-weight:700;">${esc(m.collector || "غير محدد")}</span>
+                  </td>
+                  <td>📍 ${esc(m.area || "—")}</td>
+                  <td class="tbl-amount ${isZero ? "pos" : "neg"}" style="font-size:0.92rem;">
+                    ${money(m.balance)}
+                  </td>
+                  <td>
+                    <span class="chip ${todayClass}">${esc(m.today_status || "—")}</span>
+                  </td>
+                  <td>
+                    <span class="chip ${classChip}">${esc(m.classification || "—")}</span>
+                  </td>
+                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_invoice || "—")}</td>
+                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_payment || "—")}</td>
+                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
+                  <td style="text-align: center; font-weight: 700;">${m.agreement_days ? `${esc(m.agreement_days)} يوم` : "—"}</td>
+                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; ${m.due_date && m.due_date < todayISO() && !isZero ? "color:var(--danger);" : ""}">${esc(m.due_date || "—")}</td>
+                  <td class="note-text" style="max-width: 250px;" title="${esc(m.notes || "")}">${esc(m.notes || "—")}</td>
+                </tr>
+              `;
+            }).join("") : `<tr><td colspan="14" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // ربط أحداث الفلاتر
+  const searchInp = $("masterSearchInput");
+  if (searchInp) {
+    searchInp.addEventListener("input", () => {
+      state.filters.masterSearch = searchInp.value;
+      viewMasterData();
+    });
+  }
+  const colSel = $("masterCollectorSelect");
+  if (colSel) {
+    colSel.addEventListener("change", () => {
+      state.filters.masterCollector = colSel.value;
+      viewMasterData();
+    });
+  }
+  const clsSel = $("masterClassSelect");
+  if (clsSel) {
+    clsSel.addEventListener("change", () => {
+      state.filters.masterClass = clsSel.value;
+      viewMasterData();
+    });
+  }
+  const balSel = $("masterBalanceSelect");
+  if (balSel) {
+    balSel.addEventListener("change", () => {
+      state.filters.masterBalance = balSel.value;
+      viewMasterData();
+    });
+  }
+}
+
 /* ---------- 7. Modals: Response Editor, Quick Pay & WhatsApp Share ---------- */
 function openResponseModal(customerName) {
   state.activeEditingCustomer = customerName;
@@ -1614,7 +1829,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("hashchange", () => {
     const name = location.hash.replace("#", "");
-    const views = ["dashboard", "route", "collectors", "cashflow", "cycle"];
+    const views = ["dashboard", "route", "collectors", "cashflow", "cycle", "master"];
     if (views.includes(name)) switchView(name, true);
   });
 
@@ -1677,6 +1892,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeResponseModal();
     if (state.view === "route") viewRoute();
     else if (state.view === "collectors") viewCollectors();
+    else if (state.view === "master") viewMasterData();
   });
 
 
@@ -1700,7 +1916,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const initHash = location.hash.replace("#", "");
-  const views = ["dashboard", "route", "collectors", "cashflow", "cycle"];
+  const views = ["dashboard", "route", "collectors", "cashflow", "cycle", "master"];
   if (views.includes(initHash)) switchView(initHash, true);
 
   fetchData();
