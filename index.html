@@ -151,31 +151,7 @@
   </div>
 </div>
 
-<!-- نافذة سداد سريع لعميل معين -->
-<div class="modal" id="quickPayModal" hidden>
-  <div class="modal-card">
-    <div class="modal-head">
-      <h2>تسجيل سداد سريع</h2>
-      <button type="button" class="modal-close-btn" id="quickPayCloseBtn" aria-label="إغلاق">&times;</button>
-    </div>
-    <p class="modal-subtitle" id="quickPayCustomerName"></p>
-    <div class="quick-pay-meta" id="quickPayMeta"></div>
-    <form id="quickPayForm" style="margin-top: 14px; text-align: right;">
-      <div class="form-group" style="margin-bottom: 12px;">
-        <label style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">المبلغ المسدد (ج.م):</label>
-        <input type="number" id="quickPayAmountInput" class="search-input" style="width: 100%; font-size: 1.1rem; font-weight: 700;" placeholder="0" min="1" step="any" required>
-      </div>
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label style="font-size: 0.82rem; font-weight: 700; opacity: 0.8; margin-bottom: 6px; display: block;">المحصل القائم بالتحصيل:</label>
-        <select id="quickPayCollectorSelect" class="select" style="width: 100%;"></select>
-      </div>
-      <div class="modal-actions" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-ghost" id="quickPayCancel">إلغاء</button>
-        <button type="submit" class="btn btn-primary">تأكيد السداد ✓</button>
-      </div>
-    </form>
-  </div>
-</div>
+
 
 <!-- نافذة ملخص خط السير للواتساب -->
 <div class="modal" id="whatsappModal" hidden>

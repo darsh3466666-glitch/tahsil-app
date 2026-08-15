@@ -70,6 +70,52 @@ function addManualPay(customer, amount, collector) {
   return p;
 }
 
+function setClientPayment(customer, newTotalPaid) {
+  const item = (state.interactiveRoute || []).find((x) => x.customer === customer);
+  if (!item) return;
+
+  const oldPaid = Number(item.paid) || 0;
+  const numPaid = Math.max(0, Number(newTotalPaid) || 0);
+
+  if (numPaid === oldPaid) return;
+
+  item.paid = numPaid;
+  if (item.paid >= item.balance && item.balance > 0) {
+    item.status = "خالص";
+  } else if (item.paid > 0) {
+    item.status = "سداد جزئي";
+  } else {
+    item.status = "لم يسدد";
+  }
+
+  if (item.paid > 0) {
+    item.comm = "تم الرد / مستجيب";
+    item.notVisited = false;
+  }
+
+  const diff = numPaid - oldPaid;
+  if (diff > 0) {
+    const p = {
+      id: Date.now() + Math.random(),
+      customer,
+      amount: diff,
+      collector: item.collector || "عام",
+      date: todayISO(),
+      time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
+    };
+    state.manualPays.push(p);
+    saveManualPays();
+    alertSound("pay");
+    toast("سداد جديد ✓", `تم تسجيل ${money(diff)} للعميل ${customer}`, "pay");
+  } else {
+    toast("تعديل المسدد", `تم تعديل المبلغ للعميل ${customer} إلى ${money(numPaid)}`, "pay");
+  }
+
+  saveInteractiveRoute();
+  if (state.view === "route") viewRoute();
+  else if (state.view === "collectors") viewCollectors();
+}
+
 /* ---------- إدارة خط السير التفاعلي (Interactive Daily Route) ---------- */
 const LS_ROUTE_PREFIX = "tahsil_interactive_route_";
 
@@ -703,13 +749,21 @@ function viewRoute() {
                     <!-- المبلغ المستحق -->
                     <td class="tbl-amount neg" style="font-size: 0.92rem;">${money(c.balance)}</td>
 
-                    <!-- المسدد -->
-                    <td style="min-width: 110px;">
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <b class="${c.paid > 0 ? "pos" : ""}" style="font-variant-numeric: tabular-nums;">${c.paid ? money(c.paid) : "0 ج.م"}</b>
-                        <button type="button" class="table-pay-btn" data-action="quick-pay" data-customer="${esc(c.customer)}" title="تسجيل سداد فوري">
-                          ＋سداد
-                        </button>
+                    <!-- المسدد (تعديل مباشر وسلس للرقم) -->
+                    <td style="min-width: 125px;">
+                      <div style="display: inline-flex; align-items: center; gap: 4px;">
+                        <input 
+                          type="number" 
+                          class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" 
+                          value="${c.paid ? c.paid : ""}" 
+                          placeholder="0" 
+                          min="0" 
+                          step="any"
+                          data-action="edit-paid" 
+                          data-customer="${esc(c.customer)}"
+                          title="عدّل المبلغ المسدد واضغط Enter أو انقر خارج الخانة للحفظ الفوري"
+                        />
+                        <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
                       </div>
                     </td>
 
@@ -899,6 +953,17 @@ function bindRouteEvents() {
         saveInteractiveRoute();
         toast("تحديث التواصل", `تم تحديث حالة العميل ${customer} إلى (${item.comm})`, "pay");
         viewRoute();
+      } else if (target.dataset.action === "edit-paid") {
+        const val = target.value.trim();
+        const numVal = val === "" ? 0 : Number(val);
+        setClientPayment(customer, isNaN(numVal) ? 0 : numVal);
+      }
+    });
+
+    tbody.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.dataset.action === "edit-paid") {
+        e.preventDefault();
+        e.target.blur();
       }
     });
 
@@ -911,8 +976,6 @@ function bindRouteEvents() {
 
       if (action === "edit-resp") {
         openResponseModal(customer);
-      } else if (action === "quick-pay") {
-        openQuickPayModal(customer);
       } else if (action === "delete-route-client") {
         if (confirm(`هل تريد إزالة العميل "${customer}" من خط سير اليوم؟`)) {
           state.interactiveRoute = state.interactiveRoute.filter((x) => x.customer !== customer);
@@ -1480,25 +1543,7 @@ function closeResponseModal() {
   state.activeEditingCustomer = null;
 }
 
-function openQuickPayModal(customerName) {
-  const item = (state.interactiveRoute || []).find((x) => x.customer === customerName);
-  const reps = ["مصطفى", "محمد شعبان"];
 
-  $("quickPayCustomerName").textContent = `تسجيل سداد للعميل: ${customerName}`;
-  $("quickPayMeta").innerHTML = `
-    <span>المديونية الحالية: <b>${money(item ? item.balance : 0)}</b></span>
-    <span>المسدد اليوم: <b class="pos">${money(item ? item.paid : 0)}</b></span>
-  `;
-  $("quickPayAmountInput").value = "";
-  $("quickPayCollectorSelect").innerHTML = reps.map((r) => `<option value="${esc(r)}" ${item && item.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("");
-  $("quickPayForm").dataset.customer = customerName;
-  $("quickPayModal").hidden = false;
-  $("quickPayAmountInput").focus();
-}
-
-function closeQuickPayModal() {
-  $("quickPayModal").hidden = true;
-}
 
 function openWhatsAppShareModal(collector) {
   const all = state.interactiveRoute || [];
@@ -1546,8 +1591,7 @@ function initTheme() {
 // تصدير الدوال التفاعلية عالمياً
 window.openResponseModal = openResponseModal;
 window.closeResponseModal = closeResponseModal;
-window.openQuickPayModal = openQuickPayModal;
-window.closeQuickPayModal = closeQuickPayModal;
+window.setClientPayment = setClientPayment;
 window.openWhatsAppShareModal = openWhatsAppShareModal;
 window.closeWhatsAppShareModal = closeWhatsAppShareModal;
 window.setCollectorTab = setCollectorTab;
@@ -1635,24 +1679,7 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (state.view === "collectors") viewCollectors();
   });
 
-  // ربط مودال السداد السريع
-  $("quickPayCloseBtn").addEventListener("click", closeQuickPayModal);
-  $("quickPayCancel").addEventListener("click", closeQuickPayModal);
-  $("quickPayModal").addEventListener("click", (e) => { if (e.target === $("quickPayModal")) closeQuickPayModal(); });
 
-  $("quickPayForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const customer = $("quickPayForm").dataset.customer;
-    const amount = Number($("quickPayAmountInput").value);
-    const collector = $("quickPayCollectorSelect").value;
-    if (!customer || !amount || amount <= 0) return toast("تنبيه", "أدخل مبلغاً صحيحاً", "warn");
-
-    addManualPay(customer, amount, collector);
-    toast("سداد جديد ✓", `تم تسجيل ${money(amount)} للعميل ${customer} تحت ${collector}`, "pay");
-    closeQuickPayModal();
-    if (state.view === "route") viewRoute();
-    else if (state.view === "collectors") viewCollectors();
-  });
 
   // ربط مودال الواتساب
   $("waModalCloseBtn").addEventListener("click", closeWhatsAppShareModal);
