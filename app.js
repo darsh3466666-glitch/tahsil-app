@@ -1096,15 +1096,8 @@ function viewCollectors() {
                       <td>
                         <span class="chip ${commChip}">${esc(normComm)}</span>
                       </td>
-                      <td>
-                        <div class="resp-cell-content">
-                          <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
-                            ${c.response ? esc(c.response) : `<span style="opacity:0.4; font-style:italic;">لا يوجد رد مسجل بعد</span>`}
-                          </div>
-                          <button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(c.customer)}')">
-                            ✏️ تعديل
-                          </button>
-                        </div>
+                      <td class="note-text" style="max-width: 280px;" title="${esc(c.response || "لا يوجد رد مسجل")}">
+                        ${c.response ? esc(c.response) : `<span style="opacity:0.45; font-style:italic;">—</span>`}
                       </td>
                     </tr>`;
                 }).join("") : `<tr><td colspan="7" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
