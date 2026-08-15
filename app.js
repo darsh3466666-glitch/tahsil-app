@@ -625,32 +625,37 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- إحصائيات سريعة علوية نظيفة ومتناسقة بنسبة 100% -->
+    <!-- إحصائيات سريعة علوية متوافقة تماماً مع حالات التواصل الجديدة -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
       <div class="kpi-card c-danger">
         <div class="kpi-label">اجمالي المطلوب</div>
         <div class="kpi-value">${money(stats.totalDue)}</div>
-        <div class="kpi-sub">${stats.totalCount} عميل</div>
+        <div class="kpi-sub">${stats.totalCount} عميل مكلف بهم</div>
       </div>
       <div class="kpi-card c-success">
         <div class="kpi-label">المحصل اليوم</div>
         <div class="kpi-value">${money(stats.collected)}</div>
         <div class="kpi-sub">نسبة التحصيل: ${stats.collectionRate.toFixed(1)}%</div>
       </div>
-      <div class="kpi-card c-accent">
-        <div class="kpi-label">المتبقي</div>
-        <div class="kpi-value">${money(stats.remaining)}</div>
-        <div class="kpi-sub">قيد التحصيل</div>
+      <div class="kpi-card" style="border-inline-start: 4px solid var(--success);">
+        <div class="kpi-label" style="color:var(--success);">✅ تم الرد / مستجيب</div>
+        <div class="kpi-value" style="color:var(--success);">${stats.responsiveCount}</div>
+        <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.responsiveCount / stats.totalCount) * 100) : 0}% من العملاء</div>
       </div>
-      <div class="kpi-card c-info">
-        <div class="kpi-label">تم التواصل / الزيارة</div>
-        <div class="kpi-value">${stats.contactedCount}</div>
-        <div class="kpi-sub">${stats.responsiveCount} مستجيب | ${stats.unresponsiveCount} غير مستجيب</div>
+      <div class="kpi-card" style="border-inline-start: 4px solid var(--warning);">
+        <div class="kpi-label" style="color:var(--warning);">⚠️ لا يرد / غير متاح</div>
+        <div class="kpi-value" style="color:var(--warning);">${stats.unresponsiveCount}</div>
+        <div class="kpi-sub">اتصال دون رد / المحل مغلق</div>
       </div>
       <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
-        <div class="kpi-label" style="color:var(--danger);">لم يذهب إليهم ❌</div>
+        <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
         <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
-        <div class="kpi-sub">عملاء لم يزرهم المحصل</div>
+        <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.notVisitedCount / stats.totalCount) * 100) : 0}% تقصير عن الزيارة</div>
+      </div>
+      <div class="kpi-card c-accent">
+        <div class="kpi-label">⏳ قيد المتابعة</div>
+        <div class="kpi-value">${stats.pendingCount}</div>
+        <div class="kpi-sub">بانتظار المتابعة اليوم</div>
       </div>
     </div>
 
@@ -939,14 +944,6 @@ function viewCollectors() {
     const clients = allRoute.filter((c) => c.collector === rep);
     const stats = calculateRouteStats(clients);
 
-    const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
-    const todayClients = sheet.today || [];
-    const overdueClients = sheet.overdue || [];
-    const sheetBal = todayClients.reduce((s, c) => s + c.balance, 0) + overdueClients.reduce((s, c) => s + c.balance, 0);
-
-    const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
-    const expCol = cfRep.reduce((s, c) => s + c.expected, 0) || stats.totalDue;
-    const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
     const repPays = manualToday(rep);
     const repManual = repPays.reduce((s, p) => s + p.amount, 0);
     const totalCollected = stats.collected + repManual;
@@ -957,12 +954,10 @@ function viewCollectors() {
       rep,
       clients,
       stats,
-      sheetBal,
       repPays,
       totalCollected,
       collectionPct,
       coveragePct,
-      expCol,
     };
   });
 
@@ -1000,7 +995,7 @@ function viewCollectors() {
           </div>
         </div>
 
-        <!-- مؤشرات الإنجاز الرئيسية للمحصل -->
+        <!-- مؤشرات الإنجاز الرئيسية للمحصل المتوافقة مع الحالات الجديدة -->
         <div class="kpi-grid" style="margin: var(--space-4) 0 var(--space-3) 0;">
           <div class="kpi-card c-danger">
             <div class="kpi-label">المطلوب الميداني اليوم</div>
@@ -1012,20 +1007,25 @@ function viewCollectors() {
             <div class="kpi-value">${money(totalCollected)}</div>
             <div class="kpi-sub">نسبة التحصيل: ${collectionPct}%</div>
           </div>
-          <div class="kpi-card c-info">
-            <div class="kpi-label">التغطية الميدانية (الزيارات)</div>
-            <div class="kpi-value">${coveragePct}%</div>
-            <div class="kpi-sub">${stats.contactedCount} تمت زيارتهم من ${stats.totalCount}</div>
+          <div class="kpi-card" style="border-inline-start: 4px solid var(--success);">
+            <div class="kpi-label" style="color:var(--success);">✅ تم الرد / مستجيب</div>
+            <div class="kpi-value" style="color:var(--success);">${stats.responsiveCount}</div>
+            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.responsiveCount / stats.totalCount) * 100) : 0}% من إجمالي العملاء</div>
+          </div>
+          <div class="kpi-card" style="border-inline-start: 4px solid var(--warning);">
+            <div class="kpi-label" style="color:var(--warning);">⚠️ لا يرد / غير متاح</div>
+            <div class="kpi-value" style="color:var(--warning);">${stats.unresponsiveCount}</div>
+            <div class="kpi-sub">اتصال دون رد / المحل مغلق</div>
           </div>
           <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
-            <div class="kpi-label" style="color:var(--danger);">لم يذهب إليهم ❌</div>
+            <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
             <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
-            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round(stats.notVisitedCount / stats.totalCount * 100) : 0}% من العملاء لم يزرهم</div>
+            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.notVisitedCount / stats.totalCount) * 100) : 0}% لم يزرهم المحصل</div>
           </div>
           <div class="kpi-card c-accent">
-            <div class="kpi-label">الاستجابة والتعثر</div>
-            <div class="kpi-value">${stats.responsiveCount}</div>
-            <div class="kpi-sub">${stats.unresponsiveCount} غير مستجيب | استجابة: ${stats.responseRate.toFixed(1)}%</div>
+            <div class="kpi-label">⏳ قيد المتابعة</div>
+            <div class="kpi-value">${stats.pendingCount}</div>
+            <div class="kpi-sub">بانتظار المتابعة اليوم</div>
           </div>
         </div>
 
@@ -1040,7 +1040,7 @@ function viewCollectors() {
           </div>
           <div>
             <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800; margin-bottom:5px;">
-              <span>نسبة إنجاز الزيارات الميدانية</span>
+              <span>نسبة التغطية والمجهود الميداني</span>
               <b>${coveragePct}%</b>
             </div>
             <div class="prog-track" style="height:10px;"><div class="prog-fill" style="width:${Math.min(100, coveragePct)}%; background:var(--secondary);"></div></div>
@@ -1147,7 +1147,7 @@ function viewCollectors() {
               <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
               <div>
                 <h3 style="font-size:1.15rem; font-weight:800;">${esc(rep)}</h3>
-                <div style="font-size:0.74rem; opacity:0.7;">محصل ميداني</div>
+                <div style="font-size:0.74rem; opacity:0.7;">محصل ميداني — تقييم اليوم</div>
               </div>
             </div>
           </div>
@@ -1162,23 +1162,27 @@ function viewCollectors() {
             <div class="prog-sub">تم تحصيل ${money(totalCollected)} من أصل ${money(stats.totalDue)} مطلوب</div>
           </div>
 
-          <!-- إحصائيات النشاط -->
+          <!-- إحصائيات النشاط المتوافقة مع الحالات الجديدة بدقة -->
           <div class="stat-pills">
             <div class="stat-pill">
               <b>${stats.totalCount}</b>
               <span>عملاء اليوم</span>
             </div>
-            <div class="stat-pill">
-              <b style="color:var(--info);">${stats.contactedCount} (${coveragePct}%)</b>
-              <span>تمت الزيارة</span>
+            <div class="stat-pill" style="background:color-mix(in srgb, var(--success) 10%, transparent);">
+              <b style="color:var(--success);">${stats.responsiveCount}</b>
+              <span>✅ تم الرد</span>
+            </div>
+            <div class="stat-pill" style="background:color-mix(in srgb, var(--warning) 10%, transparent);">
+              <b style="color:var(--warning);">${stats.unresponsiveCount}</b>
+              <span>⚠️ لا يرد</span>
             </div>
             <div class="stat-pill" style="background:color-mix(in srgb, var(--danger) 10%, transparent);">
               <b style="color:var(--danger);">${stats.notVisitedCount}</b>
-              <span>لم يذهب إليهم ❌</span>
+              <span>❌ لم يذهب</span>
             </div>
             <div class="stat-pill">
-              <b style="color:var(--success);">${stats.responsiveCount}</b>
-              <span>مستجيب</span>
+              <b style="color:var(--foreground); opacity:0.85;">${stats.pendingCount}</b>
+              <span>⏳ قيد المتابعة</span>
             </div>
           </div>
 
@@ -1294,19 +1298,20 @@ function copyCollectorSummaryReport(collector) {
 
   report += `🚶‍♂️ *الموقف الميداني والتغطية:*\n`;
   report += `• إجمالي العملاء: ${stats.totalCount}\n`;
-  report += `• تمت الزيارة / التواصل: ${stats.contactedCount} (${stats.totalCount > 0 ? (stats.contactedCount / stats.totalCount * 100).toFixed(1) : 0}%)\n`;
-  report += `• لم يذهب إليهم: ${stats.notVisitedCount} ❌\n`;
-  report += `• عملاء مستجيبون: ${stats.responsiveCount}\n`;
-  report += `• غير مستجيبين / تعثر: ${stats.unresponsiveCount}\n`;
+  report += `• ✅ تم الرد / مستجيب: ${stats.responsiveCount}\n`;
+  report += `• ⚠️ لا يرد / غير متاح: ${stats.unresponsiveCount}\n`;
+  report += `• ❌ لم يذهب ولم يتصل: ${stats.notVisitedCount}\n`;
+  report += `• ⏳ قيد المتابعة: ${stats.pendingCount}\n`;
   report += `━━━━━━━━━━━━━━━━━━━━━\n`;
   report += `📋 *تفاصيل ردود وسداد العملاء:*\n`;
 
   list.forEach((c, idx) => {
     const isDone = c.paid > 0;
-    const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+    const norm = normalizeComm(c.comm);
+    const commIcon = norm === "تم الرد / مستجيب" ? "✅" : norm === "لا يرد / غير متاح" ? "⚠️" : norm === "لم يذهب ولم يتصل" ? "❌" : "⏳";
     report += `${idx + 1}. *${c.customer}* (${c.area || "—"})\n`;
     report += `   - المطلوب: ${money(c.balance)}${isDone ? ` | مسدد: ${money(c.paid)} ✓` : ""}\n`;
-    report += `   - الموقف: ${isNotVisited ? "❌ لم يذهب إليه المحصل" : c.comm}\n`;
+    report += `   - الموقف: ${commIcon} ${norm}\n`;
     if (c.response) report += `   - الرد: ${c.response}\n`;
     report += `   ───────────────\n`;
   });
