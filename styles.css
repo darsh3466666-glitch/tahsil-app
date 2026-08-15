@@ -432,21 +432,42 @@ th[data-sortable].sorted { color: var(--primary); }
 }
 
 .comm-select {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  border: 1.5px solid var(--border);
   background: var(--surface);
   color: var(--foreground);
   cursor: pointer;
-  max-width: 140px;
+  width: 100%;
+  min-width: 155px;
+  transition: all 0.15s ease;
 }
-.comm-select.st-responsive { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
-.comm-select.st-unresponsive { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
-.comm-select.st-contacted { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
-.comm-select.st-not-visited { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
-.comm-select.st-none { background: var(--muted); color: var(--foreground); }
+.comm-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.comm-select.st-responsive {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+.comm-select.st-unresponsive {
+  background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+}
+.comm-select.st-not-visited {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.comm-select.st-pending, .comm-select.st-none {
+  background: var(--muted);
+  color: var(--foreground);
+  opacity: 0.85;
+}
 
 .resp-cell-content {
   display: flex;
@@ -515,22 +536,6 @@ th[data-sortable].sorted { color: var(--primary); }
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--foreground);
-  cursor: pointer;
-}
-
-.not-visited-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 700;
-  user-select: none;
-}
-.not-visited-check input[type="checkbox"] {
-  accent-color: var(--danger);
-  width: 16px;
-  height: 16px;
   cursor: pointer;
 }
 

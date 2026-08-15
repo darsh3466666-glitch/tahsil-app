@@ -60,9 +60,7 @@ function addManualPay(customer, amount, collector) {
       } else if (item.paid > 0) {
         item.status = "سداد جزئي";
       }
-      if (item.comm === "لم يتم التواصل" || item.comm === "لم يذهب إليه المحصل") {
-        item.comm = "عميل مستجيب";
-      }
+      item.comm = "تم الرد / مستجيب";
       item.notVisited = false;
       saveInteractiveRoute();
     }
@@ -177,13 +175,38 @@ function initInteractiveRouteIfNeeded() {
       item.paid += p.amount;
       if (item.paid >= item.balance && item.balance > 0) item.status = "خالص";
       else if (item.paid > 0) item.status = "سداد جزئي";
-      item.comm = "عميل مستجيب";
+      item.comm = "تم الرد / مستجيب";
       item.notVisited = false;
     }
   });
 
   state.interactiveRoute = routeList;
   saveInteractiveRoute();
+}
+
+function normalizeComm(val) {
+  if (!val) return "قيد المتابعة";
+  const s = String(val).trim();
+  if (s === "تم الرد / مستجيب" || s === "عميل مستجيب" || s === "تم التواصل" || s.includes("مستجيب") || s.includes("تم الرد")) return "تم الرد / مستجيب";
+  if (s === "لا يرد / غير متاح" || s === "عميل غير مستجيب" || s.includes("لا يرد") || s.includes("غير متاح")) return "لا يرد / غير متاح";
+  if (s === "لم يذهب ولم يتصل" || s === "لم يذهب إليه المحصل" || s.includes("لم يذهب")) return "لم يذهب ولم يتصل";
+  return "قيد المتابعة";
+}
+
+function commClassOf(val) {
+  const norm = normalizeComm(val);
+  if (norm === "تم الرد / مستجيب") return "st-responsive";
+  if (norm === "لا يرد / غير متاح") return "st-unresponsive";
+  if (norm === "لم يذهب ولم يتصل") return "st-not-visited";
+  return "st-pending";
+}
+
+function commChipClassOf(val) {
+  const norm = normalizeComm(val);
+  if (norm === "تم الرد / مستجيب") return "chip-green";
+  if (norm === "لا يرد / غير متاح") return "chip-amber";
+  if (norm === "لم يذهب ولم يتصل") return "chip-red";
+  return "chip-gray";
 }
 
 function calculateRouteStats(clients) {
@@ -193,11 +216,11 @@ function calculateRouteStats(clients) {
   const remaining = Math.max(0, totalDue - collected);
   const collectionRate = totalDue > 0 ? (collected / totalDue) * 100 : 0;
 
-  const contactedCount = list.filter((c) => c.comm === "تم التواصل" || c.comm === "عميل مستجيب" || c.comm === "عميل غير مستجيب").length;
-  const responsiveCount = list.filter((c) => c.comm === "عميل مستجيب").length;
-  const unresponsiveCount = list.filter((c) => c.comm === "عميل غير مستجيب").length;
-  const notVisitedCount = list.filter((c) => c.notVisited || c.comm === "لم يذهب إليه المحصل").length;
-  const notContactedCount = list.filter((c) => c.comm === "لم يتم التواصل" || c.comm === "لم يذهب إليه المحصل" || c.notVisited).length;
+  const responsiveCount = list.filter((c) => normalizeComm(c.comm) === "تم الرد / مستجيب").length;
+  const unresponsiveCount = list.filter((c) => normalizeComm(c.comm) === "لا يرد / غير متاح").length;
+  const notVisitedCount = list.filter((c) => normalizeComm(c.comm) === "لم يذهب ولم يتصل" || c.notVisited).length;
+  const contactedCount = responsiveCount + unresponsiveCount;
+  const pendingCount = list.filter((c) => normalizeComm(c.comm) === "قيد المتابعة" && !c.notVisited).length;
   const responseRate = contactedCount > 0 ? (responsiveCount / contactedCount) * 100 : (list.length > 0 ? (responsiveCount / list.length) * 100 : 0);
 
   return {
@@ -209,7 +232,8 @@ function calculateRouteStats(clients) {
     responsiveCount,
     unresponsiveCount,
     notVisitedCount,
-    notContactedCount,
+    pendingCount,
+    notContactedCount: notVisitedCount + pendingCount,
     responseRate,
     totalCount: list.length,
   };
@@ -537,11 +561,12 @@ function viewRoute() {
 
   let filtered = allRoute.filter((item) => {
     if (fRep !== "all" && item.collector !== fRep) return false;
-    if (fStatus === "not_visited" && !item.notVisited && item.comm !== "لم يذهب إليه المحصل") return false;
+    const nComm = normalizeComm(item.comm);
+    if (fStatus === "responded" && nComm !== "تم الرد / مستجيب") return false;
+    if (fStatus === "no_answer" && nComm !== "لا يرد / غير متاح") return false;
+    if (fStatus === "not_visited" && nComm !== "لم يذهب ولم يتصل" && !item.notVisited) return false;
+    if (fStatus === "pending" && (nComm !== "قيد المتابعة" || item.notVisited)) return false;
     if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
-    if (fStatus === "responsive" && item.comm !== "عميل مستجيب") return false;
-    if (fStatus === "unresponsive" && item.comm !== "عميل غير مستجيب") return false;
-    if (fStatus === "pending" && (item.paid > 0 || item.comm === "عميل مستجيب")) return false;
     if (fSearch && !item.customer.toLowerCase().includes(fSearch) && !item.area.toLowerCase().includes(fSearch)) return false;
     return true;
   });
@@ -588,12 +613,12 @@ function viewRoute() {
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           <input class="search-input" id="routeTableSearch" placeholder="بحث باسم العميل أو المنطقة…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:200px;">
           <select id="routeStatusFilter" class="select" style="padding:6px 10px;">
-            <option value="all" ${fStatus === "all" ? "selected" : ""}>كل الحالات</option>
-            <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب إليهم (${allRoute.filter((x) => x.notVisited || x.comm === "لم يذهب إليه المحصل").length})</option>
+            <option value="all" ${fStatus === "all" ? "selected" : ""}>كل حالات التواصل</option>
+            <option value="responded" ${fStatus === "responded" ? "selected" : ""}>✅ تم الرد / مستجيب (${allRoute.filter((x) => normalizeComm(x.comm) === "تم الرد / مستجيب").length})</option>
+            <option value="no_answer" ${fStatus === "no_answer" ? "selected" : ""}>⚠️ لا يرد / غير متاح (${allRoute.filter((x) => normalizeComm(x.comm) === "لا يرد / غير متاح").length})</option>
+            <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب ولم يتصل (${allRoute.filter((x) => normalizeComm(x.comm) === "لم يذهب ولم يتصل" || x.notVisited).length})</option>
+            <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة (${allRoute.filter((x) => normalizeComm(x.comm) === "قيد المتابعة" && !x.notVisited).length})</option>
             <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد اليوم (${allRoute.filter((x) => x.paid > 0).length})</option>
-            <option value="responsive" ${fStatus === "responsive" ? "selected" : ""}>✅ عميل مستجيب (${allRoute.filter((x) => x.comm === "عميل مستجيب").length})</option>
-            <option value="unresponsive" ${fStatus === "unresponsive" ? "selected" : ""}>⚠️ عميل غير مستجيب (${allRoute.filter((x) => x.comm === "عميل غير مستجيب").length})</option>
-            <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة / لم يسدد</option>
           </select>
           ${clearSortBtn("route")}
         </div>
@@ -647,11 +672,12 @@ function viewRoute() {
           </thead>
           <tbody id="routeTableBody">
               ${filtered.length ? filtered.map((c, idx) => {
-                const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+                const normComm = normalizeComm(c.comm);
+                const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
                 const isFullPaid = c.paid >= c.balance && c.balance > 0;
                 const isPartial = c.paid > 0 && !isFullPaid;
-                const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : isPartial ? "row-status-amber" : (c.comm === "عميل مستجيب" ? "row-status-amber" : "");
-                const commClass = c.comm === "عميل مستجيب" ? "st-responsive" : c.comm === "عميل غير مستجيب" ? "st-unresponsive" : c.comm === "تم التواصل" ? "st-contacted" : c.comm === "لم يذهب إليه المحصل" ? "st-not-visited" : "st-none";
+                const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
+                const commClass = commClassOf(normComm);
                 const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
 
                 return `
@@ -687,21 +713,14 @@ function viewRoute() {
                       <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
                     </td>
 
-                    <!-- التواصل -->
-                    <td style="min-width: 160px;">
-                      <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}">
-                          <option value="لم يتم التواصل" ${c.comm === "لم يتم التواصل" ? "selected" : ""}>لم يتم التواصل</option>
-                          <option value="تم التواصل" ${c.comm === "تم التواصل" ? "selected" : ""}>تم التواصل</option>
-                          <option value="عميل مستجيب" ${c.comm === "عميل مستجيب" ? "selected" : ""}>عميل مستجيب</option>
-                          <option value="عميل غير مستجيب" ${c.comm === "عميل غير مستجيب" ? "selected" : ""}>عميل غير مستجيب</option>
-                          <option value="لم يذهب إليه المحصل" ${c.comm === "لم يذهب إليه المحصل" ? "selected" : ""}>لم يذهب إليه المحصل ❌</option>
-                        </select>
-                        <label class="not-visited-check" title="تحديد أن المحصل لم يذهب إلى هذا العميل اليوم">
-                          <input type="checkbox" data-action="toggle-not-visited" data-customer="${esc(c.customer)}" ${isNotVisited ? "checked" : ""}>
-                          <span style="color: ${isNotVisited ? "var(--danger)" : "inherit"};">لم يذهب إليه</span>
-                        </label>
-                      </div>
+                    <!-- التواصل (مختصر وذكي) -->
+                    <td style="min-width: 165px;">
+                      <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
+                        <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
+                        <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
+                        <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
+                        <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
+                      </select>
                     </td>
 
                     <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
@@ -870,15 +889,10 @@ function bindRouteEvents() {
         viewRoute();
       } else if (target.dataset.action === "change-comm") {
         item.comm = target.value;
-        if (item.comm === "لم يذهب إليه المحصل") item.notVisited = true;
-        else if (item.notVisited && item.comm !== "لم يتم التواصل") item.notVisited = false;
+        item.notVisited = item.comm === "لم يذهب ولم يتصل";
+        item.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
         saveInteractiveRoute();
-        viewRoute();
-      } else if (target.dataset.action === "toggle-not-visited") {
-        item.notVisited = target.checked;
-        if (item.notVisited) item.comm = "لم يذهب إليه المحصل";
-        else if (item.comm === "لم يذهب إليه المحصل") item.comm = "لم يتم التواصل";
-        saveInteractiveRoute();
+        toast("تحديث التواصل", `تم تحديث حالة العميل ${customer} إلى (${item.comm})`, "pay");
         viewRoute();
       }
     });
@@ -1063,10 +1077,11 @@ function viewCollectors() {
                   return x[col] || "";
                 });
                 return sortedClients.length ? sortedClients.map((c, idx) => {
+                  const normComm = normalizeComm(c.comm);
                   const isDone = c.paid > 0;
-                  const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
-                  const rowClass = isDone ? "row-status-green" : isNotVisited ? "row-status-red" : (c.comm === "عميل مستجيب" ? "row-status-amber" : "");
-                  const commClass = c.comm === "عميل مستجيب" ? "chip-green" : c.comm === "عميل غير مستجيب" ? "chip-amber" : c.comm === "تم التواصل" ? "chip-blue" : c.comm === "لم يذهب إليه المحصل" ? "chip-red" : "chip-gray";
+                  const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
+                  const rowClass = isDone ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" ? "row-status-amber" : ""));
+                  const commChip = commChipClassOf(normComm);
 
                   return `
                     <tr class="${rowClass}">
@@ -1079,8 +1094,7 @@ function viewCollectors() {
                       <td class="tbl-amount neg">${money(c.balance)}</td>
                       <td class="tbl-amount ${isDone ? "pos" : ""}">${isDone ? "+" + money(c.paid) : "0 ج.م"}</td>
                       <td>
-                        <span class="chip ${commClass}">${esc(c.comm)}</span>
-                        ${isNotVisited ? `<span style="display:block; font-size:0.7rem; color:var(--danger); font-weight:700; margin-top:2px;">لم يذهب إليه المحصل ❌</span>` : ""}
+                        <span class="chip ${commChip}">${esc(normComm)}</span>
                       </td>
                       <td>
                         <div class="resp-cell-content">
@@ -1454,11 +1468,11 @@ function openResponseModal(customerName) {
   const mm = master.find((x) => x.name === customerName);
 
   const currentResp = item ? item.response : (mm ? mm.notes : "");
-  const currentComm = item ? item.comm : "تم التواصل";
+  const currentComm = normalizeComm(item ? item.comm : "قيد المتابعة");
 
   $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
   $("respModalInput").value = currentResp || "";
-  $("respModalComm").value = currentComm || "تم التواصل";
+  $("respModalComm").value = currentComm;
   $("responseModal").hidden = false;
   $("respModalInput").focus();
 }
@@ -1606,8 +1620,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (item) {
       item.response = text;
       item.comm = comm;
-      if (comm === "لم يذهب إليه المحصل") item.notVisited = true;
-      else if (item.notVisited && comm !== "لم يتم التواصل") item.notVisited = false;
+      item.notVisited = comm === "لم يذهب ولم يتصل";
       item.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
       saveInteractiveRoute();
     }
