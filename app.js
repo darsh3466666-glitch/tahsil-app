@@ -558,37 +558,6 @@ function viewRoute() {
   const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
 
   $("view-route").innerHTML = `
-    <!-- نموذج 💰 سداد جديد (يدوي) المنقول إلى خط السير -->
-    <div class="card" style="margin-bottom: var(--space-4);">
-      <div class="card-head">
-        <span class="card-title">💰 سداد جديد (يدوي)</span>
-        <span class="card-sub">تسجيل سداد نقدي/تحويل وتحديث حالة العميل وإحصائيات المحصل فوراً</span>
-      </div>
-      <form id="routePayForm" class="pay-form">
-        <div class="pay-field">
-          <label>المحصل</label>
-          <select id="routePayCollector" class="select">
-            ${reps.map((r) => `<option value="${esc(r)}" ${fRep === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="pay-field">
-          <label>العميل</label>
-          <input id="routePayCustomer" class="search-input" list="routeCustomerList" placeholder="ابحث باسم العميل من القائمة…" autocomplete="off" required>
-          <datalist id="routeCustomerList">
-            ${allRoute.map((m) => `<option value="${esc(m.customer)}">${esc(m.customer)} (${money(m.balance)})</option>`).join("")}
-            ${master.slice(0, 100).map((m) => `<option value="${esc(m.name)}">${esc(m.name)} (رصيد: ${money(m.balance)})</option>`).join("")}
-          </datalist>
-        </div>
-        <div class="pay-field">
-          <label>المبلغ المسدد (ج.م)</label>
-          <input id="routePayAmount" class="search-input" type="number" min="1" step="any" placeholder="0" required>
-        </div>
-        <div class="pay-field pay-actions">
-          <button type="submit" class="btn btn-primary">تسجيل السداد ✓</button>
-        </div>
-      </form>
-    </div>
-
     <!-- شريط أدوات خط السير: فلاتر، إضافة عميل، نسخ للواتساب -->
     <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
       <div class="route-toolbar">
