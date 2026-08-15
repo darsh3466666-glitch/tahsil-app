@@ -171,21 +171,28 @@ function formatNoteDisplay(val) {
 
 function initInteractiveRouteIfNeeded() {
   if (!state.data) return;
+  const d = state.data;
+  const masterMap = new Map((d.master || []).map((m) => [m.name, m]));
   const existing = loadInteractiveRoute();
+
   if (existing && Array.isArray(existing) && existing.length > 0) {
     existing.forEach((x) => {
       x.response = cleanResponse(x.response);
+      const mm = masterMap.get(x.customer);
+      if (mm) {
+        if (!x.last_invoice) x.last_invoice = mm.last_invoice || "";
+        if (!x.last_payment) x.last_payment = mm.last_payment || "";
+        if (!x.area || x.area === "—") x.area = mm.area || "—";
+      }
     });
     state.interactiveRoute = existing;
     return;
   }
 
   // إنشاء خط السير التفاعلي الأولي بناءً على أهداف اليوم والشيتات
-  const d = state.data;
   const targets = d.daily_targets || [];
   const routeLines = d.route_line || [];
   const ratingMap = new Map(routeLines.map((r) => [r.customer, r]));
-  const masterMap = new Map((d.master || []).map((m) => [m.name, m]));
 
   const routeList = [];
   const addedNames = new Set();
@@ -195,6 +202,8 @@ function initInteractiveRouteIfNeeded() {
     if (addedNames.has(t.customer)) return;
     addedNames.add(t.customer);
     const rl = ratingMap.get(t.customer);
+    const mm = masterMap.get(t.customer);
+    const rep = t.collector || (mm ? mm.collector : "") || "مصطفى";
     const rawResp = rl ? rl.last_response : (t.notes || (mm ? mm.notes : ""));
     const lastResp = cleanResponse(rawResp);
     const bal = Number(t.balance) || (mm ? Number(mm.balance) : 0) || 0;
@@ -209,9 +218,10 @@ function initInteractiveRouteIfNeeded() {
       comm: "قيد المتابعة",
       response: lastResp,
       notVisited: false,
-      last_payment: t.last_payment || (mm ? mm.last_payment : ""),
-      last_visit: t.last_visit || (mm ? mm.last_visit : ""),
-      due: t.due || (mm ? mm.due_date : ""),
+      last_invoice: mm ? (mm.last_invoice || "") : "",
+      last_payment: t.last_payment || (mm ? mm.last_payment : "") || "",
+      last_visit: t.last_visit || (mm ? mm.last_visit : "") || "",
+      due: t.due || (mm ? mm.due_date : "") || "",
       rating: rl ? rl.rating : "",
       updatedAt: "",
     });
@@ -238,7 +248,8 @@ function initInteractiveRouteIfNeeded() {
         comm: "قيد المتابعة",
         response: cleanResponse(rawResp),
         notVisited: false,
-        last_payment: c.last_payment || (mm ? mm.last_payment : ""),
+        last_invoice: mm ? (mm.last_invoice || "") : "",
+        last_payment: c.last_payment || (mm ? mm.last_payment : "") || "",
         last_visit: mm ? mm.last_visit : "",
         due: mm ? mm.due_date : "",
         rating: rl ? rl.rating : "",
@@ -660,8 +671,12 @@ function viewRoute() {
   // فرز
   filtered = sortArray(filtered, "route", (x, col) => {
     if (col === "notes" || col === "response") return x.response || "";
-    if (col === "paid") return x.paid || 0;
-    if (col === "balance") return x.balance || 0;
+    if (col === "paid") return Number(x.paid) || 0;
+    if (col === "balance") return Number(x.balance) || 0;
+    if (col === "area") return x.area || "";
+    if (col === "last_invoice") return x.last_invoice || "";
+    if (col === "last_payment") return x.last_payment || "";
+    if (col === "comm") return normalizeComm(x.comm);
     return x[col];
   });
 
@@ -744,7 +759,7 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- الجدول التفاعلي الرئيسي بعرض كامل ونظيف 100% -->
+    <!-- الجدول التفاعلي الرئيسي -->
     <div class="card" style="padding: var(--space-4);">
       <div class="table-wrap">
         <table class="interactive-table">
@@ -752,12 +767,15 @@ function viewRoute() {
             <tr>
               <th class="row-num">م</th>
               ${sortTh("route", "customer", "str", "العميل")}
+              ${sortTh("route", "area", "str", "المنطقة")}
               ${sortTh("route", "balance", "num", "المبلغ المستحق")}
+              ${sortTh("route", "last_invoice", "str", "آخر فاتورة")}
+              ${sortTh("route", "last_payment", "str", "آخر سداد")}
+              ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
               ${sortTh("route", "paid", "num", "المسدد")}
               ${sortTh("route", "status", "str", "الحالة")}
               ${sortTh("route", "comm", "str", "التواصل")}
-              ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
-              <th style="width: 90px; text-align: center;">إجراءات</th>
+              <th style="width: 80px; text-align: center;">إجراءات</th>
             </tr>
           </thead>
           <tbody id="routeTableBody">
@@ -774,19 +792,46 @@ function viewRoute() {
                   <tr class="${rowClass}" data-customer="${esc(c.customer)}">
                     <td class="row-num">${idx + 1}</td>
                     
-                    <!-- العميل -->
-                    <td style="min-width: 170px;">
+                    <!-- العميل والمحصل -->
+                    <td style="min-width: 160px;">
                       <div style="font-weight: 800; font-size: 0.92rem; color: var(--foreground);">${esc(c.customer)}</div>
-                      <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
-                        <span style="font-size: 0.72rem; opacity: 0.7;">📍 ${esc(c.area || "—")}</span>
+                      <div style="margin-top: 3px;">
                         <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
                           ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
                         </select>
                       </div>
                     </td>
 
+                    <!-- المنطقة (عمود منفصل) -->
+                    <td style="min-width: 95px; font-weight: 600;">
+                      📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}
+                    </td>
+
                     <!-- المبلغ المستحق -->
                     <td class="tbl-amount neg" style="font-size: 0.92rem;">${money(c.balance)}</td>
+
+                    <!-- آخر فاتورة -->
+                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                      ${esc(c.last_invoice || "__")}
+                    </td>
+
+                    <!-- آخر سداد -->
+                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                      ${esc(c.last_payment || "__")}
+                    </td>
+
+                    <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
+                    <td style="min-width: 220px;">
+                      <div class="resp-cell-content">
+                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                          ${formatNoteDisplay(c.response)}
+                        </div>
+                        <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                          تعديل
+                        </button>
+                      </div>
+                    </td>
 
                     <!-- المسدد (تعديل مباشر وسلس للرقم) -->
                     <td style="min-width: 125px;">
@@ -811,7 +856,7 @@ function viewRoute() {
                       <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
                     </td>
 
-                    <!-- التواصل (مختصر وذكي) -->
+                    <!-- التواصل -->
                     <td style="min-width: 165px;">
                       <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
                         <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
@@ -821,29 +866,16 @@ function viewRoute() {
                       </select>
                     </td>
 
-                    <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
-                    <td style="min-width: 220px;">
-                      <div class="resp-cell-content">
-                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
-                          ${formatNoteDisplay(c.response)}
-                        </div>
-                        <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                          تعديل
-                        </button>
-                      </div>
-                    </td>
-
                     <!-- إجراءات -->
                     <td style="text-align: center;">
                       <div class="tbl-actions" style="justify-content: center;">
                         <button type="button" class="tbl-action-icon" data-action="delete-route-client" data-customer="${esc(c.customer)}" title="إزالة العميل من خط سير اليوم">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
                         </button>
                       </div>
                     </td>
                   </tr>`;
-              }).join("") : `<tr><td colspan="8" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
+              }).join("") : `<tr><td colspan="11" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
             </tbody>
           </table>
         </div>
