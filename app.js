@@ -1034,6 +1034,72 @@ function viewCollectors() {
         </div>
       </div>
 
+      <!-- كشف نشاط المحصل وتفاعل العملاء الميداني اليوم مع أسهم الترتيب -->
+      <div class="card" style="padding: var(--space-4); margin-top: var(--space-4);">
+        <div class="card-head">
+          <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
+          <span class="card-sub">اضغط على أي عمود لترتيب العملاء حسب الأولوية أو المبالغ أو الردود</span>
+          ${clearSortBtn("collector_clients")}
+        </div>
+
+        <div class="table-wrap">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th class="row-num">م</th>
+                ${sortTh("collector_clients", "customer", "str", "العميل")}
+                ${sortTh("collector_clients", "area", "str", "المنطقة")}
+                ${sortTh("collector_clients", "balance", "num", "المطلوب")}
+                ${sortTh("collector_clients", "paid", "num", "المسدد اليوم")}
+                ${sortTh("collector_clients", "comm", "str", "حالة الزيارة والتواصل")}
+                ${sortTh("collector_clients", "response", "str", "رد العميل الوارد من الواتساب")}
+              </tr>
+            </thead>
+            <tbody>
+              ${(() => {
+                let sortedClients = sortArray(clients, "collector_clients", (x, col) => {
+                  if (col === "paid") return x.paid || 0;
+                  if (col === "balance") return x.balance || 0;
+                  return x[col] || "";
+                });
+                return sortedClients.length ? sortedClients.map((c, idx) => {
+                  const isDone = c.paid > 0;
+                  const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+                  const rowClass = isDone ? "row-status-green" : isNotVisited ? "row-status-red" : (c.comm === "عميل مستجيب" ? "row-status-amber" : "");
+                  const commClass = c.comm === "عميل مستجيب" ? "chip-green" : c.comm === "عميل غير مستجيب" ? "chip-amber" : c.comm === "تم التواصل" ? "chip-blue" : c.comm === "لم يذهب إليه المحصل" ? "chip-red" : "chip-gray";
+
+                  return `
+                    <tr class="${rowClass}">
+                      <td class="row-num">${idx + 1}</td>
+                      <td>
+                        <b style="font-size:0.92rem;">${esc(c.customer)}</b>
+                        ${c.status === "خالص" ? `<span class="chip chip-green" style="font-size:0.65rem; padding:1px 5px; margin-inline-start:4px;">خالص</span>` : ""}
+                      </td>
+                      <td>📍 ${esc(c.area || "—")}</td>
+                      <td class="tbl-amount neg">${money(c.balance)}</td>
+                      <td class="tbl-amount ${isDone ? "pos" : ""}">${isDone ? "+" + money(c.paid) : "0 ج.م"}</td>
+                      <td>
+                        <span class="chip ${commClass}">${esc(c.comm)}</span>
+                        ${isNotVisited ? `<span style="display:block; font-size:0.7rem; color:var(--danger); font-weight:700; margin-top:2px;">لم يذهب إليه المحصل ❌</span>` : ""}
+                      </td>
+                      <td>
+                        <div class="resp-cell-content">
+                          <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
+                            ${c.response ? esc(c.response) : `<span style="opacity:0.4; font-style:italic;">لا يوجد رد مسجل بعد</span>`}
+                          </div>
+                          <button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(c.customer)}')">
+                            ✏️ تعديل
+                          </button>
+                        </div>
+                      </td>
+                    </tr>`;
+                }).join("") : `<tr><td colspan="7" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
+              })()}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- آخر عمليات سداد مسجلة للمحصل اليوم -->
       <div class="card" style="margin-top: var(--space-4);">
         <div class="card-head">
