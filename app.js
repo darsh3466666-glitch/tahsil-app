@@ -375,7 +375,7 @@ function clearSortBtn(key) {
 }
 
 function viewFn(name) {
-  return { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle }[name];
+  return { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle, master: viewMasterData }[name];
 }
 
 function onTableClick(e) {
@@ -1519,7 +1519,7 @@ function viewCycle() {
           ${sortTh("cycle", "cycle_start", "date", "بداية الدورة", "c-date")}
           ${sortTh("cycle", "cycle_end", "date", "نهاية الدورة", "c-date")}
           ${sortTh("cycle", "days_left", "num", "الأيام المتبقية")}
-          <th>حالة الدورة</th>
+          ${sortTh("cycle", "cycle_status", "str", "حالة الدورة")}
         </tr></thead>
         <tbody id="cycleBody"></tbody></table></div>
     </div>`;
@@ -1536,7 +1536,11 @@ function viewCycle() {
       if (st === "soon" && (days < 0 || days > 7)) return false;
       return true;
     });
-    list = sortArray(list, "cycle");
+    list = sortArray(list, "cycle", (x, col) => {
+      if (col === "cycle_status") return (x.days_left || 0) >= 0 ? "بالدورة" : "انتهت الدورة";
+      if (col === "balance" || col === "days_left") return Number(x[col]) || 0;
+      return x[col] || "";
+    });
     $("cycleBody").innerHTML = list.map((c, i) => {
       const days = c.days_left || 0;
       const end = days >= 0 ? "chip-green" : "chip-red";
@@ -1668,6 +1672,7 @@ function viewMasterData() {
 
   // الفرز التفاعلي
   filtered = sortArray(filtered, "master", (x, col) => {
+    if (col === "activity") return x._activityKey || "";
     if (col === "balance" || col === "agreement_days") return Number(x[col]) || 0;
     return x[col] || "";
   });
@@ -1790,7 +1795,7 @@ function viewMasterData() {
               ${sortTh("master", "balance", "num", "المديونية الحالية")}
               ${sortTh("master", "today_status", "str", "موقف اليوم")}
               ${sortTh("master", "classification", "str", "التصنيف")}
-              <th>نشاط العميل</th>
+              ${sortTh("master", "activity", "str", "نشاط العميل")}
               ${sortTh("master", "last_invoice", "str", "آخر فاتورة")}
               ${sortTh("master", "last_payment", "str", "آخر سداد")}
               ${sortTh("master", "last_visit", "str", "آخر زيارة")}
