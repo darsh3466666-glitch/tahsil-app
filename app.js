@@ -141,12 +141,32 @@ function saveInteractiveRoute() {
 function cleanResponse(val) {
   if (val === null || val === undefined) return "";
   const s = String(val).trim();
-  if (s === "0" || s === 0 || s === "null" || s === "undefined") return "";
+  if (
+    s === "" ||
+    s === "0" ||
+    s === 0 ||
+    s === "null" ||
+    s === "undefined" ||
+    s === "لا يوجد رد" ||
+    s === "لا يوجد رد مسجل" ||
+    s === "—" ||
+    s === "-"
+  ) {
+    return "";
+  }
   return s;
 }
 
 function hasRealResponse(val) {
   return cleanResponse(val).length > 0;
+}
+
+function formatNoteDisplay(val) {
+  const cleaned = cleanResponse(val);
+  if (!cleaned) {
+    return `<span style="opacity:0.4; font-weight:700; letter-spacing:1px;">__</span>`;
+  }
+  return esc(cleaned);
 }
 
 function initInteractiveRouteIfNeeded() {
@@ -805,8 +825,8 @@ function viewRoute() {
                     <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
                     <td style="min-width: 220px;">
                       <div class="resp-cell-content">
-                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "لا يوجد رد"}">
-                          ${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
+                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                          ${formatNoteDisplay(c.response)}
                         </div>
                         <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
                           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1179,8 +1199,8 @@ function viewCollectors() {
                       <td>
                         <span class="chip ${commChip}">${esc(normComm)}</span>
                       </td>
-                      <td class="note-text" style="max-width: 280px;" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "لا يوجد رد"}">
-                        ${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
+                      <td class="note-text" style="max-width: 280px;" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                        ${formatNoteDisplay(c.response)}
                       </td>
                     </tr>`;
                 }).join("") : `<tr><td colspan="7" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
@@ -1330,7 +1350,7 @@ function viewCollectors() {
       $("collectBody").innerHTML = list.map(({ r, rep }, idx) => {
         const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
         const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-        const respTxt = hasRealResponse(r.last_response) ? esc(cleanResponse(r.last_response)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`;
+        const respTxt = formatNoteDisplay(r.last_response);
         return `<tr>
           <td class="row-num">${idx + 1}</td>
           <td><b>${esc(r.customer)}</b></td>
@@ -1339,7 +1359,7 @@ function viewCollectors() {
           <td class="tbl-amount neg">${money(r.target_debt)}</td>
           <td>${t}</td>
           <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-          <td class="note-text" style="max-width:250px;" title="${hasRealResponse(r.last_response) ? esc(cleanResponse(r.last_response)) : "لا يوجد رد"}">${respTxt}</td>
+          <td class="note-text" style="max-width:250px;" title="${hasRealResponse(r.last_response) ? esc(cleanResponse(r.last_response)) : "__"}">${respTxt}</td>
         </tr>`;
       }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
     };
@@ -1456,7 +1476,7 @@ function viewCashflow() {
       <td>${dueLabel(c.due)}</td>
       <td><span class="chip ${chipOf(c.pay_status)}">${statusOf(c.pay_status)}</span></td>
       <td class="tbl-amount ${c.remaining ? "neg" : ""}">${money(c.remaining)}</td>
-      <td class="note-text">${esc(c.notes || "—")}</td></tr>`;
+      <td class="note-text" title="${hasRealResponse(c.notes) ? esc(cleanResponse(c.notes)) : "__"}">${formatNoteDisplay(c.notes)}</td></tr>`;
   const drawCash = () => {
     if (!$("cashBody")) return;
     const list = sortArray(cf, "cash");
@@ -1815,8 +1835,8 @@ function viewMasterData() {
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
                   <td style="text-align: center; font-weight: 700;">${m.agreement_days ? `${esc(m.agreement_days)} يوم` : "—"}</td>
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; ${m.due_date && m.due_date < todayISO() && !isZero ? "color:var(--danger);" : ""}">${esc(m.due_date || "—")}</td>
-                  <td class="note-text" style="max-width: 250px;" title="${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : "لا يوجد رد"}">
-                    ${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد</span>`}
+                  <td class="note-text" style="max-width: 250px;" title="${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : "__"}">
+                    ${formatNoteDisplay(m.notes)}
                   </td>
                 </tr>
               `;
