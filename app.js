@@ -1638,6 +1638,17 @@ function initTheme() {
   applyTheme(saved || (prefersDark ? "dark" : "light"));
 }
 
+// تصدير الدوال التفاعلية عالمياً
+window.openResponseModal = openResponseModal;
+window.closeResponseModal = closeResponseModal;
+window.openQuickPayModal = openQuickPayModal;
+window.closeQuickPayModal = closeQuickPayModal;
+window.openWhatsAppShareModal = openWhatsAppShareModal;
+window.closeWhatsAppShareModal = closeWhatsAppShareModal;
+window.setCollectorTab = setCollectorTab;
+window.copyCollectorSummaryReport = copyCollectorSummaryReport;
+window.switchView = switchView;
+
 /* ---------- Global Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
