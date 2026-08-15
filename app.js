@@ -676,7 +676,6 @@ function viewDashboard() {
 
   const routeStats = calculateRouteStats();
   const expToday = cf.reduce((s, c) => s + c.expected, 0);
-  const colToday = cf.reduce((s, c) => s + c.collected, 0) + routeStats.collected;
   const manualPays = manualToday();
   const payToday = manualPays.reduce((s, p) => s + p.amount, 0);
 
@@ -697,9 +696,9 @@ function viewDashboard() {
       ${kp("إجمالي مديونية الشيت", money(totalBal), `${master.length} عميل مسجل`, "c-danger")}
       ${kp("🟢 مديونية النشطاء (< 6 شهور)", money(activeBal), `${activeCount} عميل أخذ فواتير حديثاً`, "c-success")}
       ${kp("🔴 مديونية الراكدين (> 6 شهور)", money(idleDebtBal), `${idleDebtCount} عميل متوقف عن الفواتير`, "c-danger")}
-      ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل — تم تحصيل ${money(routeStats.collected)}`, "c-accent")}
+      ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل مطلوب تحصيلهم`, "c-accent")}
       ${kp("المتوقع اليوم — كاش فلو", money(expToday), "خطة السداد", "c-info")}
-      ${kp("سداد اليوم (الميداني المباشر)", money(colToday), `المسجل: ${money(payToday)} (${manualPays.length} عملية)`, "c-success")}
+      ${kp("سداد اليوم (قبض يدوي)", money(payToday), `${manualPays.length} عملية سداد مسجلة اليوم`, payToday > 0 ? "c-success" : "")}
     </div>
     <div class="two-col">
       <div class="card">
