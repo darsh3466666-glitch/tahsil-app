@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 18:48:59",
+  "generated_at": "2026-08-15 19:01:08",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -6192,8 +6192,8 @@
    "last_payment": "2026-05-31",
    "last_invoice": "2026-08-10",
    "last_visit": "2026-08-15",
-   "agreement_days": "90",
-   "due_date": "2026-11-13",
+   "agreement_days": "15",
+   "due_date": "2026-08-30",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -12167,7 +12167,7 @@
    "balance": 2846380.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-11-13",
+   "due": "2026-08-30",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -13590,7 +13590,7 @@
    "seq": "52",
    "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
    "balance": 2846380.0,
-   "due_date": "2026-11-13",
+   "due_date": "2026-08-30",
    "cycle_start": "2025-12-08",
    "cycle_end": "2026-06-08",
    "days_left": -68.0
