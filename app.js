@@ -1,9 +1,8 @@
-/* ============ تحصيل: app.js — خط سير تفاعلي، تقييم المحصلين، سداد فوري، ومزامنة ردود الواتساب ============ */
+/* ============ تحصيل: app.js — شيت إكسل تفاعلي مباشر، تقييم المحصلين، ومزامنة الواتساب ============ */
 "use strict";
 
 const DATA_URL = "data/data.json";
 const POLL_MS = 30000;
-const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 const fmt = (n) => (n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
 
@@ -18,9 +17,7 @@ function todayStr() {
 function dueLabel(due) {
   if (!due) return "—";
   const parts = String(due).split("-");
-  if (parts.length === 3) {
-    return `${Number(parts[2])}/${Number(parts[1])}/${parts[0]}`;
-  }
+  if (parts.length === 3) return `${Number(parts[2])}/${Number(parts[1])}/${parts[0]}`;
   return due;
 }
 
@@ -49,30 +46,11 @@ function addManualPay(customer, amount, collector) {
   };
   state.manualPays.push(p);
   saveManualPays();
-
-  // تحديث في خط السير التفاعلي إن وُجد العميل
-  if (state.interactiveRoute) {
-    const item = state.interactiveRoute.find((x) => x.customer === customer);
-    if (item) {
-      item.paid = (Number(item.paid) || 0) + numAmt;
-      if (item.paid >= item.balance && item.balance > 0) {
-        item.status = "خالص";
-      } else if (item.paid > 0) {
-        item.status = "سداد جزئي";
-      }
-      if (item.comm === "لم يتم التواصل" || item.comm === "لم يذهب إليه المحصل") {
-        item.comm = "عميل مستجيب";
-      }
-      item.notVisited = false;
-      saveInteractiveRoute();
-    }
-  }
-
   alertSound("pay");
   return p;
 }
 
-/* ---------- إدارة خط السير التفاعلي (Interactive Daily Route) ---------- */
+/* ---------- إدارة خط السير التفاعلي كشيت إكسل مباشر ---------- */
 const LS_ROUTE_PREFIX = "tahsil_interactive_route_";
 
 function getRouteStorageKey() {
@@ -102,7 +80,6 @@ function initInteractiveRouteIfNeeded() {
     return;
   }
 
-  // إنشاء خط السير التفاعلي الأولي بناءً على أهداف اليوم والشيتات
   const d = state.data;
   const targets = d.daily_targets || [];
   const routeLines = d.route_line || [];
@@ -112,7 +89,6 @@ function initInteractiveRouteIfNeeded() {
   const routeList = [];
   const addedNames = new Set();
 
-  // 1. إضافة أهداف اليوم من Master_Data
   targets.forEach((t) => {
     if (addedNames.has(t.customer)) return;
     addedNames.add(t.customer);
@@ -136,11 +112,9 @@ function initInteractiveRouteIfNeeded() {
       last_visit: t.last_visit || (mm ? mm.last_visit : ""),
       due: t.due || (mm ? mm.due_date : ""),
       rating: rl ? rl.rating : "",
-      updatedAt: "",
     });
   });
 
-  // 2. دمج أي عملاء إضافيين من شيتات المحصلين اليومية إن وُجدوا
   const routeSheets = d.route_sheets || {};
   Object.entries(routeSheets).forEach(([repName, sheet]) => {
     const clients = (sheet.today || []).concat(sheet.overdue || []);
@@ -164,17 +138,16 @@ function initInteractiveRouteIfNeeded() {
         last_visit: mm ? mm.last_visit : "",
         due: mm ? mm.due_date : "",
         rating: rl ? rl.rating : "",
-        updatedAt: "",
       });
     });
   });
 
-  // مزامنة السدادات المسجلة اليوم بالفعل
+  // مزامنة السدادات المسجلة اليوم
   const todayPays = manualToday();
   todayPays.forEach((p) => {
     const item = routeList.find((x) => x.customer === p.customer);
     if (item) {
-      item.paid += p.amount;
+      item.paid = (Number(item.paid) || 0) + p.amount;
       if (item.paid >= item.balance && item.balance > 0) item.status = "خالص";
       else if (item.paid > 0) item.status = "سداد جزئي";
       item.comm = "عميل مستجيب";
@@ -198,7 +171,7 @@ function calculateRouteStats(clients) {
   const unresponsiveCount = list.filter((c) => c.comm === "عميل غير مستجيب").length;
   const notVisitedCount = list.filter((c) => c.notVisited || c.comm === "لم يذهب إليه المحصل").length;
   const notContactedCount = list.filter((c) => c.comm === "لم يتم التواصل" || c.comm === "لم يذهب إليه المحصل" || c.notVisited).length;
-  const responseRate = contactedCount > 0 ? (responsiveCount / contactedCount) * 100 : (list.length > 0 ? (responsiveCount / list.length) * 100 : 0);
+  const responseRate = contactedCount > 0 ? (responsiveCount / contactedCount) * 100 : 0;
 
   return {
     totalDue,
@@ -231,7 +204,6 @@ const state = {
   },
   manualPays: loadManualPays(),
   interactiveRoute: null,
-  activeEditingCustomer: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -286,7 +258,7 @@ function onTableClick(e) {
   }
 }
 
-/* ---------- Data Syncing ---------- */
+/* ---------- Data Fetching ---------- */
 async function fetchData(quiet) {
   try {
     const r = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
@@ -402,7 +374,7 @@ function showToast(a) {
   el.innerHTML = `${icon}<div style="flex:1;min-width:0"><div class="toast-title">${esc(title)}</div><div class="toast-body">${esc(a.body)}</div></div><button class="toast-close" aria-label="إغلاق">×</button>`;
   el.querySelector(".toast-close").addEventListener("click", () => el.remove());
   $("toastArea").appendChild(el);
-  setTimeout(() => el.remove(), 7000);
+  setTimeout(() => el.remove(), 6000);
 }
 
 let dismissTimer = null;
@@ -420,7 +392,7 @@ function toast(title, body, type = "pay") {
   el.className = "toast " + type;
   el.innerHTML = `<div><div class="toast-title">${esc(title)}</div><div class="toast-body">${esc(body)}</div></div>`;
   $("toastArea").appendChild(el);
-  setTimeout(() => el.remove(), 5000);
+  setTimeout(() => el.remove(), 4000);
 }
 
 /* ---------- Views Controller ---------- */
@@ -476,32 +448,30 @@ function viewDashboard() {
     <div class="kpi-grid">
       ${kp("إجمالي المديونية المستحقة", money(totalBal), `${active.length} عميل نشط`, "c-danger")}
       ${kp("إجمالي مديونية النشطاء", money(activeBal), "بدون الخالصين", "")}
-      ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل — تم تحصيل ${money(routeStats.collected)}`, "c-accent")}
+      ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل — محصل ${money(routeStats.collected)}`, "c-accent")}
       ${kp("المتوقع اليوم — كاش فلو", money(expToday), "خطة السداد", "c-info")}
-      ${kp("المُحصّل اليوم (إجمالي)", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
-      ${kp("سداد اليوم (قبض يدوي)", money(payToday), `${manualPays.length} عملية سداد مسجلة`, "c-info")}
+      ${kp("المُحصّل اليوم", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
+      ${kp("سداد اليوم (قبض يدوي)", money(payToday), `${manualPays.length} عملية مسجلة`, "c-info")}
     </div>
     <div class="two-col">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">🎯 خط سير اليوم — أبرز العملاء</span>
-          <button class="btn btn-ghost" onclick="switchView('route')" style="font-size:0.8rem;padding:4px 10px;">فتح خط السير التفاعلي ➔</button>
+          <span class="card-title">🎯 خط سير اليوم — إحصائيات سريعة</span>
+          <button class="btn btn-ghost" onclick="switchView('route')" style="font-size:0.8rem;padding:4px 10px;">فتح شيت خط السير التفاعلي ➔</button>
         </div>
         ${(state.interactiveRoute || []).length ? `<div class="table-wrap"><table>
           <thead><tr>
             <th class="row-num">م</th>
             <th>العميل</th>
             <th>المحصل</th>
-            <th>المنطقة</th>
             <th>المبلغ المستحق</th>
             <th>المسدد</th>
             <th>الحالة</th>
           </tr></thead>
-          <tbody>${(state.interactiveRoute || []).slice(0, 10).map((t, i) => `<tr>
+          <tbody>${(state.interactiveRoute || []).slice(0, 8).map((t, i) => `<tr>
             <td class="row-num">${i + 1}</td>
             <td><b>${esc(t.customer)}</b></td>
             <td>${esc(t.collector)}</td>
-            <td>${esc(t.area)}</td>
             <td class="tbl-amount neg">${money(t.balance)}</td>
             <td class="tbl-amount pos">${t.paid ? money(t.paid) : "—"}</td>
             <td><span class="chip ${t.paid >= t.balance && t.balance > 0 ? "chip-green" : t.paid > 0 ? "chip-amber" : "chip-red"}">${esc(t.status || "لم يسدد")}</span></td>
@@ -520,7 +490,7 @@ function viewDashboard() {
     </div>`;
 }
 
-/* ---------- 2. ROUTE (خط سير اليوم التفاعلي + سداد يدوي + إحصائيات الإكسل) ---------- */
+/* ---------- 2. ROUTE (شيت إكسل تفاعلي مباشر مع الإدخال الفوري) ---------- */
 function viewRoute() {
   const d = state.data;
   if (!d) return;
@@ -530,7 +500,6 @@ function viewRoute() {
   const master = d.master || [];
   const reps = ["مصطفى", "محمد شعبان"];
 
-  // تطبيق الفلاتر
   const fRep = state.filters.routeRep || "all";
   const fStatus = state.filters.routeStatus || "all";
   const fSearch = (state.filters.routeSearch || "").trim().toLowerCase();
@@ -541,263 +510,210 @@ function viewRoute() {
     if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
     if (fStatus === "responsive" && item.comm !== "عميل مستجيب") return false;
     if (fStatus === "unresponsive" && item.comm !== "عميل غير مستجيب") return false;
-    if (fStatus === "pending" && (item.paid > 0 || item.comm === "عميل مستجيب")) return false;
     if (fSearch && !item.customer.toLowerCase().includes(fSearch) && !item.area.toLowerCase().includes(fSearch)) return false;
     return true;
   });
 
-  // فرز
   filtered = sortArray(filtered, "route", (x, col) => {
-    if (col === "notes" || col === "response") return x.response || "";
+    if (col === "response") return x.response || "";
     if (col === "paid") return x.paid || 0;
     if (col === "balance") return x.balance || 0;
     return x[col];
   });
 
-  // حساب المؤشرات المطابقة لشيت الإكسل
-  const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
+  const repClients = fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep);
+  const stats = calculateRouteStats(repClients);
 
   $("view-route").innerHTML = `
-    <!-- نموذج 💰 سداد جديد (يدوي) المنقول إلى خط السير -->
-    <div class="card" style="margin-bottom: var(--space-4);">
-      <div class="card-head">
-        <span class="card-title">💰 سداد جديد (يدوي)</span>
-        <span class="card-sub">تسجيل سداد نقدي/تحويل وتحديث حالة العميل وإحصائيات المحصل فوراً</span>
-      </div>
-      <form id="routePayForm" class="pay-form">
-        <div class="pay-field">
-          <label>المحصل</label>
-          <select id="routePayCollector" class="select">
-            ${reps.map((r) => `<option value="${esc(r)}" ${fRep === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="pay-field">
-          <label>العميل</label>
-          <input id="routePayCustomer" class="search-input" list="routeCustomerList" placeholder="ابحث باسم العميل من القائمة…" autocomplete="off" required>
-          <datalist id="routeCustomerList">
-            ${allRoute.map((m) => `<option value="${esc(m.customer)}">${esc(m.customer)} (${money(m.balance)})</option>`).join("")}
-            ${master.slice(0, 100).map((m) => `<option value="${esc(m.name)}">${esc(m.name)} (رصيد: ${money(m.balance)})</option>`).join("")}
-          </datalist>
-        </div>
-        <div class="pay-field">
-          <label>المبلغ المسدد (ج.م)</label>
-          <input id="routePayAmount" class="search-input" type="number" min="1" step="any" placeholder="0" required>
-        </div>
-        <div class="pay-field pay-actions">
-          <button type="submit" class="btn btn-primary">تسجيل السداد ✓</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- شريط أدوات خط السير: فلاتر، إضافة عميل، نسخ للواتساب -->
-    <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
-      <div class="route-toolbar">
-        <div class="add-client-form">
-          <span style="font-size:0.85rem; font-weight:800; color:var(--primary);">➕ إضافة عميل لليوم:</span>
-          <input id="addClientInput" class="search-input" list="masterDataList" placeholder="اختر عميلاً من Master Data…" style="min-width: 240px;">
-          <datalist id="masterDataList">
-            ${master.map((m) => `<option value="${esc(m.name)}">${esc(m.name)} — ${esc(m.area)} (${money(m.balance)})</option>`).join("")}
-          </datalist>
-          <select id="addClientRepSelect" class="select">
-            ${reps.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join("")}
-          </select>
-          <button type="button" id="addClientBtn" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.82rem;">إضافة ＋</button>
-        </div>
-
-        <div class="route-actions-group">
-          <button type="button" id="waRouteShareBtn" class="btn-wa" title="نسخ رسالة خط السير لإرسالها للمحصل عبر الواتساب">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82-1.55 1.56-3.62 2.42-5.82 2.42-1.45 0-2.88-.38-4.14-1.11l-.3-.17-3.08.81.82-3-.2-.31a8.18 8.18 0 0 1-1.26-4.46c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.71 4.3 3.8 2.53 1.09 2.53.73 2.98.69.46-.04 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29"/></svg>
-            نسخ خط السير للواتساب
-          </button>
-          <button type="button" id="resetRouteBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
-        </div>
+    <!-- شريط التحكم السريع لخط السير -->
+    <div class="sheet-top-controls">
+      <div class="quick-add-bar">
+        <span style="font-weight:800; font-size:0.85rem; color:var(--primary);">➕ إضافة عميل للشيت:</span>
+        <input id="quickAddInput" class="search-input" list="masterClientsDataList" placeholder="اكتب أو اختر اسم العميل من Master Data…" style="min-width:260px; padding:6px 12px; font-size:0.85rem;">
+        <datalist id="masterClientsDataList">
+          ${master.map((m) => `<option value="${esc(m.name)}">${esc(m.name)} — ${esc(m.area)} (${money(m.balance)})</option>`).join("")}
+        </datalist>
+        <select id="quickAddRep" class="select" style="padding:6px 10px; font-size:0.85rem;">
+          ${reps.map((r) => `<option value="${esc(r)}" ${fRep === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
+        </select>
+        <button type="button" id="quickAddBtn" class="btn btn-primary" style="padding:6px 14px; font-size:0.82rem;">إضافة ＋</button>
       </div>
 
-      <!-- تصفيات سريعة -->
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
-        <div class="seg" id="routeRepSeg">
-          <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
-          ${reps.map((r) => `<button data-f="${esc(r)}" class="${fRep === r ? "active" : ""}">${esc(r)} (${allRoute.filter((x) => x.collector === r).length})</button>`).join("")}
-        </div>
-
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <input class="search-input" id="routeTableSearch" placeholder="بحث باسم العميل أو المنطقة…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:200px;">
-          <select id="routeStatusFilter" class="select" style="padding:6px 10px;">
-            <option value="all" ${fStatus === "all" ? "selected" : ""}>كل الحالات</option>
-            <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب إليهم (${allRoute.filter((x) => x.notVisited || x.comm === "لم يذهب إليه المحصل").length})</option>
-            <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد اليوم (${allRoute.filter((x) => x.paid > 0).length})</option>
-            <option value="responsive" ${fStatus === "responsive" ? "selected" : ""}>✅ عميل مستجيب (${allRoute.filter((x) => x.comm === "عميل مستجيب").length})</option>
-            <option value="unresponsive" ${fStatus === "unresponsive" ? "selected" : ""}>⚠️ عميل غير مستجيب (${allRoute.filter((x) => x.comm === "عميل غير مستجيب").length})</option>
-            <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة / لم يسدد</option>
-          </select>
-          ${clearSortBtn("route")}
-        </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button type="button" id="waRouteCopyBtn" class="btn-wa" title="نسخ رسالة خط السير لإرسالها للمحصل عبر الواتساب">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82-1.55 1.56-3.62 2.42-5.82 2.42-1.45 0-2.88-.38-4.14-1.11l-.3-.17-3.08.81.82-3-.2-.31a8.18 8.18 0 0 1-1.26-4.46c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.71 4.3 3.8 2.53 1.09 2.53.73 2.98.69.46-.04 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29"/></svg>
+          نسخ للواتساب 📋
+        </button>
+        <button type="button" id="resetRouteSheetBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
       </div>
     </div>
 
-    <!-- التخطيط الرئيسي: جدول العملاء التفاعلي + صندوق الإحصائيات المطابق للإكسل -->
+    <!-- فلاتر التبويب والبحث -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:var(--space-3);">
+      <div class="seg" id="routeRepTabSeg">
+        <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
+        ${reps.map((r) => `<button data-f="${esc(r)}" class="${fRep === r ? "active" : ""}">${esc(r)} (${allRoute.filter((x) => x.collector === r).length})</button>`).join("")}
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input class="search-input" id="routeSheetSearchInput" placeholder="🔍 بحث في الجدول بالاسم أو المنطقة…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:210px; font-size:0.85rem;">
+        <select id="routeSheetStatusSelect" class="select" style="padding:6px 10px; font-size:0.85rem;">
+          <option value="all" ${fStatus === "all" ? "selected" : ""}>كل الحالات</option>
+          <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب إليهم (${allRoute.filter((x) => x.notVisited || x.comm === "لم يذهب إليه المحصل").length})</option>
+          <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد (${allRoute.filter((x) => x.paid > 0).length})</option>
+          <option value="responsive" ${fStatus === "responsive" ? "selected" : ""}>✅ عميل مستجيب (${allRoute.filter((x) => x.comm === "عميل مستجيب").length})</option>
+          <option value="unresponsive" ${fStatus === "unresponsive" ? "selected" : ""}>⚠️ عميل غير مستجيب (${allRoute.filter((x) => x.comm === "عميل غير مستجيب").length})</option>
+        </select>
+        ${clearSortBtn("route")}
+      </div>
+    </div>
+
+    <!-- التخطيط العام: جدول إحصائيات الإكسل الجانبي + شيت الجدول التفاعلي المباشر -->
     <div class="route-interactive-layout">
-      <!-- 1. صندوق الإحصائيات (طِبق شيت الإكسل المرفق بالصورة) -->
-      <div class="excel-summary-card">
-        <div class="excel-summary-title">
-          <span>📊 ملخص التحصيل والمتابعة</span>
-          <span style="font-size:0.75rem; font-weight:600; opacity:0.7;">${fRep === "all" ? "كل المحصلين" : fRep}</span>
+      <!-- 1. لوحة إحصائيات الإكسل المطابقة للصورة الأصلية تماماً -->
+      <div class="excel-stat-card">
+        <div class="excel-stat-header">
+          <span>📊 ملخص الإكسل</span>
+          <span style="font-size:0.75rem; opacity:0.75;">${fRep === "all" ? "إجمالي الشيت" : fRep}</span>
         </div>
 
-        <table class="excel-table-summary">
+        <table class="excel-matrix">
           <tbody>
-            <tr>
-              <td class="excel-lbl">اجمالي المطلوب</td>
-              <td class="excel-val c-total">${money(stats.totalDue)}</td>
+            <tr class="row-req">
+              <td class="val" id="stat-totalDue">${fmt(stats.totalDue)}</td>
+              <td class="lbl">اجمالي المطلوب</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">المحصل</td>
-              <td class="excel-val c-collected">${money(stats.collected)}</td>
+            <tr class="row-col">
+              <td class="val" id="stat-collected" style="color:#2E7D32;">${fmt(stats.collected)}</td>
+              <td class="lbl">المحصل</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">الباقي</td>
-              <td class="excel-val c-remaining">${money(stats.remaining)}</td>
+            <tr class="row-rem">
+              <td class="val" id="stat-remaining" style="color:#C62828;">${fmt(stats.remaining)}</td>
+              <td class="lbl">الباقي</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">نسبة التحصيل</td>
-              <td class="excel-val c-rate">${stats.collectionRate.toFixed(2)}%</td>
+            <tr class="row-rate">
+              <td class="val" id="stat-collectionRate" style="color:#1B5E20;">${stats.collectionRate.toFixed(2)}%</td>
+              <td class="lbl">نسبة التحصيل</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">تم التواصل</td>
-              <td class="excel-val c-contacted">${stats.contactedCount}</td>
+            <tr class="row-comm">
+              <td class="val" id="stat-contactedCount">${stats.contactedCount}</td>
+              <td class="lbl">تم التواصل</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">عميل مستجيب</td>
-              <td class="excel-val c-responsive">${stats.responsiveCount}</td>
+            <tr class="row-resp">
+              <td class="val" id="stat-responsiveCount" style="color:#2E7D32;">${stats.responsiveCount}</td>
+              <td class="lbl">عميل مستجيب</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">عميل غير مستجيب</td>
-              <td class="excel-val c-unresponsive">${stats.unresponsiveCount}</td>
+            <tr class="row-unresp">
+              <td class="val" id="stat-unresponsiveCount" style="color:#E65100;">${stats.unresponsiveCount}</td>
+              <td class="lbl">عميل غير مستجيب</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">نسبة الاستجابة</td>
-              <td class="excel-val c-rate">${stats.responseRate.toFixed(2)}%</td>
+            <tr class="row-resprate">
+              <td class="val" id="stat-responseRate" style="color:#0D47A1;">${stats.responseRate.toFixed(2)}%</td>
+              <td class="lbl">نسبة الاستجابة</td>
             </tr>
-            <tr>
-              <td class="excel-lbl">لم يتم التواصل</td>
-              <td class="excel-val c-not-visited">${stats.notContactedCount}</td>
+            <tr class="row-notcomm">
+              <td class="val" id="stat-notContactedCount" style="color:#B71C1C;">${stats.notContactedCount}</td>
+              <td class="lbl">لم يتم التواصل</td>
             </tr>
           </tbody>
         </table>
 
-        <!-- شريط نسبة التحصيل -->
-        <div style="margin-top: 10px;">
-          <div style="display:flex; justify-content:space-between; font-size:0.76rem; font-weight:700; margin-bottom:4px;">
-            <span>نسبة إنجاز التحصيل</span>
-            <b>${stats.collectionRate.toFixed(1)}%</b>
-          </div>
-          <div class="bar-track" style="height: 8px;">
-            <div class="bar-fill" style="width: ${Math.min(100, stats.collectionRate)}%; background: ${stats.collectionRate >= 60 ? "var(--success)" : stats.collectionRate >= 30 ? "var(--warning)" : "var(--danger)"}"></div>
-          </div>
-        </div>
-
-        <div style="margin-top: 14px; font-size: 0.74rem; opacity: 0.7; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 8px;">
-          💡 يتم تحديث الإحصائيات تلقائياً عند تغيير حالة التواصل، تسجيل السداد، أو تعديل ردود الواتساب.
+        <div style="margin-top:12px; font-size:0.72rem; opacity:0.75; line-height:1.4; text-align:center;">
+          ✏️ يمكنك تعديل المسدد، الحالة، التواصل، والرد مباشرة في خلايا الجدول، ويتم الحفظ وإعادة الحساب فورياً.
         </div>
       </div>
 
-      <!-- 2. الجدول التفاعلي الرئيسي (مطابق لأعمدة شيت الإكسل: م، العميل، المبلغ المستحق، المسدد، الحالة، التواصل، الرد) -->
-      <div class="card" style="padding: var(--space-4);">
+      <!-- 2. جدول الإكسل التفاعلي المطابق لأعمدة شيت الإكسل بالصورة -->
+      <div class="excel-sheet-card">
         <div class="table-wrap">
-          <table class="interactive-table">
+          <table class="excel-sheet-table" id="excelMainTable">
             <thead>
               <tr>
-                <th class="row-num">م</th>
+                <th style="width:36px;">م</th>
                 ${sortTh("route", "customer", "str", "العميل")}
                 ${sortTh("route", "balance", "num", "المبلغ المستحق")}
                 ${sortTh("route", "paid", "num", "المسدد")}
                 ${sortTh("route", "status", "str", "الحالة")}
                 ${sortTh("route", "comm", "str", "التواصل")}
                 ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
-                <th style="width: 90px; text-align: center;">إجراءات</th>
+                <th style="width:50px; text-align:center;" title="تعليم العميل كـ 'لم يذهب إليه المحصل'">لم يذهب</th>
+                <th style="width:36px; text-align:center;">حذف</th>
               </tr>
             </thead>
-            <tbody id="routeTableBody">
+            <tbody id="excelSheetBody">
               ${filtered.length ? filtered.map((c, idx) => {
                 const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
                 const isPaid = c.paid > 0;
-                const rowClass = isNotVisited ? "row-not-visited" : isPaid ? "row-paid" : "";
-                const commClass = c.comm === "عميل مستجيب" ? "st-responsive" : c.comm === "عميل غير مستجيب" ? "st-unresponsive" : c.comm === "تم التواصل" ? "st-contacted" : c.comm === "لم يذهب إليه المحصل" ? "st-not-visited" : "st-none";
-                const statusChip = c.paid >= c.balance && c.balance > 0 ? "chip-green" : c.paid > 0 ? "chip-amber" : "chip-gray";
+                const rowClass = isNotVisited ? "row-flagged-not-visited" : isPaid ? "row-flagged-paid" : "";
 
                 return `
                   <tr class="${rowClass}" data-customer="${esc(c.customer)}">
-                    <td class="row-num">${idx + 1}</td>
-                    
+                    <!-- م -->
+                    <td class="row-num" style="text-align:center; font-weight:700; color:var(--muted-text,#8a94a6);">${idx + 1}</td>
+
                     <!-- العميل -->
-                    <td style="min-width: 170px;">
-                      <div style="font-weight: 800; font-size: 0.92rem; color: var(--foreground);">${esc(c.customer)}</div>
-                      <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
-                        <span style="font-size: 0.72rem; opacity: 0.7;">📍 ${esc(c.area || "—")}</span>
-                        <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
+                    <td style="min-width:180px;">
+                      <div style="font-weight:800; font-size:0.9rem;">${esc(c.customer)}</div>
+                      <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+                        <span style="font-size:0.72rem; opacity:0.7;">📍 ${esc(c.area || "—")}</span>
+                        <select class="cell-rep-badge" data-inline="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
                           ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
                         </select>
                       </div>
                     </td>
 
                     <!-- المبلغ المستحق -->
-                    <td class="tbl-amount neg" style="font-size: 0.92rem;">${money(c.balance)}</td>
-
-                    <!-- المسدد -->
-                    <td style="min-width: 110px;">
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <b class="${c.paid > 0 ? "pos" : ""}" style="font-variant-numeric: tabular-nums;">${c.paid ? money(c.paid) : "0 ج.م"}</b>
-                        <button type="button" class="table-pay-btn" data-action="quick-pay" data-customer="${esc(c.customer)}" title="تسجيل سداد فوري">
-                          ＋سداد
-                        </button>
-                      </div>
+                    <td class="tbl-amount neg" style="text-align:end; font-size:0.92rem; padding-inline-end:10px; font-weight:800; white-space:nowrap;">
+                      ${fmt(c.balance)}
                     </td>
 
-                    <!-- الحالة -->
-                    <td>
-                      <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
+                    <!-- المسدد (إدخال مباشر في الخلية) -->
+                    <td style="width:110px; text-align:end;">
+                      <input type="number" class="cell-input-money" data-inline="edit-paid" data-customer="${esc(c.customer)}" value="${c.paid || ""}" placeholder="0" min="0" step="any" title="اكتب المبلغ المسدد مباشرة هنا">
                     </td>
 
-                    <!-- التواصل -->
-                    <td style="min-width: 160px;">
-                      <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}">
-                          <option value="لم يتم التواصل" ${c.comm === "لم يتم التواصل" ? "selected" : ""}>لم يتم التواصل</option>
-                          <option value="تم التواصل" ${c.comm === "تم التواصل" ? "selected" : ""}>تم التواصل</option>
-                          <option value="عميل مستجيب" ${c.comm === "عميل مستجيب" ? "selected" : ""}>عميل مستجيب</option>
-                          <option value="عميل غير مستجيب" ${c.comm === "عميل غير مستجيب" ? "selected" : ""}>عميل غير مستجيب</option>
-                          <option value="لم يذهب إليه المحصل" ${c.comm === "لم يذهب إليه المحصل" ? "selected" : ""}>لم يذهب إليه المحصل ❌</option>
-                        </select>
-                        <label class="not-visited-check" title="تحديد أن المحصل لم يذهب إلى هذا العميل اليوم">
-                          <input type="checkbox" data-action="toggle-not-visited" data-customer="${esc(c.customer)}" ${isNotVisited ? "checked" : ""}>
-                          <span style="color: ${isNotVisited ? "var(--danger)" : "inherit"};">لم يذهب إليه</span>
-                        </label>
-                      </div>
+                    <!-- الحالة (قائمة منسدلة مباشرة في الخلية) -->
+                    <td style="width:110px;">
+                      <select class="cell-select" data-inline="edit-status" data-customer="${esc(c.customer)}">
+                        <option value="لم يسدد" ${c.status === "لم يسدد" ? "selected" : ""}>لم يسدد</option>
+                        <option value="سداد جزئي" ${c.status === "سداد جزئي" ? "selected" : ""}>سداد جزئي</option>
+                        <option value="خالص" ${c.status === "خالص" ? "selected" : ""}>خالص ✅</option>
+                        <option value="مؤجل" ${c.status === "مؤجل" ? "selected" : ""}>مؤجل ⏱️</option>
+                        <option value="تم الاتفاق" ${c.status === "تم الاتفاق" ? "selected" : ""}>تم الاتفاق</option>
+                      </select>
                     </td>
 
-                    <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
-                    <td style="min-width: 220px;">
-                      <div class="resp-cell-content">
-                        <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
-                          ${c.response ? esc(c.response) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد مسجل</span>`}
-                        </div>
-                        <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                          تعديل
-                        </button>
-                      </div>
+                    <!-- التواصل (قائمة منسدلة مباشرة في الخلية) -->
+                    <td style="min-width:145px;">
+                      <select class="cell-select" data-inline="edit-comm" data-customer="${esc(c.customer)}">
+                        <option value="لم يتم التواصل" ${c.comm === "لم يتم التواصل" ? "selected" : ""}>لم يتم التواصل</option>
+                        <option value="تم التواصل" ${c.comm === "تم التواصل" ? "selected" : ""}>تم التواصل</option>
+                        <option value="عميل مستجيب" class="comm-opt-responsive" ${c.comm === "عميل مستجيب" ? "selected" : ""}>عميل مستجيب ✅</option>
+                        <option value="عميل غير مستجيب" class="comm-opt-unresponsive" ${c.comm === "عميل غير مستجيب" ? "selected" : ""}>عميل غير مستجيب ⚠️</option>
+                        <option value="لم يذهب إليه المحصل" class="comm-opt-not-visited" ${c.comm === "لم يذهب إليه المحصل" ? "selected" : ""}>لم يذهب إليه المحصل ❌</option>
+                      </select>
                     </td>
 
-                    <!-- إجراءات -->
-                    <td style="text-align: center;">
-                      <div class="tbl-actions" style="justify-content: center;">
-                        <button type="button" class="tbl-action-icon" data-action="delete-route-client" data-customer="${esc(c.customer)}" title="إزالة العميل من خط سير اليوم">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
-                        </button>
-                      </div>
+                    <!-- الرد (إدخال ولصق مباشر في الخلية) -->
+                    <td style="min-width:240px;">
+                      <input type="text" class="cell-input-text" data-inline="edit-response" data-customer="${esc(c.customer)}" value="${esc(c.response || "")}" placeholder="الصق رد العميل من الواتساب هنا..." title="انقر للصق رد الواتس أو كتابة ملاحظة">
+                    </td>
+
+                    <!-- لم يذهب (خانة اختيار سريعة) -->
+                    <td style="text-align:center;">
+                      <label class="cell-not-visited-chk" title="تعليم أن المحصل لم يذهب لهذا العميل اليوم">
+                        <input type="checkbox" data-inline="chk-not-visited" data-customer="${esc(c.customer)}" ${isNotVisited ? "checked" : ""}>
+                      </label>
+                    </td>
+
+                    <!-- حذف السطر -->
+                    <td style="text-align:center;">
+                      <button type="button" class="cell-del-btn" data-inline="delete-row" data-customer="${esc(c.customer)}" title="إزالة العميل من شيت اليوم">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                      </button>
                     </td>
                   </tr>`;
-              }).join("") : `<tr><td colspan="8" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
+              }).join("") : `<tr><td colspan="9" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -805,77 +721,55 @@ function viewRoute() {
     </div>
   `;
 
-  // ربط الأحداث
-  bindRouteEvents();
+  bindExcelSheetEvents();
 }
 
-function bindRouteEvents() {
-  // 1. تصفية المحصلين Tabs
-  document.querySelectorAll("#routeRepSeg button").forEach((b) => {
+/* ---------- ربط أحداث الإدخال المباشر في خلايا الإكسل ---------- */
+function bindExcelSheetEvents() {
+  // تصفية المحصلين Tabs
+  document.querySelectorAll("#routeRepTabSeg button").forEach((b) => {
     b.addEventListener("click", () => {
       state.filters.routeRep = b.dataset.f;
       viewRoute();
     });
   });
 
-  // 2. تصفية الحالة والبحث
-  const statusSelect = $("routeStatusFilter");
-  if (statusSelect) {
-    statusSelect.addEventListener("change", (e) => {
+  // تصفية الحالة والبحث السريع
+  const statusSel = $("routeSheetStatusSelect");
+  if (statusSel) {
+    statusSel.addEventListener("change", (e) => {
       state.filters.routeStatus = e.target.value;
       viewRoute();
     });
   }
-
-  const tableSearch = $("routeTableSearch");
-  if (tableSearch) {
-    tableSearch.addEventListener("input", (e) => {
+  const searchInput = $("routeSheetSearchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
       state.filters.routeSearch = e.target.value;
       viewRoute();
     });
   }
 
-  // 3. نموذج السداد اليدوي
-  const payForm = $("routePayForm");
-  if (payForm) {
-    payForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const collector = $("routePayCollector").value;
-      const customer = $("routePayCustomer").value.trim();
-      const amount = Number($("routePayAmount").value);
-      if (!customer) return toast("تنبيه", "يرجى تحديد اسم العميل أولاً", "warn");
-      if (!amount || amount <= 0) return toast("تنبيه", "يرجى إدخال مبلغ صحيح", "warn");
-
-      addManualPay(customer, amount, collector);
-      toast("تم السداد ✓", `تم تسجيل سداد مبلغ ${money(amount)} للعميل ${customer}`, "pay");
-      $("routePayAmount").value = "";
-      $("routePayCustomer").value = "";
-      viewRoute();
-    });
-  }
-
-  // 4. إضافة عميل لليوم
-  const addBtn = $("addClientBtn");
+  // إضافة عميل سريع
+  const addBtn = $("quickAddBtn");
   if (addBtn) {
     addBtn.addEventListener("click", () => {
-      const custInput = $("addClientInput");
-      const repInput = $("addClientRepSelect");
+      const custInput = $("quickAddInput");
+      const repInput = $("quickAddRep");
       const name = (custInput.value || "").trim();
       const rep = repInput.value;
-      if (!name) return toast("تنبيه", "يرجى كتابة أو اختيار اسم العميل", "warn");
+      if (!name) return toast("تنبيه", "اكتب أو اختر اسم العميل أولاً", "warn");
 
-      // البحث في ماستر داتا
       const master = (state.data && state.data.master) || [];
       const match = master.find((m) => m.name === name || m.name.includes(name));
       const customerName = match ? match.name : name;
       const bal = match ? Number(match.balance) || 0 : 0;
       const area = match ? match.area : "—";
 
-      // التحقق من وجوده بالفعل
       const existing = (state.interactiveRoute || []).find((x) => x.customer === customerName);
       if (existing) {
         existing.collector = rep;
-        toast("تم التحديث", `العميل ${customerName} موجود بالفعل وتم تعيينه للمحصل ${rep}`, "pay");
+        toast("تم التحديث", `العميل موجود بالفعل وتم تعيينه للمحصل ${rep}`, "pay");
       } else {
         state.interactiveRoute.unshift({
           customer: customerName,
@@ -891,9 +785,8 @@ function bindRouteEvents() {
           last_visit: match ? match.last_visit : "",
           due: match ? match.due_date : "",
           rating: "",
-          updatedAt: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
         });
-        toast("تمت الإضافة ✓", `تمت إضافة ${customerName} إلى خط سير ${rep}`, "pay");
+        toast("تمت الإضافة ✓", `تمت إضافة ${customerName} لشيت ${rep}`, "pay");
       }
 
       saveInteractiveRoute();
@@ -902,11 +795,19 @@ function bindRouteEvents() {
     });
   }
 
-  // 5. استعادة المقترح
-  const resetBtn = $("resetRouteBtn");
+  // نسخ خط السير للواتساب
+  const waBtn = $("waRouteCopyBtn");
+  if (waBtn) {
+    waBtn.addEventListener("click", () => {
+      openWhatsAppShareModal(state.filters.routeRep || "all");
+    });
+  }
+
+  // استعادة المقترح
+  const resetBtn = $("resetRouteSheetBtn");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
-      if (confirm("هل تريد استعادة قائمة خط السير المقترحة من الشيت الأصلي؟")) {
+      if (confirm("هل تريد استعادة بيانات خط السير الأصلية من الشيت؟")) {
         localStorage.removeItem(getRouteStorageKey());
         state.interactiveRoute = null;
         initInteractiveRouteIfNeeded();
@@ -916,66 +817,117 @@ function bindRouteEvents() {
     });
   }
 
-  // 6. نسخ خط السير للواتساب
-  const waBtn = $("waRouteShareBtn");
-  if (waBtn) {
-    waBtn.addEventListener("click", () => {
-      openWhatsAppShareModal(state.filters.routeRep || "all");
-    });
-  }
-
-  // 7. أحداث الجدول التفاعلية (Event Delegation)
-  const tbody = $("routeTableBody");
-  if (tbody) {
-    tbody.addEventListener("change", (e) => {
+  // تفويض أحداث الخلايا المباشرة (Inline Cell Inputs)
+  const table = $("excelMainTable");
+  if (table) {
+    // 1. إعادة الحساب اللحظي عند الكتابة في خانة المسدد
+    table.addEventListener("input", (e) => {
       const target = e.target;
+      const inlineAction = target.dataset.inline;
       const customer = target.dataset.customer;
       if (!customer) return;
 
       const item = state.interactiveRoute.find((x) => x.customer === customer);
       if (!item) return;
 
-      if (target.dataset.action === "change-rep") {
-        item.collector = target.value;
+      if (inlineAction === "edit-paid") {
+        const val = Number(target.value) || 0;
+        item.paid = val;
+        if (item.paid >= item.balance && item.balance > 0) {
+          item.status = "خالص";
+        } else if (item.paid > 0) {
+          item.status = "سداد جزئي";
+        }
+        // تحديث إحصائيات الإكسل في اللوحة الجانبية فورياً
+        updateStatsBoxLive();
+      } else if (inlineAction === "edit-response") {
+        item.response = target.value;
         saveInteractiveRoute();
-        toast("نقل عميل", `تم نقل العميل ${customer} للمحصل ${item.collector}`, "pay");
+        // مزامنة مع route_line
+        if (state.data && state.data.route_line) {
+          const rl = state.data.route_line.find((r) => r.customer === customer);
+          if (rl) rl.last_response = target.value;
+        }
+      }
+    });
+
+    // 2. الحفظ عند اكتمال التعديل (Change / Blur)
+    table.addEventListener("change", (e) => {
+      const target = e.target;
+      const inlineAction = target.dataset.inline;
+      const customer = target.dataset.customer;
+      if (!customer) return;
+
+      const item = state.interactiveRoute.find((x) => x.customer === customer);
+      if (!item) return;
+
+      if (inlineAction === "edit-paid") {
+        const val = Number(target.value) || 0;
+        item.paid = val;
+        if (item.paid >= item.balance && item.balance > 0) item.status = "خالص";
+        else if (item.paid > 0) item.status = "سداد جزئي";
+        if (item.paid > 0 && (item.comm === "لم يتم التواصل" || item.comm === "لم يذهب إليه المحصل")) {
+          item.comm = "عميل مستجيب";
+          item.notVisited = false;
+        }
+        saveInteractiveRoute();
+        addManualPay(customer, val, item.collector);
         viewRoute();
-      } else if (target.dataset.action === "change-comm") {
+      } else if (inlineAction === "edit-status") {
+        item.status = target.value;
+        saveInteractiveRoute();
+      } else if (inlineAction === "edit-comm") {
         item.comm = target.value;
         if (item.comm === "لم يذهب إليه المحصل") item.notVisited = true;
         else if (item.notVisited && item.comm !== "لم يتم التواصل") item.notVisited = false;
         saveInteractiveRoute();
         viewRoute();
-      } else if (target.dataset.action === "toggle-not-visited") {
+      } else if (inlineAction === "chk-not-visited") {
         item.notVisited = target.checked;
         if (item.notVisited) item.comm = "لم يذهب إليه المحصل";
         else if (item.comm === "لم يذهب إليه المحصل") item.comm = "لم يتم التواصل";
         saveInteractiveRoute();
         viewRoute();
+      } else if (inlineAction === "change-rep") {
+        item.collector = target.value;
+        saveInteractiveRoute();
+        toast("نقل عميل", `تم نقل العميل ${customer} للمحصل ${item.collector}`, "pay");
+        viewRoute();
       }
     });
 
-    tbody.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-action]");
-      if (!btn) return;
-      const action = btn.dataset.action;
-      const customer = btn.dataset.customer;
+    // 3. أزرار الحذف في السطر
+    table.addEventListener("click", (e) => {
+      const delBtn = e.target.closest("[data-inline='delete-row']");
+      if (!delBtn) return;
+      const customer = delBtn.dataset.customer;
       if (!customer) return;
 
-      if (action === "edit-resp") {
-        openResponseModal(customer);
-      } else if (action === "quick-pay") {
-        openQuickPayModal(customer);
-      } else if (action === "delete-route-client") {
-        if (confirm(`هل تريد إزالة العميل "${customer}" من خط سير اليوم؟`)) {
-          state.interactiveRoute = state.interactiveRoute.filter((x) => x.customer !== customer);
-          saveInteractiveRoute();
-          toast("تم الحذف", `تمت إزالة ${customer} من خط السير`, "warn");
-          viewRoute();
-        }
+      if (confirm(`هل تريد إزالة العميل "${customer}" من شيت اليوم؟`)) {
+        state.interactiveRoute = state.interactiveRoute.filter((x) => x.customer !== customer);
+        saveInteractiveRoute();
+        toast("تم الحذف", `تمت إزالة ${customer} من الشيت`, "warn");
+        viewRoute();
       }
     });
   }
+}
+
+function updateStatsBoxLive() {
+  const fRep = state.filters.routeRep || "all";
+  const all = state.interactiveRoute || [];
+  const list = fRep === "all" ? all : all.filter((x) => x.collector === fRep);
+  const s = calculateRouteStats(list);
+
+  if ($("stat-totalDue")) $("stat-totalDue").textContent = fmt(s.totalDue);
+  if ($("stat-collected")) $("stat-collected").textContent = fmt(s.collected);
+  if ($("stat-remaining")) $("stat-remaining").textContent = fmt(s.remaining);
+  if ($("stat-collectionRate")) $("stat-collectionRate").textContent = s.collectionRate.toFixed(2) + "%";
+  if ($("stat-contactedCount")) $("stat-contactedCount").textContent = s.contactedCount;
+  if ($("stat-responsiveCount")) $("stat-responsiveCount").textContent = s.responsiveCount;
+  if ($("stat-unresponsiveCount")) $("stat-unresponsiveCount").textContent = s.unresponsiveCount;
+  if ($("stat-responseRate")) $("stat-responseRate").textContent = s.responseRate.toFixed(2) + "%";
+  if ($("stat-notContactedCount")) $("stat-notContactedCount").textContent = s.notContactedCount;
 }
 
 /* ---------- 3. COLLECTORS (تقييم المحصلين المرتبط بالتفاعل اللحظي) ---------- */
@@ -991,16 +943,8 @@ function viewCollectors() {
   const reps = ["مصطفى", "محمد شعبان"];
 
   const cards = reps.map((rep) => {
-    // العملاء المسندون للمحصل في خط السير التفاعلي اليوم
     const repRouteClients = allRoute.filter((c) => c.collector === rep);
     const repStats = calculateRouteStats(repRouteClients);
-
-    const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
-    const todayClients = sheet.today || [];
-    const overdueClients = sheet.overdue || [];
-    const tBal = todayClients.reduce((s, c) => s + c.balance, 0);
-    const oBal = overdueClients.reduce((s, c) => s + c.balance, 0);
-    const sheetBal = tBal + oBal;
 
     const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
     const expCol = cfRep.reduce((s, c) => s + c.expected, 0) || repStats.totalDue;
@@ -1024,7 +968,6 @@ function viewCollectors() {
           </button>
         </div>
 
-        <!-- شريط الإنجاز اليومي -->
         <div class="collector-progress">
           <div class="prog-head">
             <span>الإنجاز والتحصيل الفعلي اليوم</span>
@@ -1034,7 +977,6 @@ function viewCollectors() {
           <div class="prog-sub">تم تحصيل ${money(effCol)} من أصل ${money(expCol)} مطلوب</div>
         </div>
 
-        <!-- إحصائيات التفاعل الميداني لليوم -->
         <div class="col-stats">
           <div class="col-stat">
             <b>${repStats.totalCount} عميل</b>
@@ -1062,7 +1004,6 @@ function viewCollectors() {
           </div>
         </div>
 
-        <!-- تفاصيل عملاء المحصل وردودهم اليوم -->
         <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
           <span style="font-weight:800; font-size:0.88rem;">📋 تفاصيل عملاء خط السير والتفاعل:</span>
           <span style="font-size:0.75rem; opacity:0.7;">${repRouteClients.length} عميل</span>
@@ -1088,8 +1029,7 @@ function viewCollectors() {
           }).join("") : `<div class="mini-item muted">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</div>`}
         </div>
 
-        <!-- آخر عمليات سداد مسجلة للمحصل -->
-        <div style="margin-top:14px; font-weight:800; font-size:0.85rem;">سداد اليوم (المسجل يدوي):</div>
+        <div style="margin-top:14px; font-weight:800; font-size:0.85rem;">سداد اليوم المسجل:</div>
         <div class="mini-feed" style="margin-top:6px;">
           ${repPays.slice().reverse().slice(0, 4).map((p) => `
             <div class="mini-item">
@@ -1109,10 +1049,8 @@ function viewCollectors() {
   }).sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
 
   $("view-collectors").innerHTML = `
-    <!-- شبكة بطاقات تقييم المحصلين -->
     <div class="collector-grid">${cards}</div>
 
-    <!-- جدول تقييم العملاء العام -->
     <div class="card">
       <div class="card-head">
         <span class="card-title">تقييم العملاء التاريخي — من الأخطر للأفضل (خط سير)</span>
@@ -1171,7 +1109,6 @@ function viewResponses() {
   const d = state.data;
   const rows = (d.route_line || []).filter((r) => r.last_response).slice();
 
-  // دمج أي ردود تم تعديلها اليوم من خط السير التفاعلي
   if (state.interactiveRoute) {
     state.interactiveRoute.forEach((ir) => {
       if (ir.response) {
@@ -1211,7 +1148,6 @@ function viewResponses() {
           ${sortTh("resp", "last_payment", "date", "آخر سداد")}
           ${sortTh("resp", "last_invoice", "date", "آخر فاتورة")}
           ${sortTh("resp", "last_response", "str", "آخر رد من العميل")}
-          <th>إجراء</th>
         </tr></thead>
         <tbody id="respBody"></tbody></table></div>
     </div>`;
@@ -1231,8 +1167,7 @@ function viewResponses() {
       <td>${dueLabel(r.last_payment)}</td>
       <td>${dueLabel(r.last_invoice)}</td>
       <td class="note-text"><span class="chip chip-amber">رد العميل</span> ${esc(r.last_response)}</td>
-      <td><button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(r.customer)}')">تعديل ✏️</button></td>
-    </tr>`).join("") || '<tr><td colspan="8" class="empty-state">لا نتائج مطابقة</td></tr>';
+    </tr>`).join("") || '<tr><td colspan="7" class="empty-state">لا نتائج مطابقة</td></tr>';
   };
   $("respSearch").addEventListener("input", draw);
   $("respArea").addEventListener("change", draw);
@@ -1377,48 +1312,7 @@ function viewCycle() {
   draw();
 }
 
-/* ---------- 7. Modals: Response Editor, Quick Pay & WhatsApp Share ---------- */
-function openResponseModal(customerName) {
-  state.activeEditingCustomer = customerName;
-  const item = (state.interactiveRoute || []).find((x) => x.customer === customerName);
-  const master = (state.data && state.data.master) || [];
-  const mm = master.find((x) => x.name === customerName);
-
-  const currentResp = item ? item.response : (mm ? mm.notes : "");
-  const currentComm = item ? item.comm : "تم التواصل";
-
-  $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
-  $("respModalInput").value = currentResp || "";
-  $("respModalComm").value = currentComm || "تم التواصل";
-  $("responseModal").hidden = false;
-  $("respModalInput").focus();
-}
-
-function closeResponseModal() {
-  $("responseModal").hidden = true;
-  state.activeEditingCustomer = null;
-}
-
-function openQuickPayModal(customerName) {
-  const item = (state.interactiveRoute || []).find((x) => x.customer === customerName);
-  const reps = ["مصطفى", "محمد شعبان"];
-
-  $("quickPayCustomerName").textContent = `تسجيل سداد للعميل: ${customerName}`;
-  $("quickPayMeta").innerHTML = `
-    <span>المديونية الحالية: <b>${money(item ? item.balance : 0)}</b></span>
-    <span>المسدد اليوم: <b class="pos">${money(item ? item.paid : 0)}</b></span>
-  `;
-  $("quickPayAmountInput").value = "";
-  $("quickPayCollectorSelect").innerHTML = reps.map((r) => `<option value="${esc(r)}" ${item && item.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("");
-  $("quickPayForm").dataset.customer = customerName;
-  $("quickPayModal").hidden = false;
-  $("quickPayAmountInput").focus();
-}
-
-function closeQuickPayModal() {
-  $("quickPayModal").hidden = true;
-}
-
+/* ---------- 7. WhatsApp Share Modal ---------- */
 function openWhatsAppShareModal(collector) {
   const all = state.interactiveRoute || [];
   const filtered = collector === "all" ? all : all.filter((x) => x.collector === collector);
@@ -1431,7 +1325,7 @@ function openWhatsAppShareModal(collector) {
     text += `${idx + 1}. *${c.customer}*\n`;
     text += `   📍 المنطقة: ${c.area || "—"}\n`;
     text += `   💰 المطلوب: ${money(c.balance)}\n`;
-    if (c.response) text += `   📝 ملاحظة/رد سابق: ${c.response}\n`;
+    if (c.response) text += `   📝 رد سابق: ${c.response}\n`;
     text += `   ───────────────\n`;
   });
 
@@ -1501,68 +1395,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   $("brandLogo").addEventListener("click", () => switchView("dashboard"));
-
-  // ربط أزرار مودال الردود السريعة
-  $("respModalCloseBtn").addEventListener("click", closeResponseModal);
-  $("respModalCancel").addEventListener("click", closeResponseModal);
-  $("responseModal").addEventListener("click", (e) => { if (e.target === $("responseModal")) closeResponseModal(); });
-
-  document.querySelectorAll("#respPresetChips .chip-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const preset = btn.dataset.preset;
-      const input = $("respModalInput");
-      input.value = preset;
-      input.focus();
-    });
-  });
-
-  $("respModalSave").addEventListener("click", () => {
-    const cust = state.activeEditingCustomer;
-    if (!cust) return closeResponseModal();
-    const text = $("respModalInput").value.trim();
-    const comm = $("respModalComm").value;
-
-    const item = (state.interactiveRoute || []).find((x) => x.customer === cust);
-    if (item) {
-      item.response = text;
-      item.comm = comm;
-      if (comm === "لم يذهب إليه المحصل") item.notVisited = true;
-      else if (item.notVisited && comm !== "لم يتم التواصل") item.notVisited = false;
-      item.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
-      saveInteractiveRoute();
-    }
-
-    // تحديث في route_line إن وجد
-    if (state.data && state.data.route_line) {
-      const rl = state.data.route_line.find((r) => r.customer === cust);
-      if (rl) rl.last_response = text;
-    }
-
-    toast("تم الحفظ ✓", `تم تحديث رد العميل ${cust} بنجاح`, "pay");
-    closeResponseModal();
-    if (state.view === "route") viewRoute();
-    else if (state.view === "collectors") viewCollectors();
-    else if (state.view === "responses") viewResponses();
-  });
-
-  // ربط مودال السداد السريع
-  $("quickPayCloseBtn").addEventListener("click", closeQuickPayModal);
-  $("quickPayCancel").addEventListener("click", closeQuickPayModal);
-  $("quickPayModal").addEventListener("click", (e) => { if (e.target === $("quickPayModal")) closeQuickPayModal(); });
-
-  $("quickPayForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const customer = $("quickPayForm").dataset.customer;
-    const amount = Number($("quickPayAmountInput").value);
-    const collector = $("quickPayCollectorSelect").value;
-    if (!customer || !amount || amount <= 0) return toast("تنبيه", "أدخل مبلغاً صحيحاً", "warn");
-
-    addManualPay(customer, amount, collector);
-    toast("سداد جديد ✓", `تم تسجيل ${money(amount)} للعميل ${customer} تحت ${collector}`, "pay");
-    closeQuickPayModal();
-    if (state.view === "route") viewRoute();
-    else if (state.view === "collectors") viewCollectors();
-  });
 
   // ربط مودال الواتساب
   $("waModalCloseBtn").addEventListener("click", closeWhatsAppShareModal);
