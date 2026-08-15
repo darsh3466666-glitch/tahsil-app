@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 16:07:38",
+  "generated_at": "2026-08-15 18:32:09",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -6191,14 +6191,14 @@
    "balance": 2846380.0,
    "last_payment": "2026-05-31",
    "last_invoice": "2026-08-10",
-   "last_visit": "2026-06-20",
-   "agreement_days": "56",
-   "due_date": "2026-08-15",
+   "last_visit": "2026-08-15",
+   "agreement_days": "90",
+   "due_date": "2026-11-13",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "النص بعد 3 شهور والباقي بعد 6 شهور  موعده 1/9/2026",
+   "notes": " 2مليون خلال  3 شهور والباقي بعد 7 شهور  ",
    "agreements": "",
    "cycle_start": "2025-12-08",
    "total_withdrawn": 5665990.0,
@@ -11582,24 +11582,6 @@
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
-   "prev_due": "2026-06-20",
-   "appt_status": "56",
-   "new_due": "2026-08-15",
-   "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
-   "target_debt": 2846380.0,
-   "area": "منشأة دمو",
-   "last_payment": "2026-05-31",
-   "last_invoice": "2026-08-10",
-   "last_response": "النص بعد 3 شهور والباقي بعد 6 شهور  موعده 1/9/2026",
-   "total_withdrawn": 5665990.0,
-   "total_paid": 3060000.0,
-   "collected": 0.0,
-   "remaining": 2846380.0,
-   "collection_rate": "0",
-   "turnover": "1.9905950716348484",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
    "prev_due": "2026-08-12",
    "appt_status": "2",
    "new_due": "2026-08-14",
@@ -12185,7 +12167,7 @@
    "balance": 2846380.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-15",
+   "due": "2026-11-13",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -12527,17 +12509,6 @@
   }
  ],
  "daily_targets": [
-  {
-   "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
-   "balance": 2846380.0,
-   "collector": "مصطفى",
-   "area": "منشأة دمو",
-   "due": "2026-08-15",
-   "classification": "عملاء بالدورة",
-   "notes": "النص بعد 3 شهور والباقي بعد 6 شهور  موعده 1/9/2026",
-   "last_payment": "2026-05-31",
-   "last_visit": "2026-06-20"
-  },
   {
    "customer": "المزرعه",
    "balance": 1265290.000000001,
@@ -13065,12 +13036,6 @@
      "balance": 150138.8571390002,
      "last_invoice": "2026-08-12",
      "last_payment": "2026-08-05"
-    },
-    {
-     "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
-     "balance": 2846380.0,
-     "last_invoice": "2026-08-10",
-     "last_payment": "2026-05-31"
     },
     {
      "customer": "عمرو صلاح الكومي (ياسر عبد الصمد)",
@@ -13625,7 +13590,7 @@
    "seq": "52",
    "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
    "balance": 2846380.0,
-   "due_date": "2026-08-15",
+   "due_date": "2026-11-13",
    "cycle_start": "2025-12-08",
    "cycle_end": "2026-06-08",
    "days_left": -68.0
