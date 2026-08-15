@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 19:17:02",
+  "generated_at": "2026-08-15 19:18:11",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10066,17 +10066,6 @@
    "notes": ""
   },
   {
-   "customer": "د.محمد العسكري (اطفيح)",
-   "balance": -472744.3499999996,
-   "expected": 270000.0,
-   "collected": 270000.0,
-   "due": "2026-08-13",
-   "pay_ratio": "1",
-   "pay_status": "مكتمل",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "احمد سلامه (حلوان)",
    "balance": 81020.0,
    "expected": 40000.0,
@@ -10200,12 +10189,12 @@
   {
    "customer": "مزرعة بيور",
    "balance": 634910.0999999996,
-   "expected": 200000.0,
+   "expected": 300000.0,
    "collected": 0.0,
    "due": "2026-08-22",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
-   "remaining": 200000.0,
+   "remaining": 300000.0,
    "notes": ""
   },
   {
@@ -10217,6 +10206,17 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 52000.0,
+   "notes": ""
+  },
+  {
+   "customer": "د.محمد العسكري (اطفيح)",
+   "balance": -472744.3499999996,
+   "expected": 570000.0,
+   "collected": 270000.0,
+   "due": "2026-08-13",
+   "pay_ratio": "0.47368421052631576",
+   "pay_status": "جزئي",
+   "remaining": 300000.0,
    "notes": ""
   },
   {
