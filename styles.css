@@ -69,18 +69,14 @@ input, select { font-family: inherit; font-size: .95rem; }
 .brand-logo {
   width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
-  position: relative; cursor: pointer; transition: transform .2s;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; cursor: pointer; transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
 }
-.brand-logo::before {
-  content: ""; position: absolute; inset: 11px 8px 9px 8px;
-  border: 2.5px solid #fff; border-top: none;
-  border-radius: 0 0 50% 50%;
+.brand-logo svg {
+  width: 22px; height: 22px;
 }
-.brand-logo::after {
-  content: ""; position: absolute; top: 12px; right: 12px; left: 12px;
-  height: 2.5px; background: #fff; border-radius: 2px;
-}
-.brand-logo:hover { transform: rotate(-6deg) scale(1.04); }
+.brand-logo:hover { transform: rotate(-6deg) scale(1.06); }
 .brand-name { font-weight: 800; font-size: 1.2rem; color: var(--primary); }
 .brand-sub { font-size: .72rem; color: var(--foreground); opacity: .7; }
 
