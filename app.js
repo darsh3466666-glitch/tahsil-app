@@ -1,4 +1,4 @@
-/* ============ تحصيل: app.js — لوحة التحكم، خط السير، التنبيهات، المزامنة اللايف ============ */
+/* ============ تحصيل: app.js — خط سير تفاعلي، تقييم المحصلين، سداد فوري، ومزامنة ردود الواتساب ============ */
 "use strict";
 
 const DATA_URL = "data/data.json";
@@ -6,6 +6,23 @@ const POLL_MS = 30000;
 const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 const fmt = (n) => (n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const money = (n) => fmt(n) + " ج.م";
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+}
+function dueLabel(due) {
+  if (!due) return "—";
+  const parts = String(due).split("-");
+  if (parts.length === 3) {
+    return `${Number(parts[2])}/${Number(parts[1])}/${parts[0]}`;
+  }
+  return due;
+}
 
 /* ---------- سداد يدوي (يخزن محلياً على الجهاز) ---------- */
 const LS_PAYS = "tahsil_manual_pays";
@@ -15,52 +32,212 @@ function loadManualPays() {
 function saveManualPays() {
   try { localStorage.setItem(LS_PAYS, JSON.stringify(state.manualPays)); } catch (e) {}
 }
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 function manualToday(collector) {
   const t = todayISO();
   return state.manualPays.filter((p) => p.date === t && (!collector || p.collector === collector));
 }
 function addManualPay(customer, amount, collector) {
+  const numAmt = Number(amount) || 0;
+  if (numAmt <= 0) return null;
   const p = {
     id: Date.now() + Math.random(),
     customer,
-    amount: Number(amount) || 0,
-    collector,
+    amount: numAmt,
+    collector: collector || "عام",
     date: todayISO(),
     time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
   };
   state.manualPays.push(p);
   saveManualPays();
+
+  // تحديث في خط السير التفاعلي إن وُجد العميل
+  if (state.interactiveRoute) {
+    const item = state.interactiveRoute.find((x) => x.customer === customer);
+    if (item) {
+      item.paid = (Number(item.paid) || 0) + numAmt;
+      if (item.paid >= item.balance && item.balance > 0) {
+        item.status = "خالص";
+      } else if (item.paid > 0) {
+        item.status = "سداد جزئي";
+      }
+      if (item.comm === "لم يتم التواصل" || item.comm === "لم يذهب إليه المحصل") {
+        item.comm = "عميل مستجيب";
+      }
+      item.notVisited = false;
+      saveInteractiveRoute();
+    }
+  }
+
   alertSound("pay");
   return p;
 }
 
-const state = { data: null, view: "dashboard", paySeen: new Set(), invSeen: new Set(), soundOn: true, bellBusy: false, sort: {}, filters: {}, manualPays: loadManualPays() };
+/* ---------- إدارة خط السير التفاعلي (Interactive Daily Route) ---------- */
+const LS_ROUTE_PREFIX = "tahsil_interactive_route_";
+
+function getRouteStorageKey() {
+  return LS_ROUTE_PREFIX + todayISO();
+}
+
+function loadInteractiveRoute() {
+  try {
+    const saved = localStorage.getItem(getRouteStorageKey());
+    return saved ? JSON.parse(saved) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveInteractiveRoute() {
+  try {
+    localStorage.setItem(getRouteStorageKey(), JSON.stringify(state.interactiveRoute || []));
+  } catch (e) {}
+}
+
+function initInteractiveRouteIfNeeded() {
+  if (!state.data) return;
+  const existing = loadInteractiveRoute();
+  if (existing && Array.isArray(existing) && existing.length > 0) {
+    state.interactiveRoute = existing;
+    return;
+  }
+
+  // إنشاء خط السير التفاعلي الأولي بناءً على أهداف اليوم والشيتات
+  const d = state.data;
+  const targets = d.daily_targets || [];
+  const routeLines = d.route_line || [];
+  const ratingMap = new Map(routeLines.map((r) => [r.customer, r]));
+  const masterMap = new Map((d.master || []).map((m) => [m.name, m]));
+
+  const routeList = [];
+  const addedNames = new Set();
+
+  // 1. إضافة أهداف اليوم من Master_Data
+  targets.forEach((t) => {
+    if (addedNames.has(t.customer)) return;
+    addedNames.add(t.customer);
+    const rl = ratingMap.get(t.customer);
+    const mm = masterMap.get(t.customer);
+    const rep = t.collector || (mm ? mm.collector : "") || "مصطفى";
+    const lastResp = rl ? rl.last_response : (t.notes || (mm ? mm.notes : ""));
+    const bal = Number(t.balance) || (mm ? Number(mm.balance) : 0) || 0;
+
+    routeList.push({
+      customer: t.customer,
+      collector: rep,
+      area: t.area || (mm ? mm.area : "—") || "—",
+      balance: bal,
+      paid: 0,
+      status: "لم يسدد",
+      comm: "لم يتم التواصل",
+      response: lastResp || "",
+      notVisited: false,
+      last_payment: t.last_payment || (mm ? mm.last_payment : ""),
+      last_visit: t.last_visit || (mm ? mm.last_visit : ""),
+      due: t.due || (mm ? mm.due_date : ""),
+      rating: rl ? rl.rating : "",
+      updatedAt: "",
+    });
+  });
+
+  // 2. دمج أي عملاء إضافيين من شيتات المحصلين اليومية إن وُجدوا
+  const routeSheets = d.route_sheets || {};
+  Object.entries(routeSheets).forEach(([repName, sheet]) => {
+    const clients = (sheet.today || []).concat(sheet.overdue || []);
+    clients.forEach((c) => {
+      if (addedNames.has(c.customer)) return;
+      addedNames.add(c.customer);
+      const rl = ratingMap.get(c.customer);
+      const mm = masterMap.get(c.customer);
+      const bal = Number(c.balance) || (mm ? Number(mm.balance) : 0) || 0;
+      routeList.push({
+        customer: c.customer,
+        collector: repName,
+        area: mm ? mm.area : "—",
+        balance: bal,
+        paid: 0,
+        status: "لم يسدد",
+        comm: "لم يتم التواصل",
+        response: rl ? rl.last_response : (mm ? mm.notes : ""),
+        notVisited: false,
+        last_payment: c.last_payment || (mm ? mm.last_payment : ""),
+        last_visit: mm ? mm.last_visit : "",
+        due: mm ? mm.due_date : "",
+        rating: rl ? rl.rating : "",
+        updatedAt: "",
+      });
+    });
+  });
+
+  // مزامنة السدادات المسجلة اليوم بالفعل
+  const todayPays = manualToday();
+  todayPays.forEach((p) => {
+    const item = routeList.find((x) => x.customer === p.customer);
+    if (item) {
+      item.paid += p.amount;
+      if (item.paid >= item.balance && item.balance > 0) item.status = "خالص";
+      else if (item.paid > 0) item.status = "سداد جزئي";
+      item.comm = "عميل مستجيب";
+      item.notVisited = false;
+    }
+  });
+
+  state.interactiveRoute = routeList;
+  saveInteractiveRoute();
+}
+
+function calculateRouteStats(clients) {
+  const list = clients || state.interactiveRoute || [];
+  const totalDue = list.reduce((s, c) => s + (Number(c.balance) || 0), 0);
+  const collected = list.reduce((s, c) => s + (Number(c.paid) || 0), 0);
+  const remaining = Math.max(0, totalDue - collected);
+  const collectionRate = totalDue > 0 ? (collected / totalDue) * 100 : 0;
+
+  const contactedCount = list.filter((c) => c.comm === "تم التواصل" || c.comm === "عميل مستجيب" || c.comm === "عميل غير مستجيب").length;
+  const responsiveCount = list.filter((c) => c.comm === "عميل مستجيب").length;
+  const unresponsiveCount = list.filter((c) => c.comm === "عميل غير مستجيب").length;
+  const notVisitedCount = list.filter((c) => c.notVisited || c.comm === "لم يذهب إليه المحصل").length;
+  const notContactedCount = list.filter((c) => c.comm === "لم يتم التواصل" || c.comm === "لم يذهب إليه المحصل" || c.notVisited).length;
+  const responseRate = contactedCount > 0 ? (responsiveCount / contactedCount) * 100 : (list.length > 0 ? (responsiveCount / list.length) * 100 : 0);
+
+  return {
+    totalDue,
+    collected,
+    remaining,
+    collectionRate,
+    contactedCount,
+    responsiveCount,
+    unresponsiveCount,
+    notVisitedCount,
+    notContactedCount,
+    responseRate,
+    totalCount: list.length,
+  };
+}
+
+/* ---------- State Definition ---------- */
+const state = {
+  data: null,
+  view: "dashboard",
+  paySeen: new Set(),
+  invSeen: new Set(),
+  soundOn: true,
+  bellBusy: false,
+  sort: {},
+  filters: {
+    routeRep: "all",
+    routeStatus: "all",
+    routeSearch: "",
+  },
+  manualPays: loadManualPays(),
+  interactiveRoute: null,
+  activeEditingCustomer: null,
+};
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-function todayStr() {
-  const d = new Date();
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-}
-function dueLabel(due) {
-  if (!due) return "—";
-  const [y, m, day] = due.split("-").map(Number);
-  return `${day}/${m}/${y}`;
-}
-function daysTo(due) {
-  if (!due) return null;
-  const [y, m, d] = due.split("-").map(Number);
-  const target = new Date(y, m - 1, d);
-  const now = new Date(); now.setHours(0, 0, 0, 0);
-  return Math.round((target - now) / 86400000);
-}
-
-/* ---------- فرز من رؤوس الأعمدة ---------- */
+/* ---------- Sorting ---------- */
 const RATE_ORDER = { "خطر 🔴 (متوقف/راكد)": 0, "سيء ⚫ (بطيء جداً)": 1, "جيد 🟡 (منتظم)": 2, "ممتاز 🟢 (سريع الدوران)": 3 };
 function sortTh(key, col, type, label, cls) {
   const s = state.sort[key] || null;
@@ -82,15 +259,6 @@ function sortArray(rows, key, get) {
     return av.localeCompare(bv, "ar") * dir;
   });
   return r;
-}
-function markSortable(key) {
-  document.querySelectorAll(`th[data-sortable="${key}"]`).forEach((th) => {
-    const s = state.sort[key];
-    const on = s && s.col === th.dataset.k;
-    th.classList.toggle("sorted", on);
-    const arrow = th.querySelector(".th-arrow");
-    if (arrow) arrow.textContent = on ? (s.dir === 1 ? "▲" : "▼") : "⇅";
-  });
 }
 function clearSortBtn(key) {
   return `<button class="clear-sort" data-clear-sort="${key}" title="الرجوع لترتيب الشيت الأصلي">↺ ترتيب الشيت</button>`;
@@ -118,7 +286,7 @@ function onTableClick(e) {
   }
 }
 
-/* ---------- Syncing ---------- */
+/* ---------- Data Syncing ---------- */
 async function fetchData(quiet) {
   try {
     const r = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
@@ -126,6 +294,7 @@ async function fetchData(quiet) {
     const json = await r.json();
     const changed = state.data ? detectChanges(json) : false;
     state.data = json;
+    initInteractiveRouteIfNeeded();
     setSync(true);
     render();
     if (changed) render();
@@ -143,7 +312,7 @@ function setSync(ok) {
   $("lastUpdate").textContent = ok && state.data ? "آخر تحديث: " + state.data.meta.generated_at : "—";
 }
 
-/* ---------- Change detection & ALERTS (سداد جديد) ---------- */
+/* ---------- Alerts & Notifications ---------- */
 function detectChanges(json) {
   const alerts = [];
   const pay = json.payments || [];
@@ -154,7 +323,7 @@ function detectChanges(json) {
   const oldInvKeys = new Set(oldInv.map((p) => p.num + "|" + p.amount));
   const newPays = pay.filter((p) => !oldPayKeys.has(p.customer + "|" + p.date + "|" + p.amount));
   const newInvs = inv.filter((p) => !oldInvKeys.has(p.num + "|" + p.amount));
-  // أول تشغيل: لا تنبيهات — فقط خزن
+
   if (!state.payInit) {
     state.payInit = true;
     pay.forEach((p) => state.paySeen.add(p.customer + "|" + p.date + "|" + p.amount));
@@ -194,7 +363,7 @@ function fireAlerts(alerts) {
       try {
         const n = new Notification(a.title, { body: a.body, tag: "pay-" + Date.now() });
         n.onclick = () => { window.focus(); switchView("dashboard"); };
-      } catch (e) { /* ignore */ }
+      } catch (e) {}
     }
   }
   $("bellDot").hidden = false;
@@ -220,10 +389,9 @@ function alertSound(kind) {
     };
     if (kind === "pay") { play(880, 0, .18, "triangle"); play(1174, .18, .25, "triangle"); }
     else { play(660, 0, .15); play(660, .18, .15); }
-  } catch (e) { /* sound blocked */ }
+  } catch (e) {}
 }
 
-/* ---------- Toast & Modal ---------- */
 function showToast(a) {
   const el = document.createElement("div");
   el.className = "toast " + (a.type === "pay" ? "pay" : "");
@@ -235,9 +403,6 @@ function showToast(a) {
   el.querySelector(".toast-close").addEventListener("click", () => el.remove());
   $("toastArea").appendChild(el);
   setTimeout(() => el.remove(), 7000);
-  if (a.type === "pay") {
-    el.addEventListener("click", (e) => { if (e.target.classList.contains("toast-close")) return; switchView("dashboard"); });
-  }
 }
 
 let dismissTimer = null;
@@ -255,20 +420,17 @@ function toast(title, body, type = "pay") {
   el.className = "toast " + type;
   el.innerHTML = `<div><div class="toast-title">${esc(title)}</div><div class="toast-body">${esc(body)}</div></div>`;
   $("toastArea").appendChild(el);
-  setTimeout(() => el.remove(), 6000);
+  setTimeout(() => el.remove(), 5000);
 }
 
-/* ---------- Views ---------- */
+/* ---------- Views Controller ---------- */
 function render() {
   if (!state.data) return;
-  const d = state.data;
   $("dateToday").textContent = todayStr();
-  const targets = d.daily_targets || [];
-  $("navRouteCount").hidden = targets.length === 0;
-  $("navRouteCount").textContent = targets.length;
+  const routeCount = (state.interactiveRoute || []).length;
+  $("navRouteCount").hidden = routeCount === 0;
+  $("navRouteCount").textContent = routeCount;
   switchView(state.view, true);
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle };
-  fns[state.view]();
 }
 
 function switchView(name, force) {
@@ -276,14 +438,14 @@ function switchView(name, force) {
   if (location.hash !== "#" + name) { try { location.hash = name; } catch (e) {} }
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
   const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
-  $("pageTitle").textContent = titles[name];
+  $("pageTitle").textContent = titles[name] || "لوحة التحكم";
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
   if (force || !state.data) return;
   const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle };
-  fns[name]();
+  if (fns[name]) fns[name]();
 }
 
-/* ---------- DASHBOARD ---------- */
+/* ---------- 1. DASHBOARD ---------- */
 function viewDashboard() {
   const d = state.data;
   const master = d.master || [];
@@ -291,17 +453,18 @@ function viewDashboard() {
   const totalBal = master.reduce((s, m) => s + m.balance, 0);
   const active = master.filter((m) => m.status === "نشط");
   const activeBal = active.reduce((s, m) => s + m.balance, 0);
-  const targets = d.daily_targets || [];
-  const targetsMoney = targets.reduce((s, t) => s + t.balance, 0);
+
+  const routeStats = calculateRouteStats();
   const expToday = cf.reduce((s, c) => s + c.expected, 0);
-  const colToday = cf.reduce((s, c) => s + c.collected, 0);
+  const colToday = cf.reduce((s, c) => s + c.collected, 0) + routeStats.collected;
   const manualPays = manualToday();
   const payToday = manualPays.reduce((s, p) => s + p.amount, 0);
+
   const repBal = {};
   master.forEach((m) => { if (m.collector) repBal[m.collector] = (repBal[m.collector] || 0) + m.balance; });
   const repCount = {};
   active.forEach((m) => { if (m.collector) repCount[m.collector] = (repCount[m.collector] || 0) + 1; });
-  const reps = d.route_line && d.route_line.length ? [...new Set((d.collector_follow || []).map((c) => c.area).filter(Boolean))] : [];
+
   const topAreas = [...master.reduce((map, m) => {
     if (m.area) map.set(m.area, (map.get(m.area) || 0) + m.balance);
     return map;
@@ -313,28 +476,36 @@ function viewDashboard() {
     <div class="kpi-grid">
       ${kp("إجمالي المديونية المستحقة", money(totalBal), `${active.length} عميل نشط`, "c-danger")}
       ${kp("إجمالي مديونية النشطاء", money(activeBal), "بدون الخالصين", "")}
-      ${kp("أهداف اليوم (خط سير)", money(targetsMoney), `${targets.length} عميل مستحق`, "c-accent")}
+      ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل — تم تحصيل ${money(routeStats.collected)}`, "c-accent")}
       ${kp("المتوقع اليوم — كاش فلو", money(expToday), "خطة السداد", "c-info")}
-      ${kp("المُحصّل اليوم", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
-      ${kp("سداد اليوم (قبض)", money(payToday), `${manualPays.length} عملية سداد يدوي`, "c-info")}
+      ${kp("المُحصّل اليوم (إجمالي)", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
+      ${kp("سداد اليوم (قبض يدوي)", money(payToday), `${manualPays.length} عملية سداد مسجلة`, "c-info")}
     </div>
     <div class="two-col">
       <div class="card">
-        <div class="card-head"><span class="card-title">🎯 أهداف اليوم — خط السير</span>
-          ${clearSortBtn("dash")}
+        <div class="card-head">
+          <span class="card-title">🎯 خط سير اليوم — أبرز العملاء</span>
+          <button class="btn btn-ghost" onclick="switchView('route')" style="font-size:0.8rem;padding:4px 10px;">فتح خط السير التفاعلي ➔</button>
         </div>
-        ${targets.length ? `<div class="table-wrap"><table>
+        ${(state.interactiveRoute || []).length ? `<div class="table-wrap"><table>
           <thead><tr>
             <th class="row-num">م</th>
-            ${sortTh("dash", "customer", "str", "العميل")}
-            ${sortTh("dash", "collector", "str", "المحصل")}
-            ${sortTh("dash", "area", "str", "المنطقة")}
-            ${sortTh("dash", "balance", "num", "الرصيد")}
-            ${sortTh("dash", "last_payment", "date", "آخر سداد")}
-            ${sortTh("dash", "last_visit", "date", "آخر زيارة")}
-            <th>حالة</th>
+            <th>العميل</th>
+            <th>المحصل</th>
+            <th>المنطقة</th>
+            <th>المبلغ المستحق</th>
+            <th>المسدد</th>
+            <th>الحالة</th>
           </tr></thead>
-          <tbody id="dashTargetsBody"></tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف اليوم</div>`}
+          <tbody>${(state.interactiveRoute || []).slice(0, 10).map((t, i) => `<tr>
+            <td class="row-num">${i + 1}</td>
+            <td><b>${esc(t.customer)}</b></td>
+            <td>${esc(t.collector)}</td>
+            <td>${esc(t.area)}</td>
+            <td class="tbl-amount neg">${money(t.balance)}</td>
+            <td class="tbl-amount pos">${t.paid ? money(t.paid) : "—"}</td>
+            <td><span class="chip ${t.paid >= t.balance && t.balance > 0 ? "chip-green" : t.paid > 0 ? "chip-amber" : "chip-red"}">${esc(t.status || "لم يسدد")}</span></td>
+          </tr>`).join("")}</tbody></table></div>` : `<div class="empty-state">✅ لا توجد أهداف لخط السير اليوم</div>`}
       </div>
       <div class="card">
         <div class="card-head"><span class="card-title">توزيع المديونية حسب المحصل</span></div>
@@ -347,225 +518,680 @@ function viewDashboard() {
           <div class="bar-val">${money(bal)}</div></div>`).join("")}
       </div>
     </div>`;
-  const drawTargets = () => {
-    if (!$("dashTargetsBody")) return;
-    const list = sortArray(targets, "dash");
-    $("dashTargetsBody").innerHTML = list.slice(0, 14).map((t, i) => `<tr>
-      <td class="row-num">${i + 1}</td>
-      <td>${esc(t.customer)}</td><td>${esc(t.collector)}</td><td>${esc(t.area)}</td>
-      <td class="tbl-amount neg">${money(t.balance)}</td><td>${dueLabel(t.last_payment)}</td>
-      <td>${dueLabel(t.last_visit)}</td>
-      <td><span class="chip chip-red">مستحق</span></td></tr>`).join("");
-  };
-  drawTargets();
 }
 
-/* ---------- ROUTE (خط سير اليوم) ---------- */
+/* ---------- 2. ROUTE (خط سير اليوم التفاعلي + سداد يدوي + إحصائيات الإكسل) ---------- */
 function viewRoute() {
   const d = state.data;
-  const targets = (d.daily_targets || []).slice();
-  const routeLines = d.route_line || [];
-  const ratingOf = new Map(routeLines.map((r) => [r.customer, r]));
-  const seg = document.createElement("div");
-  seg.innerHTML = `<div class="card">
-    <div class="card-head">
-      <span class="card-title">برنامج النزول اليومي — ${targets.length} عميل مستحق</span>
-      <div class="seg" id="routeSeg">
-        <button data-f="all" class="active">الكل</button>
-        <button data-f="مصطفى">مصطفى</button>
-        <button data-f="محمد شعبان">محمد شعبان</button>
-      </div>
-      ${clearSortBtn("route")}
-    </div>
-    <div class="table-wrap"><table class="route-table" id="routeTable">
-      <thead><tr>
-        <th class="row-num">م</th>
-        ${sortTh("route", "area", "str", "المنطقة", "c-zone")}
-        ${sortTh("route", "customer", "str", "العميل", "c-name")}
-        ${sortTh("route", "balance", "num", "الرصيد", "c-bal")}
-        ${sortTh("route", "last_payment", "date", "آخر سداد", "c-date")}
-        ${sortTh("route", "last_visit", "date", "آخر زيارة", "c-date")}
-        ${sortTh("route", "due", "date", "مستحق", "c-date")}
-        ${sortTh("route", "rating", "rate", "التقييم", "c-rating")}
-        ${sortTh("route", "notes", "str", "آخر رد / ملاحظة", "c-note")}
-      </tr></thead>
-      <tbody id="routeBody"></tbody>
-    </table></div>
-  </div>`;
-  $("view-route").innerHTML = seg.innerHTML;
-  const rows = targets.map((t) => {
-    const rl = ratingOf.get(t.customer);
-    const rating = rl ? rl.rating : "";
-    const rChip = rating.includes("ممتاز") ? "chip-green" : rating.includes("جيد") ? "chip-blue" : rating.includes("سيء") ? "chip-amber" : "chip-red";
-    return { t, rl, rating, rChip };
-  });
-  const applyFilter = (f) => {
-    state.filters.route = f;
-    let items = rows.filter(({ t }) => f === "all" || t.collector === f);
-    items = sortArray(items, "route", (x, col) => {
-      if (col === "rating") return x.rating;
-      if (col === "notes") return x.rl ? x.rl.last_response : (x.t.notes || "");
-      return x.t[col];
-    });
-    if (!state.sort.route) items.sort((a, b) => (a.t.area || "").localeCompare(b.t.area || "") || b.t.balance - a.t.balance);
-    $("routeBody").innerHTML = items.map(({ t, rl, rating, rChip }, i) => `<tr>
-      <td class="row-num">${i + 1}</td>
-      <td class="c-zone">${esc(t.area || "—")}</td>
-      <td class="c-name"><b>${esc(t.customer)}</b></td>
-      <td class="c-bal tbl-amount neg">${money(t.balance)}</td>
-      <td class="c-date">${dueLabel(t.last_payment)}</td>
-      <td class="c-date">${dueLabel(t.last_visit)}</td>
-      <td class="c-date">${dueLabel(t.due)}</td>
-      <td class="c-rating">${rating ? `<span class="chip ${rChip}">${esc(rating)}</span>` : "—"}</td>
-      <td class="c-note">${esc(rl ? rl.last_response : (t.notes || "—"))}</td></tr>`).join("") || '<tr><td colspan="9" class="empty-state">لا توجد عملاء مستحقون في هذا الفلتر</td></tr>';
-    document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === f));
-  };
-  document.querySelectorAll("#routeSeg button").forEach((b) => b.addEventListener("click", () => applyFilter(b.dataset.f)));
-  const saved = state.filters.route || "all";
-  document.querySelectorAll("#routeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.f === saved));
-  applyFilter(saved);
-}
+  if (!d) return;
 
-/* ---------- COLLECTORS (تقييم المحصلين) ---------- */
-function viewCollectors() {
-  const d = state.data;
+  initInteractiveRouteIfNeeded();
+  const allRoute = state.interactiveRoute || [];
   const master = d.master || [];
-  const cf = d.cash_flow || [];
-  const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
   const reps = ["مصطفى", "محمد شعبان"];
-  const cards = reps.map((rep) => {
-    const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
-    const todayClients = sheet.today || [];
-    const overdueClients = sheet.overdue || [];
-    const tBal = todayClients.reduce((s, c) => s + c.balance, 0);
-    const oBal = overdueClients.reduce((s, c) => s + c.balance, 0);
-    const bal = tBal + oBal;
-    const due = d.daily_targets.filter((t) => t.collector === rep);
-    const dueBal = due.reduce((s, t) => s + t.balance, 0);
-    const rates = (d.route_line || []).filter((r) => r.rating);
-    const rateOf = new Map(rates.map((r) => [r.customer, r.rating]));
-    const clients = master.filter((m) => m.collector === rep);
-    const dist = { "ممتاز 🟢 (سريع الدوران)": 0, "جيد 🟡 (منتظم)": 0, "سيء ⚫ (بطيء جداً)": 0, "خطر 🔴 (متوقف/راكد)": 0 };
-    clients.forEach((m) => { const r = rateOf.get(m.name); if (r && dist[r] !== undefined) dist[r]++; });
-    const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
-    const expCol = cfRep.reduce((s, c) => s + c.expected, 0);
-    const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
-    const repPays = manualToday(rep);
-    const repManual = repPays.reduce((s, p) => s + p.amount, 0);
-    const effCol = colCol + repManual;
-    const pct = expCol > 0 ? Math.round(effCol / expCol * 100) : 0;
-    const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
-    return `<div class="card collector-card">
-      <div class="col-head"><div class="col-avatar">${esc(rep.substring(0, 1))}</div>
-        <div><div class="col-name">${esc(rep)}</div><div class="col-role">محصل ميداني</div></div>
+
+  // تطبيق الفلاتر
+  const fRep = state.filters.routeRep || "all";
+  const fStatus = state.filters.routeStatus || "all";
+  const fSearch = (state.filters.routeSearch || "").trim().toLowerCase();
+
+  let filtered = allRoute.filter((item) => {
+    if (fRep !== "all" && item.collector !== fRep) return false;
+    if (fStatus === "not_visited" && !item.notVisited && item.comm !== "لم يذهب إليه المحصل") return false;
+    if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
+    if (fStatus === "responsive" && item.comm !== "عميل مستجيب") return false;
+    if (fStatus === "unresponsive" && item.comm !== "عميل غير مستجيب") return false;
+    if (fStatus === "pending" && (item.paid > 0 || item.comm === "عميل مستجيب")) return false;
+    if (fSearch && !item.customer.toLowerCase().includes(fSearch) && !item.area.toLowerCase().includes(fSearch)) return false;
+    return true;
+  });
+
+  // فرز
+  filtered = sortArray(filtered, "route", (x, col) => {
+    if (col === "notes" || col === "response") return x.response || "";
+    if (col === "paid") return x.paid || 0;
+    if (col === "balance") return x.balance || 0;
+    return x[col];
+  });
+
+  // حساب المؤشرات المطابقة لشيت الإكسل
+  const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
+
+  $("view-route").innerHTML = `
+    <!-- نموذج 💰 سداد جديد (يدوي) المنقول إلى خط السير -->
+    <div class="card" style="margin-bottom: var(--space-4);">
+      <div class="card-head">
+        <span class="card-title">💰 سداد جديد (يدوي)</span>
+        <span class="card-sub">تسجيل سداد نقدي/تحويل وتحديث حالة العميل وإحصائيات المحصل فوراً</span>
       </div>
-      <div class="collector-progress">
-        <div class="prog-head"><span>الإنجاز اليومي (المُحصّل)</span><b>${pct}%</b></div>
-        <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100, pct)}%;background:${pctColor}"></div></div>
-        <div class="prog-sub">تم تحصيل ${money(effCol)} من أصل ${money(expCol)} متوقع</div>
-      </div>
-      <div class="col-stats">
-        <div class="col-stat"><b>${money(bal)}</b><span>إجمالي مديونية Daily_Route</span></div>
-        <div class="col-stat"><b>${money(tBal)}</b><span>عملاء اليوم (${todayClients.length})</span></div>
-        <div class="col-stat"><b>${money(oBal)}</b><span>المتأخرات (${overdueClients.length})</span></div>
-        <div class="col-stat"><b>${money(dueBal)}</b><span>مستحق اليوم</span></div>
-        <div class="col-stat"><b>${due.length}</b><span>عملاء اليوم (خط سير)</span></div>
-        <div class="col-stat"><b class="pos">${money(repManual)}</b><span>سداد يدوي اليوم (${repPays.length})</span></div>
-      </div>
-      <div style="margin-top:16px;font-weight:800;font-size:.9rem">سداد اليوم (يدوي)</div>
-      <div class="mini-feed" style="margin-top:10px">
-        ${repPays.slice().reverse().slice(-5).map((p) => `<div class="mini-item"><span>${esc(p.customer)}</span><b class="pos">+${money(p.amount)}</b><em>${esc(p.time)}</em></div>`).join("") || '<div class="mini-item muted">لا توجد سدادات مسجلة</div>'}
-      </div>
-      <div style="margin-top:16px;font-weight:800;font-size:.9rem">تصنيف العملاء (خط سير)</div>
-      <div class="rating-strip" style="margin-top:10px">
-        <div class="rating-tile"><b style="color:var(--success)">${dist["ممتاز 🟢 (سريع الدوران)"]}</b>ممتاز سريع</div>
-        <div class="rating-tile"><b style="color:var(--info)">${dist["جيد 🟡 (منتظم)"]}</b>جيد منتظم</div>
-        <div class="rating-tile"><b style="color:var(--warning)">${dist["سيء ⚫ (بطيء جداً)"]}</b>سيء بطيء</div>
-        <div class="rating-tile"><b style="color:var(--danger)">${dist["خطر 🔴 (متوقف/راكد)"]}</b>خطر راكد</div>
-      </div>
-    </div>`;
-  }).join("");
-  const allRates = (d.route_line || []).filter((r) => r.rating);
-  const rateOrder = { "خطر 🔴 (متوقف/راكد)": 0, "سيء ⚫ (بطيء جداً)": 1, "جيد 🟡 (منتظم)": 2, "ممتاز 🟢 (سريع الدوران)": 3 };
-  const rows = allRates.map((r) => {
-    const m = master.find((x) => x.name === r.customer);
-    return { r, rep: m ? m.collector : "" };
-  }).sort((a, b) => (rateOrder[a.r.rating] ?? 0) - (rateOrder[b.r.rating] ?? 0));
-  $("view-collectors").innerHTML = `
-    <div class="card">
-      <div class="card-head"><span class="card-title">💰 سداد جديد (يدوي)</span><span class="card-sub">سيسجل تحت اسم المحصل ويظهر في تقييمه</span></div>
-      <form id="payForm" class="pay-form">
+      <form id="routePayForm" class="pay-form">
         <div class="pay-field">
           <label>المحصل</label>
-          <select id="payCollector" class="select">${reps.map((r) => `<option>${esc(r)}</option>`).join("")}</select>
+          <select id="routePayCollector" class="select">
+            ${reps.map((r) => `<option value="${esc(r)}" ${fRep === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
+          </select>
         </div>
         <div class="pay-field">
           <label>العميل</label>
-          <input id="payCustomer" class="search-input" list="payCustomerList" placeholder="اكتب اسم العميل…" autocomplete="off">
-          <datalist id="payCustomerList">${master.map((m) => `<option value="${esc(m.name)}"></option>`).join("")}</datalist>
+          <input id="routePayCustomer" class="search-input" list="routeCustomerList" placeholder="ابحث باسم العميل من القائمة…" autocomplete="off" required>
+          <datalist id="routeCustomerList">
+            ${allRoute.map((m) => `<option value="${esc(m.customer)}">${esc(m.customer)} (${money(m.balance)})</option>`).join("")}
+            ${master.slice(0, 100).map((m) => `<option value="${esc(m.name)}">${esc(m.name)} (رصيد: ${money(m.balance)})</option>`).join("")}
+          </datalist>
         </div>
         <div class="pay-field">
-          <label>المبلغ</label>
-          <input id="payAmount" class="search-input" type="number" min="1" step="any" placeholder="0">
+          <label>المبلغ المسدد (ج.م)</label>
+          <input id="routePayAmount" class="search-input" type="number" min="1" step="any" placeholder="0" required>
         </div>
         <div class="pay-field pay-actions">
           <button type="submit" class="btn btn-primary">تسجيل السداد ✓</button>
         </div>
       </form>
     </div>
-    <div class="collector-grid">${cards}</div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">تقييم العملاء — مرتب من الأخطر للأفضل (خط سير)</span>
-        <div class="legend"><span><i style="background:var(--danger)"></i>خطر</span><span><i style="background:var(--warning)"></i>سيء</span><span><i style="background:var(--info)"></i>جيد</span><span><i style="background:var(--success)"></i>ممتاز</span></div>
-        ${clearSortBtn("collectors")}
+
+    <!-- شريط أدوات خط السير: فلاتر، إضافة عميل، نسخ للواتساب -->
+    <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
+      <div class="route-toolbar">
+        <div class="add-client-form">
+          <span style="font-size:0.85rem; font-weight:800; color:var(--primary);">➕ إضافة عميل لليوم:</span>
+          <input id="addClientInput" class="search-input" list="masterDataList" placeholder="اختر عميلاً من Master Data…" style="min-width: 240px;">
+          <datalist id="masterDataList">
+            ${master.map((m) => `<option value="${esc(m.name)}">${esc(m.name)} — ${esc(m.area)} (${money(m.balance)})</option>`).join("")}
+          </datalist>
+          <select id="addClientRepSelect" class="select">
+            ${reps.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join("")}
+          </select>
+          <button type="button" id="addClientBtn" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.82rem;">إضافة ＋</button>
+        </div>
+
+        <div class="route-actions-group">
+          <button type="button" id="waRouteShareBtn" class="btn-wa" title="نسخ رسالة خط السير لإرسالها للمحصل عبر الواتساب">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82-1.55 1.56-3.62 2.42-5.82 2.42-1.45 0-2.88-.38-4.14-1.11l-.3-.17-3.08.81.82-3-.2-.31a8.18 8.18 0 0 1-1.26-4.46c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.71 4.3 3.8 2.53 1.09 2.53.73 2.98.69.46-.04 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29"/></svg>
+            نسخ خط السير للواتساب
+          </button>
+          <button type="button" id="resetRouteBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
+        </div>
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th class="row-num">م</th>
-          ${sortTh("collectors", "customer", "str", "العميل")}
-          ${sortTh("collectors", "rep", "str", "المحصل")}
-          ${sortTh("collectors", "area", "str", "المنطقة")}
-          ${sortTh("collectors", "target_debt", "num", "المديونية")}
-          ${sortTh("collectors", "turnover", "num", "معدل الدوران")}
-          ${sortTh("collectors", "rating", "rate", "التقييم")}
-          ${sortTh("collectors", "last_response", "str", "آخر رد")}
-        </tr></thead>
-        <tbody id="collectBody"></tbody></table></div>
-    </div>`;
-  const drawCollect = () => {
-    if (!$("collectBody")) return;
-    let list = sortArray(rows, "collectors", (x, col) => (col === "rep" ? x.rep : x.r[col]));
-    if (!state.sort.collectors) list = rows.slice().sort((a, b) => (rateOrder[a.r.rating] ?? 0) - (rateOrder[b.r.rating] ?? 0));
-    $("collectBody").innerHTML = list.map(({ r, rep }) => {
-      const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
-      const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-      return `<tr><td class="row-num">${i + 1}</td><td><b>${esc(r.customer)}</b></td><td>${esc(rep || "—")}</td><td>${esc(r.area)}</td>
-        <td class="tbl-amount neg">${money(r.target_debt)}</td><td>${t}</td>
-        <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-        <td class="note-text">${esc(r.last_response || "—")}</td></tr>`;
-    }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
-  };
-  drawCollect();
-  const payForm = $("payForm");
+
+      <!-- تصفيات سريعة -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
+        <div class="seg" id="routeRepSeg">
+          <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
+          ${reps.map((r) => `<button data-f="${esc(r)}" class="${fRep === r ? "active" : ""}">${esc(r)} (${allRoute.filter((x) => x.collector === r).length})</button>`).join("")}
+        </div>
+
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <input class="search-input" id="routeTableSearch" placeholder="بحث باسم العميل أو المنطقة…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:200px;">
+          <select id="routeStatusFilter" class="select" style="padding:6px 10px;">
+            <option value="all" ${fStatus === "all" ? "selected" : ""}>كل الحالات</option>
+            <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب إليهم (${allRoute.filter((x) => x.notVisited || x.comm === "لم يذهب إليه المحصل").length})</option>
+            <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد اليوم (${allRoute.filter((x) => x.paid > 0).length})</option>
+            <option value="responsive" ${fStatus === "responsive" ? "selected" : ""}>✅ عميل مستجيب (${allRoute.filter((x) => x.comm === "عميل مستجيب").length})</option>
+            <option value="unresponsive" ${fStatus === "unresponsive" ? "selected" : ""}>⚠️ عميل غير مستجيب (${allRoute.filter((x) => x.comm === "عميل غير مستجيب").length})</option>
+            <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة / لم يسدد</option>
+          </select>
+          ${clearSortBtn("route")}
+        </div>
+      </div>
+    </div>
+
+    <!-- التخطيط الرئيسي: جدول العملاء التفاعلي + صندوق الإحصائيات المطابق للإكسل -->
+    <div class="route-interactive-layout">
+      <!-- 1. صندوق الإحصائيات (طِبق شيت الإكسل المرفق بالصورة) -->
+      <div class="excel-summary-card">
+        <div class="excel-summary-title">
+          <span>📊 ملخص التحصيل والمتابعة</span>
+          <span style="font-size:0.75rem; font-weight:600; opacity:0.7;">${fRep === "all" ? "كل المحصلين" : fRep}</span>
+        </div>
+
+        <table class="excel-table-summary">
+          <tbody>
+            <tr>
+              <td class="excel-lbl">اجمالي المطلوب</td>
+              <td class="excel-val c-total">${money(stats.totalDue)}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">المحصل</td>
+              <td class="excel-val c-collected">${money(stats.collected)}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">الباقي</td>
+              <td class="excel-val c-remaining">${money(stats.remaining)}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">نسبة التحصيل</td>
+              <td class="excel-val c-rate">${stats.collectionRate.toFixed(2)}%</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">تم التواصل</td>
+              <td class="excel-val c-contacted">${stats.contactedCount}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">عميل مستجيب</td>
+              <td class="excel-val c-responsive">${stats.responsiveCount}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">عميل غير مستجيب</td>
+              <td class="excel-val c-unresponsive">${stats.unresponsiveCount}</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">نسبة الاستجابة</td>
+              <td class="excel-val c-rate">${stats.responseRate.toFixed(2)}%</td>
+            </tr>
+            <tr>
+              <td class="excel-lbl">لم يتم التواصل</td>
+              <td class="excel-val c-not-visited">${stats.notContactedCount}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- شريط نسبة التحصيل -->
+        <div style="margin-top: 10px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.76rem; font-weight:700; margin-bottom:4px;">
+            <span>نسبة إنجاز التحصيل</span>
+            <b>${stats.collectionRate.toFixed(1)}%</b>
+          </div>
+          <div class="bar-track" style="height: 8px;">
+            <div class="bar-fill" style="width: ${Math.min(100, stats.collectionRate)}%; background: ${stats.collectionRate >= 60 ? "var(--success)" : stats.collectionRate >= 30 ? "var(--warning)" : "var(--danger)"}"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; font-size: 0.74rem; opacity: 0.7; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 8px;">
+          💡 يتم تحديث الإحصائيات تلقائياً عند تغيير حالة التواصل، تسجيل السداد، أو تعديل ردود الواتساب.
+        </div>
+      </div>
+
+      <!-- 2. الجدول التفاعلي الرئيسي (مطابق لأعمدة شيت الإكسل: م، العميل، المبلغ المستحق، المسدد، الحالة، التواصل، الرد) -->
+      <div class="card" style="padding: var(--space-4);">
+        <div class="table-wrap">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th class="row-num">م</th>
+                ${sortTh("route", "customer", "str", "العميل")}
+                ${sortTh("route", "balance", "num", "المبلغ المستحق")}
+                ${sortTh("route", "paid", "num", "المسدد")}
+                ${sortTh("route", "status", "str", "الحالة")}
+                ${sortTh("route", "comm", "str", "التواصل")}
+                ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
+                <th style="width: 90px; text-align: center;">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="routeTableBody">
+              ${filtered.length ? filtered.map((c, idx) => {
+                const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+                const isPaid = c.paid > 0;
+                const rowClass = isNotVisited ? "row-not-visited" : isPaid ? "row-paid" : "";
+                const commClass = c.comm === "عميل مستجيب" ? "st-responsive" : c.comm === "عميل غير مستجيب" ? "st-unresponsive" : c.comm === "تم التواصل" ? "st-contacted" : c.comm === "لم يذهب إليه المحصل" ? "st-not-visited" : "st-none";
+                const statusChip = c.paid >= c.balance && c.balance > 0 ? "chip-green" : c.paid > 0 ? "chip-amber" : "chip-gray";
+
+                return `
+                  <tr class="${rowClass}" data-customer="${esc(c.customer)}">
+                    <td class="row-num">${idx + 1}</td>
+                    
+                    <!-- العميل -->
+                    <td style="min-width: 170px;">
+                      <div style="font-weight: 800; font-size: 0.92rem; color: var(--foreground);">${esc(c.customer)}</div>
+                      <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
+                        <span style="font-size: 0.72rem; opacity: 0.7;">📍 ${esc(c.area || "—")}</span>
+                        <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
+                          ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
+                        </select>
+                      </div>
+                    </td>
+
+                    <!-- المبلغ المستحق -->
+                    <td class="tbl-amount neg" style="font-size: 0.92rem;">${money(c.balance)}</td>
+
+                    <!-- المسدد -->
+                    <td style="min-width: 110px;">
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <b class="${c.paid > 0 ? "pos" : ""}" style="font-variant-numeric: tabular-nums;">${c.paid ? money(c.paid) : "0 ج.م"}</b>
+                        <button type="button" class="table-pay-btn" data-action="quick-pay" data-customer="${esc(c.customer)}" title="تسجيل سداد فوري">
+                          ＋سداد
+                        </button>
+                      </div>
+                    </td>
+
+                    <!-- الحالة -->
+                    <td>
+                      <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
+                    </td>
+
+                    <!-- التواصل -->
+                    <td style="min-width: 160px;">
+                      <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}">
+                          <option value="لم يتم التواصل" ${c.comm === "لم يتم التواصل" ? "selected" : ""}>لم يتم التواصل</option>
+                          <option value="تم التواصل" ${c.comm === "تم التواصل" ? "selected" : ""}>تم التواصل</option>
+                          <option value="عميل مستجيب" ${c.comm === "عميل مستجيب" ? "selected" : ""}>عميل مستجيب</option>
+                          <option value="عميل غير مستجيب" ${c.comm === "عميل غير مستجيب" ? "selected" : ""}>عميل غير مستجيب</option>
+                          <option value="لم يذهب إليه المحصل" ${c.comm === "لم يذهب إليه المحصل" ? "selected" : ""}>لم يذهب إليه المحصل ❌</option>
+                        </select>
+                        <label class="not-visited-check" title="تحديد أن المحصل لم يذهب إلى هذا العميل اليوم">
+                          <input type="checkbox" data-action="toggle-not-visited" data-customer="${esc(c.customer)}" ${isNotVisited ? "checked" : ""}>
+                          <span style="color: ${isNotVisited ? "var(--danger)" : "inherit"};">لم يذهب إليه</span>
+                        </label>
+                      </div>
+                    </td>
+
+                    <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
+                    <td style="min-width: 220px;">
+                      <div class="resp-cell-content">
+                        <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
+                          ${c.response ? esc(c.response) : `<span style="opacity:0.45; font-style:italic;">لا يوجد رد مسجل</span>`}
+                        </div>
+                        <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                          تعديل
+                        </button>
+                      </div>
+                    </td>
+
+                    <!-- إجراءات -->
+                    <td style="text-align: center;">
+                      <div class="tbl-actions" style="justify-content: center;">
+                        <button type="button" class="tbl-action-icon" data-action="delete-route-client" data-customer="${esc(c.customer)}" title="إزالة العميل من خط سير اليوم">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>`;
+              }).join("") : `<tr><td colspan="8" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ربط الأحداث
+  bindRouteEvents();
+}
+
+function bindRouteEvents() {
+  // 1. تصفية المحصلين Tabs
+  document.querySelectorAll("#routeRepSeg button").forEach((b) => {
+    b.addEventListener("click", () => {
+      state.filters.routeRep = b.dataset.f;
+      viewRoute();
+    });
+  });
+
+  // 2. تصفية الحالة والبحث
+  const statusSelect = $("routeStatusFilter");
+  if (statusSelect) {
+    statusSelect.addEventListener("change", (e) => {
+      state.filters.routeStatus = e.target.value;
+      viewRoute();
+    });
+  }
+
+  const tableSearch = $("routeTableSearch");
+  if (tableSearch) {
+    tableSearch.addEventListener("input", (e) => {
+      state.filters.routeSearch = e.target.value;
+      viewRoute();
+    });
+  }
+
+  // 3. نموذج السداد اليدوي
+  const payForm = $("routePayForm");
   if (payForm) {
     payForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const collector = $("payCollector").value;
-      const customer = $("payCustomer").value.trim();
-      const amount = Number($("payAmount").value);
-      if (!customer) return toast("اكتب اسم العميل أولاً", "err");
-      if (!amount || amount <= 0) return toast("أدخل مبلغاً صحيحاً", "err");
+      const collector = $("routePayCollector").value;
+      const customer = $("routePayCustomer").value.trim();
+      const amount = Number($("routePayAmount").value);
+      if (!customer) return toast("تنبيه", "يرجى تحديد اسم العميل أولاً", "warn");
+      if (!amount || amount <= 0) return toast("تنبيه", "يرجى إدخال مبلغ صحيح", "warn");
+
       addManualPay(customer, amount, collector);
-      toast(`تم تسجيل سداد ${money(amount)} من ${customer} تحت ${collector}`, "ok");
-      viewCollectors();
+      toast("تم السداد ✓", `تم تسجيل سداد مبلغ ${money(amount)} للعميل ${customer}`, "pay");
+      $("routePayAmount").value = "";
+      $("routePayCustomer").value = "";
+      viewRoute();
+    });
+  }
+
+  // 4. إضافة عميل لليوم
+  const addBtn = $("addClientBtn");
+  if (addBtn) {
+    addBtn.addEventListener("click", () => {
+      const custInput = $("addClientInput");
+      const repInput = $("addClientRepSelect");
+      const name = (custInput.value || "").trim();
+      const rep = repInput.value;
+      if (!name) return toast("تنبيه", "يرجى كتابة أو اختيار اسم العميل", "warn");
+
+      // البحث في ماستر داتا
+      const master = (state.data && state.data.master) || [];
+      const match = master.find((m) => m.name === name || m.name.includes(name));
+      const customerName = match ? match.name : name;
+      const bal = match ? Number(match.balance) || 0 : 0;
+      const area = match ? match.area : "—";
+
+      // التحقق من وجوده بالفعل
+      const existing = (state.interactiveRoute || []).find((x) => x.customer === customerName);
+      if (existing) {
+        existing.collector = rep;
+        toast("تم التحديث", `العميل ${customerName} موجود بالفعل وتم تعيينه للمحصل ${rep}`, "pay");
+      } else {
+        state.interactiveRoute.unshift({
+          customer: customerName,
+          collector: rep,
+          area: area,
+          balance: bal,
+          paid: 0,
+          status: "لم يسدد",
+          comm: "لم يتم التواصل",
+          response: match ? match.notes : "",
+          notVisited: false,
+          last_payment: match ? match.last_payment : "",
+          last_visit: match ? match.last_visit : "",
+          due: match ? match.due_date : "",
+          rating: "",
+          updatedAt: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
+        });
+        toast("تمت الإضافة ✓", `تمت إضافة ${customerName} إلى خط سير ${rep}`, "pay");
+      }
+
+      saveInteractiveRoute();
+      custInput.value = "";
+      viewRoute();
+    });
+  }
+
+  // 5. استعادة المقترح
+  const resetBtn = $("resetRouteBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (confirm("هل تريد استعادة قائمة خط السير المقترحة من الشيت الأصلي؟")) {
+        localStorage.removeItem(getRouteStorageKey());
+        state.interactiveRoute = null;
+        initInteractiveRouteIfNeeded();
+        toast("تمت الاستعادة", "تمت استعادة خط السير الأصلي من الشيت", "pay");
+        viewRoute();
+      }
+    });
+  }
+
+  // 6. نسخ خط السير للواتساب
+  const waBtn = $("waRouteShareBtn");
+  if (waBtn) {
+    waBtn.addEventListener("click", () => {
+      openWhatsAppShareModal(state.filters.routeRep || "all");
+    });
+  }
+
+  // 7. أحداث الجدول التفاعلية (Event Delegation)
+  const tbody = $("routeTableBody");
+  if (tbody) {
+    tbody.addEventListener("change", (e) => {
+      const target = e.target;
+      const customer = target.dataset.customer;
+      if (!customer) return;
+
+      const item = state.interactiveRoute.find((x) => x.customer === customer);
+      if (!item) return;
+
+      if (target.dataset.action === "change-rep") {
+        item.collector = target.value;
+        saveInteractiveRoute();
+        toast("نقل عميل", `تم نقل العميل ${customer} للمحصل ${item.collector}`, "pay");
+        viewRoute();
+      } else if (target.dataset.action === "change-comm") {
+        item.comm = target.value;
+        if (item.comm === "لم يذهب إليه المحصل") item.notVisited = true;
+        else if (item.notVisited && item.comm !== "لم يتم التواصل") item.notVisited = false;
+        saveInteractiveRoute();
+        viewRoute();
+      } else if (target.dataset.action === "toggle-not-visited") {
+        item.notVisited = target.checked;
+        if (item.notVisited) item.comm = "لم يذهب إليه المحصل";
+        else if (item.comm === "لم يذهب إليه المحصل") item.comm = "لم يتم التواصل";
+        saveInteractiveRoute();
+        viewRoute();
+      }
+    });
+
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const customer = btn.dataset.customer;
+      if (!customer) return;
+
+      if (action === "edit-resp") {
+        openResponseModal(customer);
+      } else if (action === "quick-pay") {
+        openQuickPayModal(customer);
+      } else if (action === "delete-route-client") {
+        if (confirm(`هل تريد إزالة العميل "${customer}" من خط سير اليوم؟`)) {
+          state.interactiveRoute = state.interactiveRoute.filter((x) => x.customer !== customer);
+          saveInteractiveRoute();
+          toast("تم الحذف", `تمت إزالة ${customer} من خط السير`, "warn");
+          viewRoute();
+        }
+      }
     });
   }
 }
 
-/* ---------- RESPONSES (ردود العملاء) ---------- */
+/* ---------- 3. COLLECTORS (تقييم المحصلين المرتبط بالتفاعل اللحظي) ---------- */
+function viewCollectors() {
+  const d = state.data;
+  if (!d) return;
+
+  initInteractiveRouteIfNeeded();
+  const allRoute = state.interactiveRoute || [];
+  const master = d.master || [];
+  const cf = d.cash_flow || [];
+  const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
+  const reps = ["مصطفى", "محمد شعبان"];
+
+  const cards = reps.map((rep) => {
+    // العملاء المسندون للمحصل في خط السير التفاعلي اليوم
+    const repRouteClients = allRoute.filter((c) => c.collector === rep);
+    const repStats = calculateRouteStats(repRouteClients);
+
+    const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
+    const todayClients = sheet.today || [];
+    const overdueClients = sheet.overdue || [];
+    const tBal = todayClients.reduce((s, c) => s + c.balance, 0);
+    const oBal = overdueClients.reduce((s, c) => s + c.balance, 0);
+    const sheetBal = tBal + oBal;
+
+    const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
+    const expCol = cfRep.reduce((s, c) => s + c.expected, 0) || repStats.totalDue;
+    const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
+    const repPays = manualToday(rep);
+    const repManual = repPays.reduce((s, p) => s + p.amount, 0);
+    const effCol = colCol + repManual + repStats.collected;
+    const pct = expCol > 0 ? Math.round((effCol / expCol) * 100) : 0;
+    const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
+
+    return `
+      <div class="card collector-card">
+        <div class="col-head">
+          <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
+          <div style="flex:1;">
+            <div class="col-name">${esc(rep)}</div>
+            <div class="col-role">محصل ميداني — متابعة حية لليوم</div>
+          </div>
+          <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" style="font-size:0.75rem; padding:5px 10px;">
+            💬 إرسال خط السير
+          </button>
+        </div>
+
+        <!-- شريط الإنجاز اليومي -->
+        <div class="collector-progress">
+          <div class="prog-head">
+            <span>الإنجاز والتحصيل الفعلي اليوم</span>
+            <b>${pct}%</b>
+          </div>
+          <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100, pct)}%;background:${pctColor}"></div></div>
+          <div class="prog-sub">تم تحصيل ${money(effCol)} من أصل ${money(expCol)} مطلوب</div>
+        </div>
+
+        <!-- إحصائيات التفاعل الميداني لليوم -->
+        <div class="col-stats">
+          <div class="col-stat">
+            <b>${repStats.totalCount} عميل</b>
+            <span>مكلف بهم اليوم</span>
+          </div>
+          <div class="col-stat">
+            <b class="pos">${money(repStats.collected)}</b>
+            <span>مُحصّل اليوم (${repStats.collectionRate.toFixed(1)}%)</span>
+          </div>
+          <div class="col-stat">
+            <b style="color:var(--info)">${repStats.contactedCount}</b>
+            <span>تم التواصل / الزيارة</span>
+          </div>
+          <div class="col-stat">
+            <b style="color:var(--danger)">${repStats.notVisitedCount}</b>
+            <span>لم يذهب إليهم ❌</span>
+          </div>
+          <div class="col-stat">
+            <b style="color:var(--success)">${repStats.responsiveCount}</b>
+            <span>عميل مستجيب (${repStats.responseRate.toFixed(1)}%)</span>
+          </div>
+          <div class="col-stat">
+            <b style="color:var(--warning)">${repStats.unresponsiveCount}</b>
+            <span>غير مستجيب</span>
+          </div>
+        </div>
+
+        <!-- تفاصيل عملاء المحصل وردودهم اليوم -->
+        <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:800; font-size:0.88rem;">📋 تفاصيل عملاء خط السير والتفاعل:</span>
+          <span style="font-size:0.75rem; opacity:0.7;">${repRouteClients.length} عميل</span>
+        </div>
+
+        <div class="mini-feed" style="margin-top:10px; max-height:220px; overflow-y:auto;">
+          ${repRouteClients.length ? repRouteClients.map((c) => {
+            const isDone = c.paid > 0;
+            const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+            return `
+              <div class="mini-item" style="border-right: 3px solid ${isDone ? "var(--success)" : isNotVisited ? "var(--danger)" : "var(--border)"}">
+                <div style="flex:1; min-width:0;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700;">${esc(c.customer)}</span>
+                    <b class="${isDone ? "pos" : "neg"}">${isDone ? "+" + money(c.paid) : money(c.balance)}</b>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px; font-size:0.72rem;">
+                    <span style="opacity:0.8;">${c.response ? "💬 " + esc(c.response) : `<i style="opacity:0.5;">${esc(c.comm)}</i>`}</span>
+                    <span class="chip ${isDone ? "chip-green" : isNotVisited ? "chip-red" : "chip-gray"}" style="padding:1px 6px; font-size:0.65rem;">${esc(c.comm)}</span>
+                  </div>
+                </div>
+              </div>`;
+          }).join("") : `<div class="mini-item muted">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</div>`}
+        </div>
+
+        <!-- آخر عمليات سداد مسجلة للمحصل -->
+        <div style="margin-top:14px; font-weight:800; font-size:0.85rem;">سداد اليوم (المسجل يدوي):</div>
+        <div class="mini-feed" style="margin-top:6px;">
+          ${repPays.slice().reverse().slice(0, 4).map((p) => `
+            <div class="mini-item">
+              <span>${esc(p.customer)}</span>
+              <b class="pos">+${money(p.amount)}</b>
+              <em>${esc(p.time)}</em>
+            </div>`).join("") || '<div class="mini-item muted">لا توجد سدادات جديدة مسجلة</div>'}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const allRates = (d.route_line || []).filter((r) => r.rating);
+  const rows = allRates.map((r) => {
+    const m = master.find((x) => x.name === r.customer);
+    return { r, rep: m ? m.collector : "" };
+  }).sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
+
+  $("view-collectors").innerHTML = `
+    <!-- شبكة بطاقات تقييم المحصلين -->
+    <div class="collector-grid">${cards}</div>
+
+    <!-- جدول تقييم العملاء العام -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">تقييم العملاء التاريخي — من الأخطر للأفضل (خط سير)</span>
+        <div class="legend">
+          <span><i style="background:var(--danger)"></i>خطر</span>
+          <span><i style="background:var(--warning)"></i>سيء</span>
+          <span><i style="background:var(--info)"></i>جيد</span>
+          <span><i style="background:var(--success)"></i>ممتاز</span>
+        </div>
+        ${clearSortBtn("collectors")}
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="row-num">م</th>
+              ${sortTh("collectors", "customer", "str", "العميل")}
+              ${sortTh("collectors", "rep", "str", "المحصل")}
+              ${sortTh("collectors", "area", "str", "المنطقة")}
+              ${sortTh("collectors", "target_debt", "num", "المديونية")}
+              ${sortTh("collectors", "turnover", "num", "معدل الدوران")}
+              ${sortTh("collectors", "rating", "rate", "التقييم")}
+              ${sortTh("collectors", "last_response", "str", "آخر رد")}
+            </tr>
+          </thead>
+          <tbody id="collectBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const drawCollect = () => {
+    if (!$("collectBody")) return;
+    let list = sortArray(rows, "collectors", (x, col) => (col === "rep" ? x.rep : x.r[col]));
+    if (!state.sort.collectors) list = rows.slice().sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
+    $("collectBody").innerHTML = list.map(({ r, rep }, idx) => {
+      const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
+      const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
+      return `<tr>
+        <td class="row-num">${idx + 1}</td>
+        <td><b>${esc(r.customer)}</b></td>
+        <td>${esc(rep || "—")}</td>
+        <td>${esc(r.area)}</td>
+        <td class="tbl-amount neg">${money(r.target_debt)}</td>
+        <td>${t}</td>
+        <td><span class="chip ${c}">${esc(r.rating)}</span></td>
+        <td class="note-text">${esc(r.last_response || "—")}</td>
+      </tr>`;
+    }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
+  };
+  drawCollect();
+}
+
+/* ---------- 4. RESPONSES (ردود العملاء) ---------- */
 function viewResponses() {
   const d = state.data;
-  const rows = (d.route_line || []).filter((r) => r.last_response);
+  const rows = (d.route_line || []).filter((r) => r.last_response).slice();
+
+  // دمج أي ردود تم تعديلها اليوم من خط السير التفاعلي
+  if (state.interactiveRoute) {
+    state.interactiveRoute.forEach((ir) => {
+      if (ir.response) {
+        const found = rows.find((r) => r.customer === ir.customer);
+        if (found) {
+          found.last_response = ir.response;
+        } else {
+          rows.unshift({
+            customer: ir.customer,
+            area: ir.area,
+            target_debt: ir.balance,
+            last_payment: ir.last_payment,
+            last_invoice: "",
+            last_response: ir.response,
+          });
+        }
+      }
+    });
+  }
+
   const byArea = [...new Set(rows.map((r) => r.area).filter(Boolean))];
   $("view-responses").innerHTML = `
     <div class="card">
@@ -585,9 +1211,11 @@ function viewResponses() {
           ${sortTh("resp", "last_payment", "date", "آخر سداد")}
           ${sortTh("resp", "last_invoice", "date", "آخر فاتورة")}
           ${sortTh("resp", "last_response", "str", "آخر رد من العميل")}
+          <th>إجراء</th>
         </tr></thead>
         <tbody id="respBody"></tbody></table></div>
     </div>`;
+
   const draw = () => {
     const q = $("respSearch").value.trim();
     const area = $("respArea").value;
@@ -596,18 +1224,22 @@ function viewResponses() {
     let list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
     list = sortArray(list, "resp");
     $("respBody").innerHTML = list.map((r, i) => `<tr>
-      <td class="row-num">${i + 1}</td><td><b>${esc(r.customer)}</b></td><td>${esc(r.area || "—")}</td>
+      <td class="row-num">${i + 1}</td>
+      <td><b>${esc(r.customer)}</b></td>
+      <td>${esc(r.area || "—")}</td>
       <td class="tbl-amount neg">${money(r.target_debt)}</td>
-      <td>${dueLabel(r.last_payment)}</td><td>${dueLabel(r.last_invoice)}</td>
-      <td class="note-text"><span class="chip chip-amber">رد العميل</span> ${esc(r.last_response)}</td></tr>`).join("") ||
-      '<tr><td colspan="7" class="empty-state">لا نتائج مطابقة</td></tr>';
+      <td>${dueLabel(r.last_payment)}</td>
+      <td>${dueLabel(r.last_invoice)}</td>
+      <td class="note-text"><span class="chip chip-amber">رد العميل</span> ${esc(r.last_response)}</td>
+      <td><button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(r.customer)}')">تعديل ✏️</button></td>
+    </tr>`).join("") || '<tr><td colspan="8" class="empty-state">لا نتائج مطابقة</td></tr>';
   };
   $("respSearch").addEventListener("input", draw);
   $("respArea").addEventListener("change", draw);
   draw();
 }
 
-/* ---------- CASHFLOW ---------- */
+/* ---------- 5. CASHFLOW (التدفق النقدي) ---------- */
 function viewCashflow() {
   const d = state.data;
   const cf = d.cash_flow || [];
@@ -669,7 +1301,7 @@ function viewCashflow() {
   drawCash();
 }
 
-/* ---------- CYCLE (عملاء بالدورة) ---------- */
+/* ---------- 6. CYCLE (عملاء بالدورة) ---------- */
 function viewCycle() {
   const d = state.data;
   const cc = (d.cycle_clients || []).slice();
@@ -745,7 +1377,79 @@ function viewCycle() {
   draw();
 }
 
-/* ---------- Theme (نهاري/ليلي) ---------- */
+/* ---------- 7. Modals: Response Editor, Quick Pay & WhatsApp Share ---------- */
+function openResponseModal(customerName) {
+  state.activeEditingCustomer = customerName;
+  const item = (state.interactiveRoute || []).find((x) => x.customer === customerName);
+  const master = (state.data && state.data.master) || [];
+  const mm = master.find((x) => x.name === customerName);
+
+  const currentResp = item ? item.response : (mm ? mm.notes : "");
+  const currentComm = item ? item.comm : "تم التواصل";
+
+  $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
+  $("respModalInput").value = currentResp || "";
+  $("respModalComm").value = currentComm || "تم التواصل";
+  $("responseModal").hidden = false;
+  $("respModalInput").focus();
+}
+
+function closeResponseModal() {
+  $("responseModal").hidden = true;
+  state.activeEditingCustomer = null;
+}
+
+function openQuickPayModal(customerName) {
+  const item = (state.interactiveRoute || []).find((x) => x.customer === customerName);
+  const reps = ["مصطفى", "محمد شعبان"];
+
+  $("quickPayCustomerName").textContent = `تسجيل سداد للعميل: ${customerName}`;
+  $("quickPayMeta").innerHTML = `
+    <span>المديونية الحالية: <b>${money(item ? item.balance : 0)}</b></span>
+    <span>المسدد اليوم: <b class="pos">${money(item ? item.paid : 0)}</b></span>
+  `;
+  $("quickPayAmountInput").value = "";
+  $("quickPayCollectorSelect").innerHTML = reps.map((r) => `<option value="${esc(r)}" ${item && item.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("");
+  $("quickPayForm").dataset.customer = customerName;
+  $("quickPayModal").hidden = false;
+  $("quickPayAmountInput").focus();
+}
+
+function closeQuickPayModal() {
+  $("quickPayModal").hidden = true;
+}
+
+function openWhatsAppShareModal(collector) {
+  const all = state.interactiveRoute || [];
+  const filtered = collector === "all" ? all : all.filter((x) => x.collector === collector);
+  const dateStr = todayStr();
+
+  let text = `📋 *خط سير التحصيل اليومي*\n📅 التاريخ: ${dateStr}\n👤 المحصل: ${collector === "all" ? "عام (كل المحصلين)" : collector}\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  filtered.forEach((c, idx) => {
+    text += `${idx + 1}. *${c.customer}*\n`;
+    text += `   📍 المنطقة: ${c.area || "—"}\n`;
+    text += `   💰 المطلوب: ${money(c.balance)}\n`;
+    if (c.response) text += `   📝 ملاحظة/رد سابق: ${c.response}\n`;
+    text += `   ───────────────\n`;
+  });
+
+  const totalDue = filtered.reduce((s, c) => s + (Number(c.balance) || 0), 0);
+  text += `\n📊 *الإجمالي:* ${filtered.length} عميل | المطلوب: ${money(totalDue)}\n`;
+  text += `⚠️ برجاء إرسال رد كل عميل فور مقابلته أو الاتصال به. بالتوفيق!`;
+
+  $("waModalText").value = text;
+  $("waModalTitle").textContent = `📋 خط سير الواتساب — ${collector === "all" ? "الكل" : collector}`;
+  $("waCopyAlert").style.opacity = "0";
+  $("whatsappModal").hidden = false;
+}
+
+function closeWhatsAppShareModal() {
+  $("whatsappModal").hidden = true;
+}
+
+/* ---------- 8. Theme & Init ---------- */
 function applyTheme(mode) {
   document.documentElement.classList.toggle("dark", mode === "dark");
   document.documentElement.classList.toggle("light", mode === "light");
@@ -758,41 +1462,130 @@ function initTheme() {
   applyTheme(saved || (prefersDark ? "dark" : "light"));
 }
 
-/* ---------- Bootstrap ---------- */
+/* ---------- Global Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   document.addEventListener("click", onTableClick);
+
   $("themeBtn").addEventListener("click", () => {
     const isDark = document.documentElement.classList.contains("dark");
     applyTheme(isDark ? "light" : "dark");
-    toast(isDark ? "الوضع النهاري" : "الوضع الليلي", isDark ? "تم تفعيل الوضع النهاري" : "تم تفعيل الوضع الليلي", "info");
+    toast(isDark ? "الوضع النهاري" : "الوضع الليلي", isDark ? "تم تفعيل الوضع النهاري" : "تم تفعيل الوضع الليلي", "pay");
   });
+
   $("dateToday").textContent = todayStr();
   document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => switchView(b.dataset.view)));
+
   window.addEventListener("hashchange", () => {
     const name = location.hash.replace("#", "");
     const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
     if (views.includes(name)) switchView(name, true);
   });
+
   $("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));
   $("refreshBtn").addEventListener("click", () => fetchData());
   $("modalClose").addEventListener("click", closeModal);
   $("modalSilence").addEventListener("click", () => { closeModal(); state.soundOn = false; $("soundBtn").classList.add("muted"); });
   $("paymentModal").addEventListener("click", (e) => { if (e.target === $("paymentModal")) closeModal(); });
+
   $("soundBtn").addEventListener("click", () => {
     state.soundOn = !state.soundOn;
     $("soundBtn").classList.toggle("muted", !state.soundOn);
   });
+
   $("bellBtn").addEventListener("click", () => {
     if ("Notification" in window) {
       if (Notification.permission === "default") Notification.requestPermission();
       toast("إشعارات المتصفح", Notification.permission === "granted" ? "مفعّلة — سيصلك تنبيه عند أي سداد جديد" : "مسموح بها بعد الموافقة", "pay");
     } else toast("غير مدعوم", "المتصفح لا يدعم الإشعارات", "warn");
   });
+
   $("brandLogo").addEventListener("click", () => switchView("dashboard"));
+
+  // ربط أزرار مودال الردود السريعة
+  $("respModalCloseBtn").addEventListener("click", closeResponseModal);
+  $("respModalCancel").addEventListener("click", closeResponseModal);
+  $("responseModal").addEventListener("click", (e) => { if (e.target === $("responseModal")) closeResponseModal(); });
+
+  document.querySelectorAll("#respPresetChips .chip-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const preset = btn.dataset.preset;
+      const input = $("respModalInput");
+      input.value = preset;
+      input.focus();
+    });
+  });
+
+  $("respModalSave").addEventListener("click", () => {
+    const cust = state.activeEditingCustomer;
+    if (!cust) return closeResponseModal();
+    const text = $("respModalInput").value.trim();
+    const comm = $("respModalComm").value;
+
+    const item = (state.interactiveRoute || []).find((x) => x.customer === cust);
+    if (item) {
+      item.response = text;
+      item.comm = comm;
+      if (comm === "لم يذهب إليه المحصل") item.notVisited = true;
+      else if (item.notVisited && comm !== "لم يتم التواصل") item.notVisited = false;
+      item.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+      saveInteractiveRoute();
+    }
+
+    // تحديث في route_line إن وجد
+    if (state.data && state.data.route_line) {
+      const rl = state.data.route_line.find((r) => r.customer === cust);
+      if (rl) rl.last_response = text;
+    }
+
+    toast("تم الحفظ ✓", `تم تحديث رد العميل ${cust} بنجاح`, "pay");
+    closeResponseModal();
+    if (state.view === "route") viewRoute();
+    else if (state.view === "collectors") viewCollectors();
+    else if (state.view === "responses") viewResponses();
+  });
+
+  // ربط مودال السداد السريع
+  $("quickPayCloseBtn").addEventListener("click", closeQuickPayModal);
+  $("quickPayCancel").addEventListener("click", closeQuickPayModal);
+  $("quickPayModal").addEventListener("click", (e) => { if (e.target === $("quickPayModal")) closeQuickPayModal(); });
+
+  $("quickPayForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const customer = $("quickPayForm").dataset.customer;
+    const amount = Number($("quickPayAmountInput").value);
+    const collector = $("quickPayCollectorSelect").value;
+    if (!customer || !amount || amount <= 0) return toast("تنبيه", "أدخل مبلغاً صحيحاً", "warn");
+
+    addManualPay(customer, amount, collector);
+    toast("سداد جديد ✓", `تم تسجيل ${money(amount)} للعميل ${customer} تحت ${collector}`, "pay");
+    closeQuickPayModal();
+    if (state.view === "route") viewRoute();
+    else if (state.view === "collectors") viewCollectors();
+  });
+
+  // ربط مودال الواتساب
+  $("waModalCloseBtn").addEventListener("click", closeWhatsAppShareModal);
+  $("waModalClose").addEventListener("click", closeWhatsAppShareModal);
+  $("whatsappModal").addEventListener("click", (e) => { if (e.target === $("whatsappModal")) closeWhatsAppShareModal(); });
+
+  $("waModalCopy").addEventListener("click", () => {
+    const text = $("waModalText").value;
+    navigator.clipboard.writeText(text).then(() => {
+      $("waCopyAlert").style.opacity = "1";
+      setTimeout(() => { $("waCopyAlert").style.opacity = "0"; }, 3000);
+      toast("تم النسخ", "تم نسخ نص خط السير إلى الحافظة بنجاح", "pay");
+    }).catch(() => {
+      $("waModalText").select();
+      document.execCommand("copy");
+      toast("تم النسخ", "تم نسخ نص خط السير إلى الحافظة", "pay");
+    });
+  });
+
   const initHash = location.hash.replace("#", "");
   const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
   if (views.includes(initHash)) switchView(initHash, true);
+
   fetchData();
   setInterval(() => fetchData(true), POLL_MS);
 });
