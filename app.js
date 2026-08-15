@@ -952,180 +952,394 @@ function viewCollectors() {
   const repOf = new Map(master.filter((m) => m.collector).map((m) => [m.name, m.collector]));
   const reps = ["مصطفى", "محمد شعبان"];
 
-  const cards = reps.map((rep) => {
-    // العملاء المسندون للمحصل في خط السير التفاعلي اليوم
-    const repRouteClients = allRoute.filter((c) => c.collector === rep);
-    const repStats = calculateRouteStats(repRouteClients);
+  const currentTab = state.filters.collectorTab || "all";
+
+  // حساب بيانات التقييم الشاملة لكل محصل
+  const repMetrics = reps.map((rep) => {
+    const clients = allRoute.filter((c) => c.collector === rep);
+    const stats = calculateRouteStats(clients);
 
     const sheet = (d.route_sheets || {})[rep] || { today: [], overdue: [] };
     const todayClients = sheet.today || [];
     const overdueClients = sheet.overdue || [];
-    const tBal = todayClients.reduce((s, c) => s + c.balance, 0);
-    const oBal = overdueClients.reduce((s, c) => s + c.balance, 0);
-    const sheetBal = tBal + oBal;
+    const sheetBal = todayClients.reduce((s, c) => s + c.balance, 0) + overdueClients.reduce((s, c) => s + c.balance, 0);
 
     const cfRep = cf.filter((c) => repOf.get(c.customer) === rep);
-    const expCol = cfRep.reduce((s, c) => s + c.expected, 0) || repStats.totalDue;
+    const expCol = cfRep.reduce((s, c) => s + c.expected, 0) || stats.totalDue;
     const colCol = cfRep.reduce((s, c) => s + c.collected, 0);
     const repPays = manualToday(rep);
     const repManual = repPays.reduce((s, p) => s + p.amount, 0);
-    const effCol = colCol + repManual + repStats.collected;
-    const pct = expCol > 0 ? Math.round((effCol / expCol) * 100) : 0;
-    const pctColor = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
+    const totalCollected = stats.collected + repManual;
+    const collectionPct = stats.totalDue > 0 ? Math.round((totalCollected / stats.totalDue) * 100) : 0;
+    const coveragePct = stats.totalCount > 0 ? Math.round((stats.contactedCount / stats.totalCount) * 100) : 0;
 
-    return `
-      <div class="card collector-card">
-        <div class="col-head">
-          <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
-          <div style="flex:1;">
-            <div class="col-name">${esc(rep)}</div>
-            <div class="col-role">محصل ميداني — متابعة حية لليوم</div>
-          </div>
-          <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" style="font-size:0.75rem; padding:5px 10px;">
+    return {
+      rep,
+      clients,
+      stats,
+      sheetBal,
+      repPays,
+      totalCollected,
+      collectionPct,
+      coveragePct,
+      expCol,
+    };
+  });
+
+  // إذا تم اختيار محصل معين (عرض مخصص وتفصيلي)
+  if (currentTab !== "all") {
+    const data = repMetrics.find((x) => x.rep === currentTab) || repMetrics[0];
+    const { rep, clients, stats, repPays, totalCollected, collectionPct, coveragePct } = data;
+    const pctColor = collectionPct >= 70 ? "var(--success)" : collectionPct >= 40 ? "var(--warning)" : "var(--danger)";
+
+    $("view-collectors").innerHTML = `
+      <!-- شريط التنقل العلوي بين المحصلين والمقارنة الشاملة -->
+      <div class="collector-nav-bar">
+        <div class="seg" id="collectorTabSeg">
+          <button data-tab="all" class="${currentTab === "all" ? "active" : ""}">📊 مقارنة الأداء الشاملة</button>
+          ${reps.map((r) => `<button data-tab="${esc(r)}" class="${currentTab === r ? "active" : ""}">👤 ${esc(r)}</button>`).join("")}
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" title="إرسال خط السير الصباحي للمحصل">
             💬 إرسال خط السير
           </button>
+          <button type="button" class="btn btn-primary" onclick="copyCollectorSummaryReport('${esc(rep)}')" style="font-size:0.8rem; padding:7px 14px;">
+            📋 تقرير الإنجاز اليومي
+          </button>
         </div>
+      </div>
 
-        <!-- شريط الإنجاز اليومي -->
-        <div class="collector-progress">
-          <div class="prog-head">
-            <span>الإنجاز والتحصيل الفعلي اليوم</span>
-            <b>${pct}%</b>
-          </div>
-          <div class="prog-track"><div class="prog-fill" style="width:${Math.min(100, pct)}%;background:${pctColor}"></div></div>
-          <div class="prog-sub">تم تحصيل ${money(effCol)} من أصل ${money(expCol)} مطلوب</div>
-        </div>
-
-        <!-- إحصائيات التفاعل الميداني لليوم -->
-        <div class="col-stats">
-          <div class="col-stat">
-            <b>${repStats.totalCount} عميل</b>
-            <span>مكلف بهم اليوم</span>
-          </div>
-          <div class="col-stat">
-            <b class="pos">${money(repStats.collected)}</b>
-            <span>مُحصّل اليوم (${repStats.collectionRate.toFixed(1)}%)</span>
-          </div>
-          <div class="col-stat">
-            <b style="color:var(--info)">${repStats.contactedCount}</b>
-            <span>تم التواصل / الزيارة</span>
-          </div>
-          <div class="col-stat">
-            <b style="color:var(--danger)">${repStats.notVisitedCount}</b>
-            <span>لم يذهب إليهم ❌</span>
-          </div>
-          <div class="col-stat">
-            <b style="color:var(--success)">${repStats.responsiveCount}</b>
-            <span>عميل مستجيب (${repStats.responseRate.toFixed(1)}%)</span>
-          </div>
-          <div class="col-stat">
-            <b style="color:var(--warning)">${repStats.unresponsiveCount}</b>
-            <span>غير مستجيب</span>
+      <!-- بطاقة المحصل الرئيسية ومؤشرات الإنجاز التنفيذية -->
+      <div class="card" style="margin-bottom: var(--space-4);">
+        <div class="collector-hero-header">
+          <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 style="font-size:1.35rem; font-weight:900;">${esc(rep)}</h2>
+              <span class="chip chip-blue">محصل ميداني نشط</span>
+            </div>
+            <div style="font-size:0.8rem; opacity:0.7; margin-top:2px;">تقييم نشاط ومتابعة العملاء الميدانية لليوم — ${todayStr()}</div>
           </div>
         </div>
 
-        <!-- تفاصيل عملاء المحصل وردودهم اليوم -->
-        <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-weight:800; font-size:0.88rem;">📋 تفاصيل عملاء خط السير والتفاعل:</span>
-          <span style="font-size:0.75rem; opacity:0.7;">${repRouteClients.length} عميل</span>
+        <!-- مؤشرات الإنجاز الرئيسية للمحصل -->
+        <div class="kpi-grid" style="margin: var(--space-4) 0 var(--space-3) 0;">
+          <div class="kpi-card c-danger">
+            <div class="kpi-label">المطلوب الميداني اليوم</div>
+            <div class="kpi-value">${money(stats.totalDue)}</div>
+            <div class="kpi-sub">${stats.totalCount} عميل مكلف بهم</div>
+          </div>
+          <div class="kpi-card c-success">
+            <div class="kpi-label">المُحصّل الفعلي اليوم</div>
+            <div class="kpi-value">${money(totalCollected)}</div>
+            <div class="kpi-sub">نسبة التحصيل: ${collectionPct}%</div>
+          </div>
+          <div class="kpi-card c-info">
+            <div class="kpi-label">التغطية الميدانية (الزيارات)</div>
+            <div class="kpi-value">${coveragePct}%</div>
+            <div class="kpi-sub">${stats.contactedCount} تمت زيارتهم من ${stats.totalCount}</div>
+          </div>
+          <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
+            <div class="kpi-label" style="color:var(--danger);">لم يذهب إليهم ❌</div>
+            <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
+            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round(stats.notVisitedCount / stats.totalCount * 100) : 0}% من العملاء لم يزرهم</div>
+          </div>
+          <div class="kpi-card c-accent">
+            <div class="kpi-label">الاستجابة والتعثر</div>
+            <div class="kpi-value">${stats.responsiveCount}</div>
+            <div class="kpi-sub">${stats.unresponsiveCount} غير مستجيب | استجابة: ${stats.responseRate.toFixed(1)}%</div>
+          </div>
         </div>
 
-        <div class="mini-feed" style="margin-top:10px; max-height:220px; overflow-y:auto;">
-          ${repRouteClients.length ? repRouteClients.map((c) => {
-            const isDone = c.paid > 0;
-            const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
-            return `
-              <div class="mini-item" style="border-right: 3px solid ${isDone ? "var(--success)" : isNotVisited ? "var(--danger)" : "var(--border)"}">
-                <div style="flex:1; min-width:0;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700;">${esc(c.customer)}</span>
-                    <b class="${isDone ? "pos" : "neg"}">${isDone ? "+" + money(c.paid) : money(c.balance)}</b>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px; font-size:0.72rem;">
-                    <span style="opacity:0.8;">${c.response ? "💬 " + esc(c.response) : `<i style="opacity:0.5;">${esc(c.comm)}</i>`}</span>
-                    <span class="chip ${isDone ? "chip-green" : isNotVisited ? "chip-red" : "chip-gray"}" style="padding:1px 6px; font-size:0.65rem;">${esc(c.comm)}</span>
-                  </div>
-                </div>
-              </div>`;
-          }).join("") : `<div class="mini-item muted">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</div>`}
+        <!-- شريط التقدم الفعلي للتحصيل والتغطية -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-3);">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800; margin-bottom:5px;">
+              <span>نسبة تحقيق التحصيل المالي</span>
+              <b style="color:${pctColor};">${collectionPct}%</b>
+            </div>
+            <div class="prog-track" style="height:10px;"><div class="prog-fill" style="width:${Math.min(100, collectionPct)}%; background:${pctColor};"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800; margin-bottom:5px;">
+              <span>نسبة إنجاز الزيارات الميدانية</span>
+              <b>${coveragePct}%</b>
+            </div>
+            <div class="prog-track" style="height:10px;"><div class="prog-fill" style="width:${Math.min(100, coveragePct)}%; background:var(--secondary);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- جدول تفصيلي شامل لكافة عملاء المحصل وتفاعلاتهم وردودهم -->
+      <div class="card" style="padding: var(--space-4);">
+        <div class="card-head">
+          <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
+          <span class="card-sub">يوضح مبالغ السداد، حالة الزيارة والتواصل، وردود العملاء المحدثة عبر الواتساب</span>
         </div>
 
-        <!-- آخر عمليات سداد مسجلة للمحصل -->
-        <div style="margin-top:14px; font-weight:800; font-size:0.85rem;">سداد اليوم (المسجل يدوي):</div>
-        <div class="mini-feed" style="margin-top:6px;">
-          ${repPays.slice().reverse().slice(0, 4).map((p) => `
-            <div class="mini-item">
-              <span>${esc(p.customer)}</span>
-              <b class="pos">+${money(p.amount)}</b>
-              <em>${esc(p.time)}</em>
-            </div>`).join("") || '<div class="mini-item muted">لا توجد سدادات جديدة مسجلة</div>'}
+        <div class="table-wrap">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th class="row-num">م</th>
+                <th>العميل</th>
+                <th>المنطقة</th>
+                <th>المطلوب</th>
+                <th>المسدد اليوم</th>
+                <th>حالة الزيارة والتواصل</th>
+                <th>رد العميل الوارد من الواتساب</th>
+                <th style="width: 100px; text-align: center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${clients.length ? clients.map((c, idx) => {
+                const isDone = c.paid > 0;
+                const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+                const rowClass = isNotVisited ? "row-not-visited" : isDone ? "row-paid" : "";
+                const commClass = c.comm === "عميل مستجيب" ? "chip-green" : c.comm === "عميل غير مستجيب" ? "chip-amber" : c.comm === "تم التواصل" ? "chip-blue" : c.comm === "لم يذهب إليه المحصل" ? "chip-red" : "chip-gray";
+
+                return `
+                  <tr class="${rowClass}">
+                    <td class="row-num">${idx + 1}</td>
+                    <td>
+                      <b style="font-size:0.92rem;">${esc(c.customer)}</b>
+                      ${c.status === "خالص" ? `<span class="chip chip-green" style="font-size:0.65rem; padding:1px 5px; margin-inline-start:4px;">خالص</span>` : ""}
+                    </td>
+                    <td>📍 ${esc(c.area || "—")}</td>
+                    <td class="tbl-amount neg">${money(c.balance)}</td>
+                    <td class="tbl-amount ${isDone ? "pos" : ""}">${isDone ? "+" + money(c.paid) : "0 ج.م"}</td>
+                    <td>
+                      <span class="chip ${commClass}">${esc(c.comm)}</span>
+                      ${isNotVisited ? `<span style="display:block; font-size:0.7rem; color:var(--danger); font-weight:700; margin-top:2px;">لم يذهب إليه المحصل ❌</span>` : ""}
+                    </td>
+                    <td>
+                      <div class="resp-cell-content">
+                        <div class="resp-text-preview" title="${esc(c.response || "لا يوجد رد مسجل")}">
+                          ${c.response ? esc(c.response) : `<span style="opacity:0.4; font-style:italic;">لا يوجد رد مسجل بعد</span>`}
+                        </div>
+                        <button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(c.customer)}')">
+                          ✏️ تعديل
+                        </button>
+                      </div>
+                    </td>
+                    <td style="text-align:center;">
+                      <button type="button" class="table-pay-btn" onclick="openQuickPayModal('${esc(c.customer)}')">
+                        ＋سداد
+                      </button>
+                    </td>
+                  </tr>`;
+              }).join("") : `<tr><td colspan="8" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- آخر عمليات سداد مسجلة للمحصل اليوم -->
+      <div class="card" style="margin-top: var(--space-4);">
+        <div class="card-head">
+          <span class="card-title">💵 سجل المقبوضات والسداد المباشر للمحصل اليوم (${repPays.length} عملية)</span>
+        </div>
+        <div class="mini-feed">
+          ${repPays.length ? repPays.slice().reverse().map((p) => `
+            <div class="mini-item" style="padding: 10px 14px;">
+              <div>
+                <b style="font-size:0.9rem;">${esc(p.customer)}</b>
+                <div style="font-size:0.74rem; opacity:0.7;">سداد نقدي مباشر في الميدان</div>
+              </div>
+              <div style="text-align:end;">
+                <b class="pos" style="font-size:1.05rem;">+${money(p.amount)}</b>
+                <em style="display:block; font-size:0.72rem; opacity:0.7;">⏰ ${esc(p.time)}</em>
+              </div>
+            </div>`).join("") : `<div class="mini-item muted">لا توجد عمليات سداد مسجلة للمحصل اليوم حتى الآن</div>`}
         </div>
       </div>
     `;
-  }).join("");
+  } else {
+    // عرض المقارنة الشاملة (All Collectors Side-by-Side Comparison)
+    const scorecards = repMetrics.map((data) => {
+      const { rep, stats, repPays, totalCollected, collectionPct, coveragePct } = data;
+      const pctColor = collectionPct >= 70 ? "var(--success)" : collectionPct >= 40 ? "var(--warning)" : "var(--danger)";
 
-  const allRates = (d.route_line || []).filter((r) => r.rating);
-  const rows = allRates.map((r) => {
-    const m = master.find((x) => x.name === r.customer);
-    return { r, rep: m ? m.collector : "" };
-  }).sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
+      return `
+        <div class="comp-scorecard highlight">
+          <div class="scorecard-head">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:800;">${esc(rep)}</h3>
+                <div style="font-size:0.74rem; opacity:0.7;">محصل ميداني</div>
+              </div>
+            </div>
+            <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" style="font-size:0.72rem; padding:4px 8px;">
+              💬 خط السير
+            </button>
+          </div>
 
-  $("view-collectors").innerHTML = `
-    <!-- شبكة بطاقات تقييم المحصلين -->
-    <div class="collector-grid">${cards}</div>
+          <!-- شريط الإنجاز -->
+          <div class="collector-progress" style="margin-bottom:var(--space-3);">
+            <div class="prog-head">
+              <span>نسبة التحصيل المالي</span>
+              <b style="color:${pctColor};">${collectionPct}%</b>
+            </div>
+            <div class="prog-track" style="height:9px;"><div class="prog-fill" style="width:${Math.min(100, collectionPct)}%; background:${pctColor};"></div></div>
+            <div class="prog-sub">تم تحصيل ${money(totalCollected)} من أصل ${money(stats.totalDue)} مطلوب</div>
+          </div>
 
-    <!-- جدول تقييم العملاء العام -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">تقييم العملاء التاريخي — من الأخطر للأفضل (خط سير)</span>
-        <div class="legend">
-          <span><i style="background:var(--danger)"></i>خطر</span>
-          <span><i style="background:var(--warning)"></i>سيء</span>
-          <span><i style="background:var(--info)"></i>جيد</span>
-          <span><i style="background:var(--success)"></i>ممتاز</span>
+          <!-- إحصائيات النشاط -->
+          <div class="stat-pills">
+            <div class="stat-pill">
+              <b>${stats.totalCount}</b>
+              <span>عملاء اليوم</span>
+            </div>
+            <div class="stat-pill">
+              <b style="color:var(--info);">${stats.contactedCount} (${coveragePct}%)</b>
+              <span>تمت الزيارة</span>
+            </div>
+            <div class="stat-pill" style="background:color-mix(in srgb, var(--danger) 10%, transparent);">
+              <b style="color:var(--danger);">${stats.notVisitedCount}</b>
+              <span>لم يذهب إليهم ❌</span>
+            </div>
+            <div class="stat-pill">
+              <b style="color:var(--success);">${stats.responsiveCount}</b>
+              <span>مستجيب</span>
+            </div>
+          </div>
+
+          <!-- زر فتح الكشف التفصيلي للمحصل -->
+          <div style="margin-top:14px; text-align:center;">
+            <button type="button" class="btn btn-ghost" onclick="setCollectorTab('${esc(rep)}')" style="width:100%; font-size:0.82rem; font-weight:700;">
+              عرض تقرير نشاط ${esc(rep)} التفصيلي ➔
+            </button>
+          </div>
         </div>
-        ${clearSortBtn("collectors")}
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="row-num">م</th>
-              ${sortTh("collectors", "customer", "str", "العميل")}
-              ${sortTh("collectors", "rep", "str", "المحصل")}
-              ${sortTh("collectors", "area", "str", "المنطقة")}
-              ${sortTh("collectors", "target_debt", "num", "المديونية")}
-              ${sortTh("collectors", "turnover", "num", "معدل الدوران")}
-              ${sortTh("collectors", "rating", "rate", "التقييم")}
-              ${sortTh("collectors", "last_response", "str", "آخر رد")}
-            </tr>
-          </thead>
-          <tbody id="collectBody"></tbody>
-        </table>
-      </div>
-    </div>
-  `;
+      `;
+    }).join("");
 
-  const drawCollect = () => {
-    if (!$("collectBody")) return;
-    let list = sortArray(rows, "collectors", (x, col) => (col === "rep" ? x.rep : x.r[col]));
-    if (!state.sort.collectors) list = rows.slice().sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
-    $("collectBody").innerHTML = list.map(({ r, rep }, idx) => {
-      const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
-      const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
-      return `<tr>
-        <td class="row-num">${idx + 1}</td>
-        <td><b>${esc(r.customer)}</b></td>
-        <td>${esc(rep || "—")}</td>
-        <td>${esc(r.area)}</td>
-        <td class="tbl-amount neg">${money(r.target_debt)}</td>
-        <td>${t}</td>
-        <td><span class="chip ${c}">${esc(r.rating)}</span></td>
-        <td class="note-text">${esc(r.last_response || "—")}</td>
-      </tr>`;
-    }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
-  };
-  drawCollect();
+    $("view-collectors").innerHTML = `
+      <!-- شريط التنقل العلوي -->
+      <div class="collector-nav-bar">
+        <div class="seg" id="collectorTabSeg">
+          <button data-tab="all" class="active">📊 مقارنة الأداء الشاملة</button>
+          ${reps.map((r) => `<button data-tab="${esc(r)}">👤 ${esc(r)}</button>`).join("")}
+        </div>
+      </div>
+
+      <!-- بطاقات المقارنة الشاملة -->
+      <div class="comparison-grid">${scorecards}</div>
+
+      <!-- جدول تقييم العملاء التاريخي (مرتب من الأخطر للأفضل) -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">تقييم العملاء التاريخي العام — من الأخطر للأفضل (خط سير)</span>
+          <div class="legend">
+            <span><i style="background:var(--danger)"></i>خطر</span>
+            <span><i style="background:var(--warning)"></i>سيء</span>
+            <span><i style="background:var(--info)"></i>جيد</span>
+            <span><i style="background:var(--success)"></i>ممتاز</span>
+          </div>
+          ${clearSortBtn("collectors")}
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="row-num">م</th>
+                ${sortTh("collectors", "customer", "str", "العميل")}
+                ${sortTh("collectors", "rep", "str", "المحصل")}
+                ${sortTh("collectors", "area", "str", "المنطقة")}
+                ${sortTh("collectors", "target_debt", "num", "المديونية")}
+                ${sortTh("collectors", "turnover", "num", "معدل الدوران")}
+                ${sortTh("collectors", "rating", "rate", "التقييم")}
+                ${sortTh("collectors", "last_response", "str", "آخر رد")}
+              </tr>
+            </thead>
+            <tbody id="collectBody"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // رسم جدول التقييمات التاريخي
+    const allRates = (d.route_line || []).filter((r) => r.rating);
+    const rows = allRates.map((r) => {
+      const m = master.find((x) => x.name === r.customer);
+      return { r, rep: m ? m.collector : "" };
+    }).sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
+
+    const drawCollect = () => {
+      if (!$("collectBody")) return;
+      let list = sortArray(rows, "collectors", (x, col) => (col === "rep" ? x.rep : x.r[col]));
+      if (!state.sort.collectors) list = rows.slice().sort((a, b) => (RATE_ORDER[a.r.rating] ?? 0) - (RATE_ORDER[b.r.rating] ?? 0));
+      $("collectBody").innerHTML = list.map(({ r, rep }, idx) => {
+        const c = r.rating.includes("ممتاز") ? "chip-green" : r.rating.includes("جيد") ? "chip-blue" : r.rating.includes("سيء") ? "chip-amber" : "chip-red";
+        const t = r.turnover && r.turnover !== "0" ? Number(r.turnover).toFixed(1) : "—";
+        return `<tr>
+          <td class="row-num">${idx + 1}</td>
+          <td><b>${esc(r.customer)}</b></td>
+          <td>${esc(rep || "—")}</td>
+          <td>${esc(r.area)}</td>
+          <td class="tbl-amount neg">${money(r.target_debt)}</td>
+          <td>${t}</td>
+          <td><span class="chip ${c}">${esc(r.rating)}</span></td>
+          <td class="note-text">${esc(r.last_response || "—")}</td>
+        </tr>`;
+      }).join("") || '<tr><td colspan="8" class="empty-state">لا توجد تقييمات</td></tr>';
+    };
+    drawCollect();
+  }
+
+  // ربط أزرار التاب
+  document.querySelectorAll("#collectorTabSeg button").forEach((b) => {
+    b.addEventListener("click", () => {
+      setCollectorTab(b.dataset.tab);
+    });
+  });
+}
+
+function setCollectorTab(tabName) {
+  state.filters.collectorTab = tabName;
+  viewCollectors();
+}
+
+function copyCollectorSummaryReport(collector) {
+  const all = state.interactiveRoute || [];
+  const list = all.filter((x) => x.collector === collector);
+  const stats = calculateRouteStats(list);
+  const pays = manualToday(collector);
+  const totalPaid = stats.collected + pays.reduce((s, p) => s + p.amount, 0);
+
+  let report = `📊 *تقرير إنجاز المحصل اليومي*\n👤 *المحصل:* ${collector}\n📅 *التاريخ:* ${todayStr()}\n`;
+  report += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  report += `💰 *التحصيل المالي:*\n`;
+  report += `• المطلوب: ${money(stats.totalDue)}\n`;
+  report += `• المحصل الفعلي: ${money(totalPaid)}\n`;
+  report += `• نسبة التحصيل: ${stats.totalDue > 0 ? (totalPaid / stats.totalDue * 100).toFixed(1) : 0}%\n\n`;
+
+  report += `🚶‍♂️ *الموقف الميداني والتغطية:*\n`;
+  report += `• إجمالي العملاء: ${stats.totalCount}\n`;
+  report += `• تمت الزيارة / التواصل: ${stats.contactedCount} (${stats.totalCount > 0 ? (stats.contactedCount / stats.totalCount * 100).toFixed(1) : 0}%)\n`;
+  report += `• لم يذهب إليهم: ${stats.notVisitedCount} ❌\n`;
+  report += `• عملاء مستجيبون: ${stats.responsiveCount}\n`;
+  report += `• غير مستجيبين / تعثر: ${stats.unresponsiveCount}\n`;
+  report += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  report += `📋 *تفاصيل ردود وسداد العملاء:*\n`;
+
+  list.forEach((c, idx) => {
+    const isDone = c.paid > 0;
+    const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
+    report += `${idx + 1}. *${c.customer}* (${c.area || "—"})\n`;
+    report += `   - المطلوب: ${money(c.balance)}${isDone ? ` | مسدد: ${money(c.paid)} ✓` : ""}\n`;
+    report += `   - الموقف: ${isNotVisited ? "❌ لم يذهب إليه المحصل" : c.comm}\n`;
+    if (c.response) report += `   - الرد: ${c.response}\n`;
+    report += `   ───────────────\n`;
+  });
+
+  navigator.clipboard.writeText(report).then(() => {
+    toast("تم النسخ ✓", `تم نسخ تقرير إنجاز ${collector} الكامل إلى الحافظة بنجاح`, "pay");
+  }).catch(() => {
+    toast("تم التوليد", "يمكنك نسخ التقرير", "pay");
+  });
 }
 
 /* ---------- 4. RESPONSES (ردود العملاء) ---------- */
