@@ -26,7 +26,7 @@ except Exception:
 
 SHEET_PATH = r"D:\Mostafa Ibrahim\شيت تحصيل.xlsm"
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
-PYTHON = r"G:\Python312\python.exe"
+PYTHON = r"G:\Python312\pythonw.exe"
 POLL_SECONDS = 30
 
 
@@ -39,7 +39,8 @@ def file_fingerprint(path):
 
 
 def run(cmd, cwd):
-    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    creation_flags = 0x08000000 if sys.platform == "win32" else 0
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=creation_flags)
     if r.returncode != 0:
         log(f"CMD FAIL {' '.join(cmd)}: {r.stderr[:500]}")
     return r
