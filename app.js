@@ -27,7 +27,18 @@ function dueLabel(due) {
 /* ---------- سداد يدوي (يخزن محلياً على الجهاز) ---------- */
 const LS_PAYS = "tahsil_manual_pays";
 function loadManualPays() {
-  try { return JSON.parse(localStorage.getItem(LS_PAYS)) || []; } catch (e) { return []; }
+  try {
+    const raw = localStorage.getItem(LS_PAYS);
+    const arr = raw ? JSON.parse(raw) : [];
+    return (Array.isArray(arr) ? arr : []).map((x, idx) => ({
+      ...x,
+      id: x.id ? String(x.id) : `${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+      amount: Number(x.amount) || 0,
+      customer: String(x.customer || ""),
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 function saveManualPays() {
   try { localStorage.setItem(LS_PAYS, JSON.stringify(state.manualPays)); } catch (e) {}
@@ -70,12 +81,21 @@ function addManualPay(customer, amount, collector) {
   return p;
 }
 
-function deleteManualPay(id) {
-  const pIdx = state.manualPays.findIndex((x) => String(x.id) === String(id));
+function deleteManualPay(id, customerFallback) {
+  let pIdx = -1;
+  if (id) {
+    pIdx = state.manualPays.findIndex((x) => String(x.id) === String(id));
+  }
+  if (pIdx === -1 && customerFallback) {
+    pIdx = state.manualPays.findIndex((x) => x.customer === customerFallback);
+  }
+  if (pIdx === -1 && state.manualPays.length === 1) {
+    pIdx = 0;
+  }
   if (pIdx === -1) return;
 
   const p = state.manualPays[pIdx];
-  const customer = p.customer;
+  const customer = p.customer || customerFallback;
   const amount = Number(p.amount) || 0;
 
   if (confirm(`هل تريد بالتأكيد إلغاء وحذف عملية سداد (${money(amount)}) للعميل "${customer}"؟`)) {
@@ -83,7 +103,7 @@ function deleteManualPay(id) {
     saveManualPays();
 
     // تحديث رصيد المسدد في خط السير التفاعلي
-    if (state.interactiveRoute) {
+    if (state.interactiveRoute && customer) {
       const item = state.interactiveRoute.find((x) => x.customer === customer);
       if (item) {
         item.paid = Math.max(0, (Number(item.paid) || 0) - amount);
@@ -99,10 +119,7 @@ function deleteManualPay(id) {
     }
 
     toast("تم الحذف", `تم حذف عملية السداد بمبلغ ${money(amount)} وتحديث رصيد العميل`, "warn");
-
-    if (state.view === "collectors") viewCollectors();
-    else if (state.view === "route") viewRoute();
-    else if (state.view === "dashboard") viewDashboard();
+    render();
   }
 }
 
@@ -129,27 +146,43 @@ function setClientPayment(customer, newTotalPaid) {
     item.notVisited = false;
   }
 
-  const diff = numPaid - oldPaid;
-  if (diff > 0) {
-    const p = {
-      id: Date.now() + Math.random(),
-      customer,
-      amount: diff,
-      collector: item.collector || "عام",
-      date: todayISO(),
-      time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
-    };
-    state.manualPays.push(p);
+  // تحديث سجل المقبوضات (manualPays) بدقة
+  if (numPaid === 0) {
+    state.manualPays = state.manualPays.filter((x) => x.customer !== customer);
     saveManualPays();
-    alertSound("pay");
-    toast("سداد جديد ✓", `تم تسجيل ${money(diff)} للعميل ${customer}`, "pay");
+    toast("تصفير المسدد", `تم إلغاء السداد للعميل ${customer} وتحديث السجلات`, "pay");
   } else {
-    toast("تعديل المسدد", `تم تعديل المبلغ للعميل ${customer} إلى ${money(numPaid)}`, "pay");
+    const diff = numPaid - oldPaid;
+    if (diff > 0) {
+      const p = {
+        id: `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        customer,
+        amount: diff,
+        collector: item.collector || "عام",
+        date: todayISO(),
+        time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
+      };
+      state.manualPays.push(p);
+      saveManualPays();
+      alertSound("pay");
+      toast("سداد جديد ✓", `تم تسجيل ${money(diff)} للعميل ${customer}`, "pay");
+    } else {
+      state.manualPays = state.manualPays.filter((x) => x.customer !== customer);
+      state.manualPays.push({
+        id: `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        customer,
+        amount: numPaid,
+        collector: item.collector || "عام",
+        date: todayISO(),
+        time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
+      });
+      saveManualPays();
+      toast("تعديل المسدد", `تم تعديل المبلغ للعميل ${customer} إلى ${money(numPaid)}`, "pay");
+    }
   }
 
   saveInteractiveRoute();
-  if (state.view === "route") viewRoute();
-  else if (state.view === "collectors") viewCollectors();
+  render();
 }
 
 /* ---------- إدارة خط السير التفاعلي (Interactive Daily Route) ---------- */
@@ -1378,7 +1411,7 @@ function viewCollectors() {
                   <b class="pos" style="font-size:1.05rem; font-weight:800;">+${money(p.amount)}</b>
                   <em style="display:block; font-size:0.72rem; opacity:0.7;">⏰ ${esc(p.time)}</em>
                 </div>
-                <button type="button" class="tbl-action-icon" style="color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border-radius: 6px; width: 30px; height: 30px;" onclick="deleteManualPay('${p.id}')" title="حذف عملية السداد من السجل وتحديث الحسابات">
+                <button type="button" class="tbl-action-icon" style="color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border-radius: 6px; width: 30px; height: 30px;" onclick="deleteManualPay('${p.id}', '${esc(p.customer)}')" title="حذف عملية السداد من السجل وتحديث الحسابات">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
                 </button>
               </div>
