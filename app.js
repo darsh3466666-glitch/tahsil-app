@@ -665,9 +665,14 @@ function viewDashboard() {
   const d = state.data;
   const master = d.master || [];
   const cf = d.cash_flow || [];
-  const totalBal = master.reduce((s, m) => s + m.balance, 0);
-  const active = master.filter((m) => m.status === "نشط");
-  const activeBal = active.reduce((s, m) => s + m.balance, 0);
+  
+  // حساب النشاط والركود وفق قاعدة الـ 6 شهور لتاريخ آخر فاتورة حصرياً
+  const masterStats = getMasterActivityStats(master);
+  const totalBal = master.reduce((s, m) => s + (Number(m.balance) || 0), 0);
+  const activeCount = masterStats.activeCount;
+  const activeBal = masterStats.activeBal;
+  const idleDebtCount = masterStats.idleDebtCount;
+  const idleDebtBal = masterStats.idleDebtBal;
 
   const routeStats = calculateRouteStats();
   const expToday = cf.reduce((s, c) => s + c.expected, 0);
@@ -678,7 +683,7 @@ function viewDashboard() {
   const repBal = {};
   master.forEach((m) => { if (m.collector) repBal[m.collector] = (repBal[m.collector] || 0) + m.balance; });
   const repCount = {};
-  active.forEach((m) => { if (m.collector) repCount[m.collector] = (repCount[m.collector] || 0) + 1; });
+  masterStats.enriched.filter((m) => m._isActive).forEach((m) => { if (m.collector) repCount[m.collector] = (repCount[m.collector] || 0) + 1; });
 
   const topAreas = [...master.reduce((map, m) => {
     if (m.area) map.set(m.area, (map.get(m.area) || 0) + m.balance);
@@ -689,12 +694,12 @@ function viewDashboard() {
   const kp = (label, value, sub, cls) => `<div class="kpi-card ${cls || ""}"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>${sub ? `<div class="kpi-sub">${sub}</div>` : ""}</div>`;
   $("view-dashboard").innerHTML = `
     <div class="kpi-grid">
-      ${kp("إجمالي المديونية المستحقة", money(totalBal), `${active.length} عميل نشط`, "c-danger")}
-      ${kp("إجمالي مديونية النشطاء", money(activeBal), "بدون الخالصين", "")}
+      ${kp("إجمالي مديونية الشيت", money(totalBal), `${master.length} عميل مسجل`, "c-danger")}
+      ${kp("🟢 مديونية النشطاء (< 6 شهور)", money(activeBal), `${activeCount} عميل أخذ فواتير حديثاً`, "c-success")}
+      ${kp("🔴 مديونية الراكدين (> 6 شهور)", money(idleDebtBal), `${idleDebtCount} عميل متوقف عن الفواتير`, "c-danger")}
       ${kp("أهداف اليوم (خط السير)", money(routeStats.totalDue), `${routeStats.totalCount} عميل — تم تحصيل ${money(routeStats.collected)}`, "c-accent")}
       ${kp("المتوقع اليوم — كاش فلو", money(expToday), "خطة السداد", "c-info")}
-      ${kp("المُحصّل اليوم (إجمالي)", money(colToday), `نسبة ${expToday ? Math.round(colToday / expToday * 100) : 0}% من المتوقع`, "c-success")}
-      ${kp("سداد اليوم (قبض يدوي)", money(payToday), `${manualPays.length} عملية سداد مسجلة`, "c-info")}
+      ${kp("سداد اليوم (الميداني المباشر)", money(colToday), `المسجل: ${money(payToday)} (${manualPays.length} عملية)`, "c-success")}
     </div>
     <div class="two-col">
       <div class="card">
@@ -1894,6 +1899,14 @@ function viewCycle() {
 }
 
 /* ---------- 7. MASTER DATA (عرض شيت البيانات الرئيسية لايف) ---------- */
+/*
+  قاعدة احتساب النشاط والركود:
+  - النشاط يُحسب حصرياً بناءً على "تاريخ آخر فاتورة أخذها العميل" (last_invoice).
+  - إذا كان تاريخ آخر فاتورة خلال آخر 6 شهور (180 يوماً) -> العميل يعتبر "نشط" 🟢
+  - إذا مر على آخر فاتورة أكثر من 6 شهور (أو لم يأخذ فواتير):
+      * وعليه رصيد مديونية (balance > 0) -> "راكد وعليه مديونية" 🔴
+      * ورصيده مسدد بالكامل (balance <= 0) -> "راكد بدون رصيد (خالص)" ⚪
+*/
 function getMasterActivityStats(master) {
   const now = new Date(todayISO()).getTime();
   const SIX_MO_MS = 180 * 24 * 60 * 60 * 1000;
@@ -1904,20 +1917,22 @@ function getMasterActivityStats(master) {
   let idleDebtBal = 0;
   let idleZeroCount = 0;
 
-  const enriched = master.map((m) => {
-    const dates = [m.last_invoice, m.last_payment, m.last_visit].filter(Boolean);
-    let latestTime = 0;
-    dates.forEach((dStr) => {
-      const t = new Date(dStr).getTime();
-      if (!isNaN(t) && t > latestTime) latestTime = t;
-    });
+  const enriched = (master || []).map((m) => {
+    const invStr = (m.last_invoice || "").trim();
+    let invTime = 0;
+    if (invStr) {
+      const t = new Date(invStr).getTime();
+      if (!isNaN(t)) invTime = t;
+    }
 
     const bal = Number(m.balance) || 0;
-    const isIdle = latestTime === 0 || (now - latestTime) > SIX_MO_MS;
-    const isActive = !isIdle;
+    // التحقق هل أخذ فاتورة خلال آخر 6 شهور
+    const isWithin6Mo = invTime > 0 && (now - invTime) <= SIX_MO_MS;
+    const isActive = isWithin6Mo;
+    const isIdle = !isWithin6Mo;
     let activityKey = "active";
 
-    if (!isIdle) {
+    if (isActive) {
       activeCount++;
       activeBal += bal;
       activityKey = "active";
@@ -1930,14 +1945,14 @@ function getMasterActivityStats(master) {
       activityKey = "idle_zero";
     }
 
-    const daysSince = latestTime > 0 ? Math.floor((now - latestTime) / (24 * 60 * 60 * 1000)) : null;
+    const daysSince = invTime > 0 ? Math.floor((now - invTime) / (24 * 60 * 60 * 1000)) : null;
 
     return {
       ...m,
       _isActive: isActive,
       _isIdle: isIdle,
       _activityKey: activityKey,
-      _daysSinceActivity: daysSince,
+      _daysSinceLastInvoice: daysSince,
     };
   });
 
@@ -2011,7 +2026,7 @@ function viewMasterData() {
   const totalBal = master.reduce((s, m) => s + (Number(m.balance) || 0), 0);
 
   $("view-master").innerHTML = `
-    <!-- إحصائيات Master Data والنشاط والركود (قاعدة الـ 6 شهور) -->
+    <!-- إحصائيات Master Data والنشاط والركود (قاعدة الـ 6 شهور لتاريخ آخر فاتورة) -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
       <div class="kpi-card c-info" style="cursor: pointer;" onclick="setMasterActivityFilter('all')" title="عرض كل عملاء الشيت">
         <div class="kpi-label">إجمالي عملاء الشيت</div>
@@ -2019,19 +2034,19 @@ function viewMasterData() {
         <div class="kpi-sub">${money(totalBal)} (كامل الشيت)</div>
       </div>
 
-      <div class="kpi-card c-success" style="cursor: pointer;" onclick="setMasterActivityFilter('active')" title="عرض العملاء النشطين (نشاط خلال آخر 6 شهور)">
-        <div class="kpi-label">🟢 عملاء نشطون (نشاط خلال 6 شهور)</div>
+      <div class="kpi-card c-success" style="cursor: pointer;" onclick="setMasterActivityFilter('active')" title="عرض العملاء النشطين (أخذوا فواتير خلال آخر 6 شهور)">
+        <div class="kpi-label">🟢 عملاء نشطون (آخر فاتورة < 6 شهور)</div>
         <div class="kpi-value">${stats.activeCount} عميل</div>
-        <div class="kpi-sub">${money(stats.activeBal)} — حركة حديثة</div>
+        <div class="kpi-sub">${money(stats.activeBal)} — حركة فواتير حديثة</div>
       </div>
 
-      <div class="kpi-card c-danger" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_debt')" title="عرض العملاء الراكدين ولديهم مديونية">
-        <div class="kpi-label">🔴 راكد وعليه مديونية (> 6 شهور)</div>
+      <div class="kpi-card c-danger" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_debt')" title="عرض العملاء الراكدين ولديهم مديونية (توقفوا عن الفواتير > 6 شهور)">
+        <div class="kpi-label">🔴 راكد وعليه مديونية (فواتير > 6 شهور)</div>
         <div class="kpi-value">${stats.idleDebtCount} عميل</div>
-        <div class="kpi-sub">${money(stats.idleDebtBal)} — مديونية متوقفة</div>
+        <div class="kpi-sub">${money(stats.idleDebtBal)} — مديونية راكدة</div>
       </div>
 
-      <div class="kpi-card c-accent" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_zero')" title="عرض العملاء الراكدين الخالصين بدون رصيد">
+      <div class="kpi-card c-accent" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_zero')" title="عرض العملاء الراكدين الخالصين (توقفوا عن الفواتير > 6 شهور ورصيدهم 0)">
         <div class="kpi-label">⚪ راكد بدون رصيد (خالص > 6 شهور)</div>
         <div class="kpi-value">${stats.idleZeroCount} عميل</div>
         <div class="kpi-sub">0 ج.م — مسدد بالكامل</div>
@@ -2178,7 +2193,8 @@ function viewMasterData() {
         const rowClass = isZero ? "row-status-green" : (m._activityKey === "idle_debt" ? "row-status-amber" : "");
         const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("هدف") ? "chip-purple" : "chip-gray";
         const classChip = m.classification === "عملاء بالدورة" ? "chip-blue" : m.classification === "عملاء راكدون" ? "chip-amber" : "chip-gray";
-        const actChip = m._activityKey === "active" ? `<span class="chip chip-green" title="نشاط خلال آخر 6 شهور">🟢 نشط</span>` : (m._activityKey === "idle_debt" ? `<span class="chip chip-red" title="متوقف منذ أكثر من 6 شهور وعليه مديونية">🔴 راكد (مديونية)</span>` : `<span class="chip chip-gray" title="متوقف منذ أكثر من 6 شهور ومسدد">⚪ راكد (خالص)</span>`);
+        const lastInvInfo = m.last_invoice ? `آخر فاتورة: ${m.last_invoice}` : `لا توجد فواتير مسجلة`;
+        const actChip = m._activityKey === "active" ? `<span class="chip chip-green" title="نشط — ${lastInvInfo} (خلال 6 شهور)">🟢 نشط</span>` : (m._activityKey === "idle_debt" ? `<span class="chip chip-red" title="راكد بمديونية — ${lastInvInfo} (أكثر من 6 شهور)">🔴 راكد (مديونية)</span>` : `<span class="chip chip-gray" title="راكد خالص — ${lastInvInfo} (أكثر من 6 شهور)">⚪ راكد (خالص)</span>`);
 
         return `
           <tr class="${rowClass}">
