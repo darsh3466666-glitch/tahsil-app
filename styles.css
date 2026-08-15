@@ -364,11 +364,32 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   background: var(--surface); color: var(--foreground); font-weight: 600; font-size: .86rem;
 }
 .search-input {
-  padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--foreground); min-width: 210px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: .88rem;
+  font-weight: 600;
+  min-width: 210px;
+  transition: all .18s ease-in-out;
 }
-.search-input:focus, .select:focus {
-  outline: 2px solid var(--ring); outline-offset: 1px;
+.search-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.65;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+.search-input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+.select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .seg { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
 .seg button {

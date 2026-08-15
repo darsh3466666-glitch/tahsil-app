@@ -24,6 +24,31 @@ function dueLabel(due) {
   return due;
 }
 
+/* ---------- محرك البحث الذكي والسلس (تطبيع الحروف العربية والبحث المتعدد) ---------- */
+function normalizeArabic(s) {
+  if (!s) return "";
+  return String(s)
+    .trim()
+    .toLowerCase()
+    .replace(/[\u064B-\u065F\u0670]/g, "") // إزالة التشكيل والحركات
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/[ـ\-_/\\,.]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function matchSearch(sourceText, query) {
+  if (!query) return true;
+  const normQuery = normalizeArabic(query);
+  if (!normQuery) return true;
+  const normSource = normalizeArabic(sourceText);
+  const terms = normQuery.split(" ").filter(Boolean);
+  return terms.every((term) => normSource.includes(term));
+}
+
 /* ---------- سداد يدوي (يخزن محلياً على الجهاز) ---------- */
 const LS_PAYS = "tahsil_manual_pays";
 function loadManualPays() {
@@ -723,31 +748,6 @@ function viewRoute() {
   // تطبيق الفلاتر
   const fRep = state.filters.routeRep || "all";
   const fStatus = state.filters.routeStatus || "all";
-  const fSearch = (state.filters.routeSearch || "").trim().toLowerCase();
-
-  let filtered = allRoute.filter((item) => {
-    if (fRep !== "all" && item.collector !== fRep) return false;
-    const nComm = normalizeComm(item.comm);
-    if (fStatus === "responded" && nComm !== "تم الرد / مستجيب") return false;
-    if (fStatus === "no_answer" && nComm !== "لا يرد / غير متاح") return false;
-    if (fStatus === "not_visited" && nComm !== "لم يذهب ولم يتصل" && !item.notVisited) return false;
-    if (fStatus === "pending" && (nComm !== "قيد المتابعة" || item.notVisited)) return false;
-    if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
-    if (fSearch && !item.customer.toLowerCase().includes(fSearch) && !item.area.toLowerCase().includes(fSearch)) return false;
-    return true;
-  });
-
-  // فرز
-  filtered = sortArray(filtered, "route", (x, col) => {
-    if (col === "notes" || col === "response") return x.response || "";
-    if (col === "paid") return Number(x.paid) || 0;
-    if (col === "balance") return Number(x.balance) || 0;
-    if (col === "area") return x.area || "";
-    if (col === "last_invoice") return x.last_invoice || "";
-    if (col === "last_payment") return x.last_payment || "";
-    if (col === "comm") return normalizeComm(x.comm);
-    return x[col];
-  });
 
   // حساب المؤشرات المطابقة لشيت الإكسل
   const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
@@ -781,7 +781,7 @@ function viewRoute() {
         </div>
 
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <input class="search-input" id="routeTableSearch" placeholder="بحث باسم العميل أو المنطقة…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:200px;">
+          <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث سلس وفوري باسم العميل، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:240px;">
           <select id="routeStatusFilter" class="select" style="padding:6px 10px;">
             <option value="all" ${fStatus === "all" ? "selected" : ""}>كل حالات التواصل</option>
             <option value="responded" ${fStatus === "responded" ? "selected" : ""}>✅ تم الرد / مستجيب (${allRoute.filter((x) => normalizeComm(x.comm) === "تم الرد / مستجيب").length})</option>
@@ -795,7 +795,7 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- إحصائيات سريعة علوية متوافقة تماماً مع حالات التواصل الجديدة -->
+    <!-- إحصائيات سريعة علوية -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
       <div class="kpi-card c-danger">
         <div class="kpi-label">اجمالي المطلوب</div>
@@ -828,7 +828,6 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- الجدول التفاعلي الرئيسي -->
     <div class="card" style="padding: var(--space-4);">
       <div class="table-wrap">
         <table class="interactive-table">
@@ -847,115 +846,147 @@ function viewRoute() {
               <th style="width: 80px; text-align: center;">إجراءات</th>
             </tr>
           </thead>
-          <tbody id="routeTableBody">
-              ${filtered.length ? filtered.map((c, idx) => {
-                const normComm = normalizeComm(c.comm);
-                const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
-                const isFullPaid = c.paid >= c.balance && c.balance > 0;
-                const isPartial = c.paid > 0 && !isFullPaid;
-                const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
-                const commClass = commClassOf(normComm);
-                const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
-
-                return `
-                  <tr class="${rowClass}" data-customer="${esc(c.customer)}">
-                    <td class="row-num">${idx + 1}</td>
-                    
-                    <!-- العميل والمحصل -->
-                    <td style="min-width: 165px;">
-                      <div style="font-weight: 800; font-size: 0.98rem; color: var(--foreground);">${esc(c.customer)}</div>
-                      <div style="margin-top: 3px;">
-                        <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
-                          ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
-                        </select>
-                      </div>
-                    </td>
-
-                    <!-- المنطقة (عمود منفصل) -->
-                    <td style="min-width: 100px; font-weight: 700; font-size: 0.94rem;">
-                      📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}
-                    </td>
-
-                    <!-- المبلغ المستحق -->
-                    <td class="tbl-amount neg" style="font-size: 0.98rem; font-weight: 800;">${money(c.balance)}</td>
-
-                    <!-- آخر فاتورة -->
-                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
-                      ${esc(c.last_invoice || "__")}
-                    </td>
-
-                    <!-- آخر سداد -->
-                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
-                      ${esc(c.last_payment || "__")}
-                    </td>
-
-                    <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
-                    <td style="min-width: 220px;">
-                      <div class="resp-cell-content">
-                        <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
-                          ${formatNoteDisplay(c.response)}
-                        </div>
-                        <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                          تعديل
-                        </button>
-                      </div>
-                    </td>
-
-                    <!-- المسدد (تعديل مباشر وسلس للرقم) -->
-                    <td style="min-width: 125px;">
-                      <div style="display: inline-flex; align-items: center; gap: 4px;">
-                        <input 
-                          type="number" 
-                          class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" 
-                          value="${c.paid ? c.paid : ""}" 
-                          placeholder="0" 
-                          min="0" 
-                          step="any"
-                          data-action="edit-paid" 
-                          data-customer="${esc(c.customer)}"
-                          title="عدّل المبلغ المسدد واضغط Enter أو انقر خارج الخانة للحفظ الفوري"
-                        />
-                        <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
-                      </div>
-                    </td>
-
-                    <!-- الحالة -->
-                    <td>
-                      <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
-                    </td>
-
-                    <!-- التواصل -->
-                    <td style="min-width: 165px;">
-                      <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
-                        <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
-                        <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
-                        <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
-                        <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
-                      </select>
-                    </td>
-
-                    <!-- إجراءات -->
-                    <td style="text-align: center;">
-                      <div class="tbl-actions" style="justify-content: center;">
-                        <button type="button" class="tbl-action-icon" data-action="delete-route-client" data-customer="${esc(c.customer)}" title="إزالة العميل من خط سير اليوم">
-                          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>`;
-              }).join("") : `<tr><td colspan="11" class="empty-state">لا يوجد عملاء مطابقون لهذا الفلتر</td></tr>`}
-            </tbody>
-          </table>
-        </div>
+          <tbody id="routeTableBody"></tbody>
+        </table>
       </div>
+    </div>
   `;
 
-  // ربط الأحداث
-  bindRouteEvents();
+  const drawRouteRows = () => {
+    const fSearch = (state.filters.routeSearch || "").trim();
+    const fStatus = state.filters.routeStatus || "all";
+    const fRep = state.filters.routeRep || "all";
+
+    let filtered = allRoute.filter((item) => {
+      if (fRep !== "all" && item.collector !== fRep) return false;
+      const nComm = normalizeComm(item.comm);
+      if (fStatus === "responded" && nComm !== "تم الرد / مستجيب") return false;
+      if (fStatus === "no_answer" && nComm !== "لا يرد / غير متاح") return false;
+      if (fStatus === "not_visited" && nComm !== "لم يذهب ولم يتصل" && !item.notVisited) return false;
+      if (fStatus === "pending" && (nComm !== "قيد المتابعة" || item.notVisited)) return false;
+      if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
+      if (fSearch && !matchSearch(`${item.customer} ${item.area} ${item.collector} ${item.response || ""}`, fSearch)) return false;
+      return true;
+    });
+
+    filtered = sortArray(filtered, "route", (x, col) => {
+      if (col === "notes" || col === "response") return x.response || "";
+      if (col === "paid") return Number(x.paid) || 0;
+      if (col === "balance") return Number(x.balance) || 0;
+      if (col === "area") return x.area || "";
+      if (col === "last_invoice") return x.last_invoice || "";
+      if (col === "last_payment") return x.last_payment || "";
+      if (col === "comm") return normalizeComm(x.comm);
+      return x[col];
+    });
+
+    const tbody = $("routeTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = filtered.length ? filtered.map((c, idx) => {
+      const normComm = normalizeComm(c.comm);
+      const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
+      const isFullPaid = c.paid >= c.balance && c.balance > 0;
+      const isPartial = c.paid > 0 && !isFullPaid;
+      const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
+      const commClass = commClassOf(normComm);
+      const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
+
+      return `
+        <tr class="${rowClass}" data-customer="${esc(c.customer)}">
+          <td class="row-num">${idx + 1}</td>
+          
+          <!-- العميل والمحصل -->
+          <td style="min-width: 165px;">
+            <div style="font-weight: 800; font-size: 0.98rem; color: var(--foreground);">${esc(c.customer)}</div>
+            <div style="margin-top: 3px;">
+              <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
+                ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
+              </select>
+            </div>
+          </td>
+
+          <!-- المنطقة (عمود منفصل) -->
+          <td style="min-width: 100px; font-weight: 700; font-size: 0.94rem;">
+            📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}
+          </td>
+
+          <!-- المبلغ المستحق -->
+          <td class="tbl-amount neg" style="font-size: 0.98rem; font-weight: 800;">${money(c.balance)}</td>
+
+          <!-- آخر فاتورة -->
+          <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
+            ${esc(c.last_invoice || "__")}
+          </td>
+
+          <!-- آخر سداد -->
+          <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
+            ${esc(c.last_payment || "__")}
+          </td>
+
+          <!-- الرد (رد العميل الوارد من الواتساب مع زر التعديل) -->
+          <td style="min-width: 220px;">
+            <div class="resp-cell-content">
+              <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                ${formatNoteDisplay(c.response)}
+              </div>
+              <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل الوارد من الواتساب">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                تعديل
+              </button>
+            </div>
+          </td>
+
+          <!-- المسدد (تعديل مباشر وسلس للرقم) -->
+          <td style="min-width: 125px;">
+            <div style="display: inline-flex; align-items: center; gap: 4px;">
+              <input 
+                type="number" 
+                class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" 
+                value="${c.paid ? c.paid : ""}" 
+                placeholder="0" 
+                min="0" 
+                step="any"
+                data-action="edit-paid" 
+                data-customer="${esc(c.customer)}"
+                title="عدّل المبلغ المسدد واضغط Enter أو انقر خارج الخانة للحفظ الفوري"
+              />
+              <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
+            </div>
+          </td>
+
+          <!-- الحالة -->
+          <td>
+            <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
+          </td>
+
+          <!-- التواصل -->
+          <td style="min-width: 165px;">
+            <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
+              <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
+              <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
+              <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
+              <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
+            </select>
+          </td>
+
+          <!-- إجراءات -->
+          <td style="text-align: center;">
+            <div class="tbl-actions" style="justify-content: center;">
+              <button type="button" class="tbl-action-icon" data-action="delete-route-client" data-customer="${esc(c.customer)}" title="إزالة العميل من خط سير اليوم">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("") : `<tr><td colspan="11" class="empty-state">لا يوجد عملاء مطابقون لهذا البحث أو الفلتر</td></tr>`;
+  };
+
+  drawRouteRows();
+  bindRouteEvents(drawRouteRows);
 }
 
-function bindRouteEvents() {
+function bindRouteEvents(drawRouteRows) {
   // 1. تصفية المحصلين Tabs
   document.querySelectorAll("#routeRepSeg button").forEach((b) => {
     b.addEventListener("click", () => {
@@ -964,12 +995,13 @@ function bindRouteEvents() {
     });
   });
 
-  // 2. تصفية الحالة والبحث
+  // 2. تصفية الحالة والبحث السلس فوري بدون وميض
   const statusSelect = $("routeStatusFilter");
   if (statusSelect) {
     statusSelect.addEventListener("change", (e) => {
       state.filters.routeStatus = e.target.value;
-      viewRoute();
+      if (drawRouteRows) drawRouteRows();
+      else viewRoute();
     });
   }
 
@@ -977,7 +1009,8 @@ function bindRouteEvents() {
   if (tableSearch) {
     tableSearch.addEventListener("input", (e) => {
       state.filters.routeSearch = e.target.value;
-      viewRoute();
+      if (drawRouteRows) drawRouteRows();
+      else viewRoute();
     });
   }
 
@@ -1168,6 +1201,68 @@ function bindCollectorClientEvents() {
       openResponseModal(btn.dataset.customer);
     }
   });
+
+  const colSearch = $("collectorSearchInput");
+  if (colSearch) {
+    colSearch.addEventListener("input", (e) => {
+      state.filters.collectorSearch = e.target.value;
+      const q = (e.target.value || "").trim();
+      const currentTab = state.filters.collectorTab || "all";
+      const all = state.interactiveRoute || [];
+      const clients = currentTab === "all" ? all : all.filter((x) => x.collector === currentTab);
+      let filteredClients = clients.filter((c) => {
+        if (q && !matchSearch(`${c.customer} ${c.area} ${c.response || ""}`, q)) return false;
+        return true;
+      });
+      let sortedClients = sortArray(filteredClients, "collector_clients", (x, col) => {
+        if (col === "paid") return Number(x.paid) || 0;
+        if (col === "balance") return Number(x.balance) || 0;
+        if (col === "comm") return normalizeComm(x.comm);
+        return x[col] || "";
+      });
+      tbody.innerHTML = sortedClients.length ? sortedClients.map((c, idx) => {
+        const normComm = normalizeComm(c.comm);
+        const isFullPaid = c.paid >= c.balance && c.balance > 0;
+        const isPartial = c.paid > 0 && !isFullPaid;
+        const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
+        const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
+        const commClass = commClassOf(normComm);
+        const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
+        return `
+          <tr class="${rowClass}" data-customer="${esc(c.customer)}">
+            <td class="row-num">${idx + 1}</td>
+            <td><b style="font-size:0.92rem; color:var(--foreground);">${esc(c.customer)}</b></td>
+            <td>📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}</td>
+            <td class="tbl-amount neg">${money(c.balance)}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">${esc(c.last_invoice || "__")}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">${esc(c.last_payment || "__")}</td>
+            <td style="min-width: 200px;">
+              <div class="resp-cell-content">
+                <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">${formatNoteDisplay(c.response)}</div>
+                <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> تعديل
+                </button>
+              </div>
+            </td>
+            <td style="min-width: 120px;">
+              <div style="display: inline-flex; align-items: center; gap: 4px;">
+                <input type="number" class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" value="${c.paid ? c.paid : ""}" placeholder="0" min="0" step="any" data-action="edit-paid" data-customer="${esc(c.customer)}" title="عدّل المبلغ واضغط Enter للحفظ وتحديث الكروت فورياً" />
+                <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
+              </div>
+            </td>
+            <td><span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span></td>
+            <td style="min-width: 165px;">
+              <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
+                <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
+                <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
+                <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
+                <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
+              </select>
+            </td>
+          </tr>`;
+      }).join("") : `<tr><td colspan="10" class="empty-state">لا توجد نتائج مطابقة لبحث المحصل</td></tr>`;
+    });
+  }
 }
 
 /* ---------- 3. COLLECTORS (تقييم المحصلين المرتبط بالتفاعل اللحظي) ---------- */
@@ -1291,10 +1386,15 @@ function viewCollectors() {
 
       <!-- كشف نشاط المحصل وتفاعل العملاء الميداني اليوم مع أسهم الترتيب والتفاعل المباشر -->
       <div class="card" style="padding: var(--space-4); margin-top: var(--space-4);">
-        <div class="card-head">
-          <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
-          <span class="card-sub">يمكنك تعديل المبالغ وحالات التواصل والردود مباشرة وتتحدث كافة الكروت والنسب فورياً</span>
-          ${clearSortBtn("collector_clients")}
+        <div class="card-head" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
+            <span class="card-sub" style="display:block; margin-top:2px;">يمكنك تعديل المبالغ وحالات التواصل والردود مباشرة وتتحدث كافة الكروت والنسب فورياً</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input class="search-input" id="collectorSearchInput" type="search" placeholder="بحث باسم العميل، المنطقة، الرد…" value="${esc(state.filters.collectorSearch || "")}" style="padding: 6px 12px; min-width: 230px;">
+            ${clearSortBtn("collector_clients")}
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -1315,7 +1415,12 @@ function viewCollectors() {
             </thead>
             <tbody id="collectorClientTableBody">
               ${(() => {
-                let sortedClients = sortArray(clients, "collector_clients", (x, col) => {
+                const cQuery = (state.filters.collectorSearch || "").trim();
+                let filteredClients = clients.filter((c) => {
+                  if (cQuery && !matchSearch(`${c.customer} ${c.area} ${c.response || ""}`, cQuery)) return false;
+                  return true;
+                });
+                let sortedClients = sortArray(filteredClients, "collector_clients", (x, col) => {
                   if (col === "paid") return Number(x.paid) || 0;
                   if (col === "balance") return Number(x.balance) || 0;
                   if (col === "comm") return normalizeComm(x.comm);
@@ -1637,7 +1742,17 @@ function viewCashflow() {
         <div class="bar-val">${pct.toFixed(1)}%</div></div>
     </div>
     <div class="card">
-      <div class="card-head"><span class="card-title">خطة السداد اليومية — ${cf.length} عميل</span>
+      <div class="card-head">
+        <span class="card-title">خطة السداد اليومية — ${cf.length} عميل</span>
+        <div class="filters">
+          <input class="search-input" id="cashSearch" type="search" placeholder="بحث باسم العميل أو الملاحظات…" value="${esc(state.filters.cashSearch || "")}" style="min-width:230px;">
+          <select class="select" id="cashStatusSelect">
+            <option value="all">كل الحالات</option>
+            <option value="مكتمل">مكتمل</option>
+            <option value="جزئي">جزئي</option>
+            <option value="لم يسدد">لم يسدد</option>
+          </select>
+        </div>
         <div class="legend"><span><i style="background:var(--success)"></i>مكتمل</span><span><i style="background:var(--warning)"></i>جزئي</span><span><i style="background:var(--danger)"></i>لم يسدد</span></div>
         ${clearSortBtn("cash")}
       </div>
@@ -1670,10 +1785,31 @@ function viewCashflow() {
       <td class="note-text" title="${hasRealResponse(c.notes) ? esc(cleanResponse(c.notes)) : "__"}">${formatNoteDisplay(c.notes)}</td></tr>`;
   const drawCash = () => {
     if (!$("cashBody")) return;
-    const list = sortArray(cf, "cash");
-    $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="10" class="empty-state">لا توجد خطة سداد</td></tr>';
+    const q = (state.filters.cashSearch || "").trim();
+    const st = state.filters.cashStatus || "all";
+    let list = cf.filter((c) => {
+      if (q && !matchSearch(`${c.customer} ${c.notes || ""}`, q)) return false;
+      if (st !== "all" && c.pay_status !== st) return false;
+      return true;
+    });
+    list = sortArray(list, "cash");
+    $("cashBody").innerHTML = list.map(cashRow).join("") || '<tr><td colspan="10" class="empty-state">لا توجد نتائج مطابقة للبحث</td></tr>';
   };
   drawCash();
+  const cSearch = $("cashSearch");
+  if (cSearch) {
+    cSearch.addEventListener("input", (e) => {
+      state.filters.cashSearch = e.target.value;
+      drawCash();
+    });
+  }
+  const cStat = $("cashStatusSelect");
+  if (cStat) {
+    cStat.addEventListener("change", (e) => {
+      state.filters.cashStatus = e.target.value;
+      drawCash();
+    });
+  }
 }
 
 /* ---------- 6. CYCLE (عملاء بالدورة) ---------- */
@@ -1722,7 +1858,7 @@ function viewCycle() {
     state.filters.cycleSearch = q;
     state.filters.cycleState = st;
     let list = cc.filter((c) => {
-      if (q && !c.customer.includes(q)) return false;
+      if (q && !matchSearch(c.customer, q)) return false;
       const days = c.days_left || 0;
       if (st === "active" && days < 0) return false;
       if (st === "overdue" && days >= 0) return false;
@@ -1909,9 +2045,10 @@ function viewMasterData() {
           <input 
             class="search-input" 
             id="masterSearchInput" 
-            placeholder="بحث بالاسم، الكود، المنطقة، الملاحظات…" 
+            type="search"
+            placeholder="بحث فوري وسلس بالاسم، الكود، المنطقة، الملاحظات…" 
             value="${esc(state.filters.masterSearch || "")}" 
-            style="min-width: 220px; flex: 1;"
+            style="min-width: 260px; flex: 1;"
           />
 
           <!-- فلتر موقف اليوم -->
@@ -1947,8 +2084,8 @@ function viewMasterData() {
 
           ${clearSortBtn("master")}
         </div>
-        <div style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
-          عرض <b>${filtered.length}</b> من أصل <b>${totalCount}</b> عميل
+        <div id="masterFilteredCount" style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
+          عرض <b>${annotatedMaster.length}</b> من أصل <b>${totalCount}</b> عميل
         </div>
       </div>
     </div>
@@ -1997,51 +2134,88 @@ function viewMasterData() {
               ${sortTh("master", "notes", "str", "الملاحظات")}
             </tr>
           </thead>
-          <tbody>
-            ${filtered.length ? filtered.map((m, idx) => {
-              const isZero = (Number(m.balance) || 0) === 0;
-              const rowClass = isZero ? "row-status-green" : (m._activityKey === "idle_debt" ? "row-status-amber" : "");
-              const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("هدف") ? "chip-purple" : "chip-gray";
-              const classChip = m.classification === "عملاء بالدورة" ? "chip-blue" : m.classification === "عملاء راكدون" ? "chip-amber" : "chip-gray";
-              const actChip = m._activityKey === "active" ? `<span class="chip chip-green" title="نشاط خلال آخر 6 شهور">🟢 نشط</span>` : (m._activityKey === "idle_debt" ? `<span class="chip chip-red" title="متوقف منذ أكثر من 6 شهور وعليه مديونية">🔴 راكد (مديونية)</span>` : `<span class="chip chip-gray" title="متوقف منذ أكثر من 6 شهور ومسدد">⚪ راكد (خالص)</span>`);
-
-              return `
-                <tr class="${rowClass}">
-                  <td class="row-num">${idx + 1}</td>
-                  <td style="font-family:monospace; font-weight:800; color:var(--primary); font-size:0.88rem;">${esc(m.code || "—")}</td>
-                  <td>
-                    <b style="font-size:0.92rem; color:var(--foreground);">${esc(m.name)}</b>
-                  </td>
-                  <td>
-                    <span class="chip chip-gray" style="font-weight:700;">${esc(m.collector || "غير محدد")}</span>
-                  </td>
-                  <td>📍 ${esc(m.area || "—")}</td>
-                  <td class="tbl-amount ${isZero ? "pos" : "neg"}" style="font-size:0.92rem;">
-                    ${money(m.balance)}
-                  </td>
-                  <td>
-                    <span class="chip ${todayClass}" style="font-weight:800;">${esc(m.today_status || "—")}</span>
-                  </td>
-                  <td>
-                    <span class="chip ${classChip}">${esc(m.classification || "—")}</span>
-                  </td>
-                  <td>${actChip}</td>
-                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_invoice || "—")}</td>
-                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_payment || "—")}</td>
-                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
-                  <td style="text-align: center; font-weight: 700;">${m.agreement_days ? `${esc(m.agreement_days)} يوم` : "—"}</td>
-                  <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; ${m.due_date && m.due_date < todayISO() && !isZero ? "color:var(--danger);" : ""}">${esc(m.due_date || "—")}</td>
-                  <td class="note-text" style="max-width: 250px;" title="${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : "__"}">
-                    ${formatNoteDisplay(m.notes)}
-                  </td>
-                </tr>
-              `;
-            }).join("") : `<tr><td colspan="15" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`}
-          </tbody>
+          <tbody id="masterTableBody"></tbody>
         </table>
       </div>
     </div>
   `;
+
+  const drawMaster = () => {
+    const q = (state.filters.masterSearch || "").trim();
+    const st = state.filters.masterTodayStatus || "all";
+    const act = state.filters.masterActivity || "all";
+    const col = state.filters.masterCollector || "all";
+    const cls = state.filters.masterClass || "all";
+    const bal = state.filters.masterBalance || "all";
+
+    let filtered = annotatedMaster.filter((m) => {
+      if (q && !matchSearch(`${m.code} ${m.name} ${m.collector} ${m.area} ${m.classification} ${m.notes || ""}`, q)) return false;
+      if (st !== "all" && m.today_status !== st) return false;
+      if (act !== "all" && m._activityKey !== act) return false;
+      if (col !== "all" && (col === "none" ? m.collector : m.collector !== col)) return false;
+      if (cls !== "all" && m.classification !== cls) return false;
+      if (bal === "has_debt" && m.balance <= 0) return false;
+      if (bal === "zero_debt" && m.balance > 0) return false;
+      return true;
+    });
+
+    // الفرز التفاعلي
+    filtered = sortArray(filtered, "master", (x, col) => {
+      if (col === "activity") return x._activityKey || "";
+      if (col === "balance" || col === "agreement_days") return Number(x[col]) || 0;
+      return x[col] || "";
+    });
+
+    const countDisp = $("masterFilteredCount");
+    if (countDisp) {
+      countDisp.innerHTML = `عرض <b>${filtered.length}</b> من أصل <b>${totalCount}</b> عميل`;
+    }
+
+    const tbody = $("masterTableBody");
+    if (tbody) {
+      tbody.innerHTML = filtered.length ? filtered.map((m, idx) => {
+        const isZero = (Number(m.balance) || 0) === 0;
+        const rowClass = isZero ? "row-status-green" : (m._activityKey === "idle_debt" ? "row-status-amber" : "");
+        const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("هدف") ? "chip-purple" : "chip-gray";
+        const classChip = m.classification === "عملاء بالدورة" ? "chip-blue" : m.classification === "عملاء راكدون" ? "chip-amber" : "chip-gray";
+        const actChip = m._activityKey === "active" ? `<span class="chip chip-green" title="نشاط خلال آخر 6 شهور">🟢 نشط</span>` : (m._activityKey === "idle_debt" ? `<span class="chip chip-red" title="متوقف منذ أكثر من 6 شهور وعليه مديونية">🔴 راكد (مديونية)</span>` : `<span class="chip chip-gray" title="متوقف منذ أكثر من 6 شهور ومسدد">⚪ راكد (خالص)</span>`);
+
+        return `
+          <tr class="${rowClass}">
+            <td class="row-num">${idx + 1}</td>
+            <td style="font-family:monospace; font-weight:800; color:var(--primary); font-size:0.88rem;">${esc(m.code || "—")}</td>
+            <td>
+              <b style="font-size:0.92rem; color:var(--foreground);">${esc(m.name)}</b>
+            </td>
+            <td>
+              <span class="chip chip-gray" style="font-weight:700;">${esc(m.collector || "غير محدد")}</span>
+            </td>
+            <td>📍 ${esc(m.area || "—")}</td>
+            <td class="tbl-amount ${isZero ? "pos" : "neg"}" style="font-size:0.92rem;">
+              ${money(m.balance)}
+            </td>
+            <td>
+              <span class="chip ${todayClass}" style="font-weight:800;">${esc(m.today_status || "—")}</span>
+            </td>
+            <td>
+              <span class="chip ${classChip}">${esc(m.classification || "—")}</span>
+            </td>
+            <td>${actChip}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_invoice || "—")}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_payment || "—")}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
+            <td style="text-align: center; font-weight: 700;">${m.agreement_days ? `${esc(m.agreement_days)} يوم` : "—"}</td>
+            <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; ${m.due_date && m.due_date < todayISO() && !isZero ? "color:var(--danger);" : ""}">${esc(m.due_date || "—")}</td>
+            <td class="note-text" style="max-width: 250px;" title="${hasRealResponse(m.notes) ? esc(cleanResponse(m.notes)) : "__"}">
+              ${formatNoteDisplay(m.notes)}
+            </td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="15" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`;
+    }
+  };
+
+  drawMaster();
 
   // مزامنة شريط التمرير العلوي مع الجدول
   const topScroll = $("masterTableTopScroll");
@@ -2088,47 +2262,47 @@ function viewMasterData() {
     }
   }
 
-  // ربط أحداث الفلاتر
+  // ربط أحداث الفلاتر بسلاسة بدون وميض
   const searchInp = $("masterSearchInput");
   if (searchInp) {
     searchInp.addEventListener("input", () => {
       state.filters.masterSearch = searchInp.value;
-      viewMasterData();
+      drawMaster();
     });
   }
   const todayStSel = $("masterTodayStatusSelect");
   if (todayStSel) {
     todayStSel.addEventListener("change", () => {
       state.filters.masterTodayStatus = todayStSel.value;
-      viewMasterData();
+      drawMaster();
     });
   }
   const actSel = $("masterActivitySelect");
   if (actSel) {
     actSel.addEventListener("change", () => {
       state.filters.masterActivity = actSel.value;
-      viewMasterData();
+      drawMaster();
     });
   }
   const colSel = $("masterCollectorSelect");
   if (colSel) {
     colSel.addEventListener("change", () => {
       state.filters.masterCollector = colSel.value;
-      viewMasterData();
+      drawMaster();
     });
   }
   const clsSel = $("masterClassSelect");
   if (clsSel) {
     clsSel.addEventListener("change", () => {
       state.filters.masterClass = clsSel.value;
-      viewMasterData();
+      drawMaster();
     });
   }
   const balSel = $("masterBalanceSelect");
   if (balSel) {
     balSel.addEventListener("change", () => {
       state.filters.masterBalance = balSel.value;
-      viewMasterData();
+      drawMaster();
     });
   }
 }
