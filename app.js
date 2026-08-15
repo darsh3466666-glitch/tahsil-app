@@ -265,7 +265,7 @@ function clearSortBtn(key) {
 }
 
 function viewFn(name) {
-  return { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle }[name];
+  return { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle }[name];
 }
 
 function onTableClick(e) {
@@ -437,11 +437,11 @@ function switchView(name, force) {
   state.view = name;
   if (location.hash !== "#" + name) { try { location.hash = name; } catch (e) {} }
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", responses: "ردود العملاء", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
+  const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة" };
   $("pageTitle").textContent = titles[name] || "لوحة التحكم";
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
   if (force || !state.data) return;
-  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, responses: viewResponses, cashflow: viewCashflow, cycle: viewCycle };
+  const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle };
   if (fns[name]) fns[name]();
 }
 
@@ -1302,78 +1302,7 @@ function copyCollectorSummaryReport(collector) {
   });
 }
 
-/* ---------- 4. RESPONSES (ردود العملاء) ---------- */
-function viewResponses() {
-  const d = state.data;
-  const rows = (d.route_line || []).filter((r) => r.last_response).slice();
 
-  // دمج أي ردود تم تعديلها اليوم من خط السير التفاعلي
-  if (state.interactiveRoute) {
-    state.interactiveRoute.forEach((ir) => {
-      if (ir.response) {
-        const found = rows.find((r) => r.customer === ir.customer);
-        if (found) {
-          found.last_response = ir.response;
-        } else {
-          rows.unshift({
-            customer: ir.customer,
-            area: ir.area,
-            target_debt: ir.balance,
-            last_payment: ir.last_payment,
-            last_invoice: "",
-            last_response: ir.response,
-          });
-        }
-      }
-    });
-  }
-
-  const byArea = [...new Set(rows.map((r) => r.area).filter(Boolean))];
-  $("view-responses").innerHTML = `
-    <div class="card">
-      <div class="card-head"><span class="card-title">آخر ردود العملاء — ${rows.length} رد</span>
-        <div class="filters">
-          <input class="search-input" id="respSearch" placeholder="ابحث باسم عميل…" value="${esc(state.filters.respSearch || "")}">
-          <select class="select" id="respArea"><option value="">كل المناطق</option>${byArea.map((a) => `<option ${state.filters.respArea === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select>
-        </div>
-        ${clearSortBtn("resp")}
-      </div>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th class="row-num">م</th>
-          ${sortTh("resp", "customer", "str", "العميل")}
-          ${sortTh("resp", "area", "str", "المنطقة")}
-          ${sortTh("resp", "target_debt", "num", "المديونية المستهدفة")}
-          ${sortTh("resp", "last_payment", "date", "آخر سداد")}
-          ${sortTh("resp", "last_invoice", "date", "آخر فاتورة")}
-          ${sortTh("resp", "last_response", "str", "آخر رد من العميل")}
-          <th>إجراء</th>
-        </tr></thead>
-        <tbody id="respBody"></tbody></table></div>
-    </div>`;
-
-  const draw = () => {
-    const q = $("respSearch").value.trim();
-    const area = $("respArea").value;
-    state.filters.respSearch = q;
-    state.filters.respArea = area;
-    let list = rows.filter((r) => (!q || r.customer.includes(q)) && (!area || r.area === area));
-    list = sortArray(list, "resp");
-    $("respBody").innerHTML = list.map((r, i) => `<tr>
-      <td class="row-num">${i + 1}</td>
-      <td><b>${esc(r.customer)}</b></td>
-      <td>${esc(r.area || "—")}</td>
-      <td class="tbl-amount neg">${money(r.target_debt)}</td>
-      <td>${dueLabel(r.last_payment)}</td>
-      <td>${dueLabel(r.last_invoice)}</td>
-      <td class="note-text"><span class="chip chip-amber">رد العميل</span> ${esc(r.last_response)}</td>
-      <td><button type="button" class="resp-edit-btn" onclick="openResponseModal('${esc(r.customer)}')">تعديل ✏️</button></td>
-    </tr>`).join("") || '<tr><td colspan="8" class="empty-state">لا نتائج مطابقة</td></tr>';
-  };
-  $("respSearch").addEventListener("input", draw);
-  $("respArea").addEventListener("change", draw);
-  draw();
-}
 
 /* ---------- 5. CASHFLOW (التدفق النقدي) ---------- */
 function viewCashflow() {
@@ -1627,7 +1556,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("hashchange", () => {
     const name = location.hash.replace("#", "");
-    const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
+    const views = ["dashboard", "route", "collectors", "cashflow", "cycle"];
     if (views.includes(name)) switchView(name, true);
   });
 
@@ -1691,7 +1620,6 @@ document.addEventListener("DOMContentLoaded", () => {
     closeResponseModal();
     if (state.view === "route") viewRoute();
     else if (state.view === "collectors") viewCollectors();
-    else if (state.view === "responses") viewResponses();
   });
 
   // ربط مودال السداد السريع
@@ -1732,7 +1660,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const initHash = location.hash.replace("#", "");
-  const views = ["dashboard", "route", "collectors", "responses", "cashflow", "cycle"];
+  const views = ["dashboard", "route", "collectors", "cashflow", "cycle"];
   if (views.includes(initHash)) switchView(initHash, true);
 
   fetchData();
