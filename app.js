@@ -862,8 +862,8 @@ function viewRoute() {
                     <td class="row-num">${idx + 1}</td>
                     
                     <!-- العميل والمحصل -->
-                    <td style="min-width: 160px;">
-                      <div style="font-weight: 800; font-size: 0.92rem; color: var(--foreground);">${esc(c.customer)}</div>
+                    <td style="min-width: 165px;">
+                      <div style="font-weight: 800; font-size: 0.98rem; color: var(--foreground);">${esc(c.customer)}</div>
                       <div style="margin-top: 3px;">
                         <select class="table-rep-select" data-action="change-rep" data-customer="${esc(c.customer)}" title="نقل العميل لمحصل آخر">
                           ${reps.map((r) => `<option value="${esc(r)}" ${c.collector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
@@ -872,20 +872,20 @@ function viewRoute() {
                     </td>
 
                     <!-- المنطقة (عمود منفصل) -->
-                    <td style="min-width: 95px; font-weight: 600;">
+                    <td style="min-width: 100px; font-weight: 700; font-size: 0.94rem;">
                       📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}
                     </td>
 
                     <!-- المبلغ المستحق -->
-                    <td class="tbl-amount neg" style="font-size: 0.92rem;">${money(c.balance)}</td>
+                    <td class="tbl-amount neg" style="font-size: 0.98rem; font-weight: 800;">${money(c.balance)}</td>
 
                     <!-- آخر فاتورة -->
-                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
                       ${esc(c.last_invoice || "__")}
                     </td>
 
                     <!-- آخر سداد -->
-                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
+                    <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.92rem; font-weight: 600;">
                       ${esc(c.last_payment || "__")}
                     </td>
 
@@ -1977,7 +1977,7 @@ function viewMasterData() {
       </div>
 
       <div class="table-wrap" id="masterTableWrap">
-        <table class="interactive-table" id="masterDataTable" style="font-size: 0.84rem;">
+        <table class="interactive-table" id="masterDataTable" style="font-size: 0.92rem;">
           <thead>
             <tr>
               <th class="row-num">م</th>

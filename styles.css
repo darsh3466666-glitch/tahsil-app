@@ -190,16 +190,21 @@ input, select { font-family: inherit; font-size: .95rem; }
 
 /* ============ Tables ============ */
 .table-wrap { overflow-x: auto; border-radius: var(--radius-sm); }
-table { width: 100%; border-collapse: collapse; font-size: .95rem; min-width: 640px; }
+table { width: 100%; border-collapse: collapse; font-size: 1rem; min-width: 640px; }
 thead th {
-  text-align: start; font-size: .82rem; font-weight: 800; letter-spacing: .2px;
-  color: var(--foreground); opacity: .65; text-transform: none;
-  padding: 10px var(--space-3); border-bottom: 2px solid var(--border);
-  white-space: nowrap; background: var(--muted);
+  text-align: start; font-size: .92rem; font-weight: 900; letter-spacing: .2px;
+  color: #0b1329; opacity: 1; text-transform: none;
+  padding: 12px var(--space-3); border-bottom: 2.5px solid var(--border);
+  white-space: nowrap; background: color-mix(in srgb, var(--muted) 90%, var(--surface));
+}
+html.dark thead th {
+  color: #f8fafc;
 }
 tbody td {
-  padding: 9px var(--space-3); border-bottom: 1px solid var(--border);
+  padding: 11px var(--space-3); border-bottom: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
+  font-size: 0.96rem;
+  color: var(--foreground);
 }
 tbody tr { transition: background .12s; }
 tbody tr:hover { background: var(--muted); opacity: 1; }
@@ -392,7 +397,7 @@ table.route-table { table-layout: fixed; min-width: 920px; }
 th[data-sortable] { cursor: pointer; user-select: none; white-space: nowrap; }
 th[data-sortable]:hover { color: var(--primary); }
 th[data-sortable].sorted { color: var(--primary); }
-.th-arrow { display: inline-block; margin-inline-start: 5px; font-size: .7rem; opacity: .75; vertical-align: middle; }
+.th-arrow { display: inline-block; margin-inline-start: 5px; font-size: .82rem; font-weight: 900; opacity: 1; vertical-align: middle; }
 
 /* ============ Buttons ============ */
 .btn {
@@ -553,14 +558,14 @@ th[data-sortable].sorted { color: var(--primary); }
 }
 
 .paid-inline-input {
-  width: 95px;
-  padding: 5px 8px;
+  width: 100px;
+  padding: 6px 9px;
   border-radius: 7px;
   border: 1.5px solid var(--border);
   background: var(--surface);
   color: var(--foreground);
-  font-weight: 800;
-  font-size: 0.92rem;
+  font-weight: 900;
+  font-size: 0.98rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
   transition: all 0.15s ease;
