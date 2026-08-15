@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 18:38:50",
+  "generated_at": "2026-08-15 18:48:59",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -611,14 +611,14 @@
    "balance": 11370.0,
    "last_payment": "2026-08-02",
    "last_invoice": "2026-07-09",
-   "last_visit": "2026-06-29",
-   "agreement_days": "55",
-   "due_date": "2026-08-23",
+   "last_visit": "2026-08-15",
+   "agreement_days": "90",
+   "due_date": "2026-11-13",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "نص 8 التصفية 2026",
+   "notes": "تصفية الحساب بعد  3 شهور",
    "agreements": "",
    "cycle_start": "2025-01-27",
    "total_withdrawn": 2102395.0,
@@ -13158,7 +13158,7 @@
    "seq": "4",
    "customer": "نصر لملوم",
    "balance": 11370.0,
-   "due_date": "2026-08-23",
+   "due_date": "2026-11-13",
    "cycle_start": "2025-01-27",
    "cycle_end": "2025-07-27",
    "days_left": -384.0
