@@ -208,6 +208,29 @@ tbody td {
 tbody tr { transition: background .12s; }
 tbody tr:hover { background: var(--muted); opacity: 1; }
 tbody tr:last-child td { border-bottom: none; }
+
+/* تلوين كامل الصف حسب الحالة لسهولة التمييز (أخضر / أصفر / أحمر) */
+tbody tr.row-status-green, tbody tr.row-paid, tbody tr.row-success {
+  background: color-mix(in srgb, var(--success) 11%, var(--surface)) !important;
+}
+tbody tr.row-status-green:hover, tbody tr.row-paid:hover, tbody tr.row-success:hover {
+  background: color-mix(in srgb, var(--success) 20%, var(--surface)) !important;
+}
+
+tbody tr.row-status-amber, tbody tr.row-partial, tbody tr.row-warning {
+  background: color-mix(in srgb, var(--warning) 14%, var(--surface)) !important;
+}
+tbody tr.row-status-amber:hover, tbody tr.row-partial:hover, tbody tr.row-warning:hover {
+  background: color-mix(in srgb, var(--warning) 22%, var(--surface)) !important;
+}
+
+tbody tr.row-status-red, tbody tr.row-not-visited, tbody tr.row-danger {
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface)) !important;
+}
+tbody tr.row-status-red:hover, tbody tr.row-not-visited:hover, tbody tr.row-danger:hover {
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface)) !important;
+}
+
 .tbl-amount { font-weight: 700; }
 .pos { color: var(--success); }
 .neg { color: var(--danger); }

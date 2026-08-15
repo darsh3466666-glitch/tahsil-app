@@ -648,10 +648,11 @@ function viewRoute() {
           <tbody id="routeTableBody">
               ${filtered.length ? filtered.map((c, idx) => {
                 const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
-                const isPaid = c.paid > 0;
-                const rowClass = isNotVisited ? "row-not-visited" : isPaid ? "row-paid" : "";
+                const isFullPaid = c.paid >= c.balance && c.balance > 0;
+                const isPartial = c.paid > 0 && !isFullPaid;
+                const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : isPartial ? "row-status-amber" : (c.comm === "عميل مستجيب" ? "row-status-amber" : "");
                 const commClass = c.comm === "عميل مستجيب" ? "st-responsive" : c.comm === "عميل غير مستجيب" ? "st-unresponsive" : c.comm === "تم التواصل" ? "st-contacted" : c.comm === "لم يذهب إليه المحصل" ? "st-not-visited" : "st-none";
-                const statusChip = c.paid >= c.balance && c.balance > 0 ? "chip-green" : c.paid > 0 ? "chip-amber" : "chip-gray";
+                const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
 
                 return `
                   <tr class="${rowClass}" data-customer="${esc(c.customer)}">
@@ -1058,7 +1059,7 @@ function viewCollectors() {
               ${clients.length ? clients.map((c, idx) => {
                 const isDone = c.paid > 0;
                 const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
-                const rowClass = isNotVisited ? "row-not-visited" : isDone ? "row-paid" : "";
+                const rowClass = isDone ? "row-status-green" : isNotVisited ? "row-status-red" : (c.comm === "عميل مستجيب" ? "row-status-amber" : "");
                 const commClass = c.comm === "عميل مستجيب" ? "chip-green" : c.comm === "عميل غير مستجيب" ? "chip-amber" : c.comm === "تم التواصل" ? "chip-blue" : c.comm === "لم يذهب إليه المحصل" ? "chip-red" : "chip-gray";
 
                 return `
@@ -1417,7 +1418,8 @@ function viewCashflow() {
         </tr></thead>
         <tbody id="cashBody"></tbody></table></div>
     </div>`;
-  const cashRow = (c, i) => `<tr>
+  const rowClassOf = (s) => (s === "مكتمل" ? "row-status-green" : s === "جزئي" ? "row-status-amber" : "row-status-red");
+  const cashRow = (c, i) => `<tr class="${rowClassOf(c.pay_status)}">
       <td class="row-num">${i + 1}</td>
       <td><b>${esc(c.customer)}</b></td>
       <td class="tbl-amount">${money(c.balance)}</td>
@@ -1496,7 +1498,8 @@ function viewCycle() {
       const endTxt = days >= 0 ? "بالدورة" : "انتهت الدورة";
       const dChip = days < 0 ? "chip-red" : days <= 7 ? "chip-amber" : "chip-green";
       const dTxt = days < 0 ? `منذ ${Math.abs(days)} يوم` : days === 0 ? "اليوم" : `${days} يوم`;
-      return `<tr>
+      const cycleRowClass = days < 0 ? "row-status-red" : days <= 7 ? "row-status-amber" : "row-status-green";
+      return `<tr class="${cycleRowClass}">
         <td class="row-num">${i + 1}</td>
         <td class="c-name"><b>${esc(c.customer)}</b></td>
         <td class="c-bal tbl-amount neg">${money(c.balance)}</td>
