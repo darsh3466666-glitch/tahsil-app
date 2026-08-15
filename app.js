@@ -574,10 +574,6 @@ function viewRoute() {
         </div>
 
         <div class="route-actions-group">
-          <button type="button" id="waRouteShareBtn" class="btn-wa" title="نسخ رسالة خط السير لإرسالها للمحصل عبر الواتساب">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82-1.55 1.56-3.62 2.42-5.82 2.42-1.45 0-2.88-.38-4.14-1.11l-.3-.17-3.08.81.82-3-.2-.31a8.18 8.18 0 0 1-1.26-4.46c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.71 4.3 3.8 2.53 1.09 2.53.73 2.98.69.46-.04 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29"/></svg>
-            نسخ خط السير للواتساب
-          </button>
           <button type="button" id="resetRouteBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
         </div>
       </div>
@@ -970,9 +966,6 @@ function viewCollectors() {
         </div>
 
         <div style="display:flex; gap:8px; align-items:center;">
-          <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" title="إرسال خط السير الصباحي للمحصل">
-            💬 إرسال خط السير
-          </button>
           <button type="button" class="btn btn-primary" onclick="copyCollectorSummaryReport('${esc(rep)}')" style="font-size:0.8rem; padding:7px 14px;">
             📋 تقرير الإنجاز اليومي
           </button>
@@ -1140,9 +1133,6 @@ function viewCollectors() {
                 <div style="font-size:0.74rem; opacity:0.7;">محصل ميداني</div>
               </div>
             </div>
-            <button type="button" class="btn-wa" onclick="openWhatsAppShareModal('${esc(rep)}')" style="font-size:0.72rem; padding:4px 8px;">
-              💬 خط السير
-            </button>
           </div>
 
           <!-- شريط الإنجاز -->
