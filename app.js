@@ -70,6 +70,42 @@ function addManualPay(customer, amount, collector) {
   return p;
 }
 
+function deleteManualPay(id) {
+  const pIdx = state.manualPays.findIndex((x) => String(x.id) === String(id));
+  if (pIdx === -1) return;
+
+  const p = state.manualPays[pIdx];
+  const customer = p.customer;
+  const amount = Number(p.amount) || 0;
+
+  if (confirm(`هل تريد بالتأكيد إلغاء وحذف عملية سداد (${money(amount)}) للعميل "${customer}"؟`)) {
+    state.manualPays.splice(pIdx, 1);
+    saveManualPays();
+
+    // تحديث رصيد المسدد في خط السير التفاعلي
+    if (state.interactiveRoute) {
+      const item = state.interactiveRoute.find((x) => x.customer === customer);
+      if (item) {
+        item.paid = Math.max(0, (Number(item.paid) || 0) - amount);
+        if (item.paid >= item.balance && item.balance > 0) {
+          item.status = "خالص";
+        } else if (item.paid > 0) {
+          item.status = "سداد جزئي";
+        } else {
+          item.status = "لم يسدد";
+        }
+        saveInteractiveRoute();
+      }
+    }
+
+    toast("تم الحذف", `تم حذف عملية السداد بمبلغ ${money(amount)} وتحديث رصيد العميل`, "warn");
+
+    if (state.view === "collectors") viewCollectors();
+    else if (state.view === "route") viewRoute();
+    else if (state.view === "dashboard") viewDashboard();
+  }
+}
+
 function setClientPayment(customer, newTotalPaid) {
   const item = (state.interactiveRoute || []).find((x) => x.customer === customer);
   if (!item) return;
@@ -1247,14 +1283,19 @@ function viewCollectors() {
         </div>
         <div class="mini-feed">
           ${repPays.length ? repPays.slice().reverse().map((p) => `
-            <div class="mini-item" style="padding: 10px 14px;">
-              <div>
-                <b style="font-size:0.9rem;">${esc(p.customer)}</b>
-                <div style="font-size:0.74rem; opacity:0.7;">سداد نقدي مباشر في الميدان</div>
+            <div class="mini-item" style="padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div style="flex: 1;">
+                <b style="font-size:0.92rem; color: var(--foreground);">${esc(p.customer)}</b>
+                <div style="font-size:0.74rem; opacity:0.7; margin-top: 2px;">سداد نقدي مباشر في الميدان</div>
               </div>
-              <div style="text-align:end;">
-                <b class="pos" style="font-size:1.05rem;">+${money(p.amount)}</b>
-                <em style="display:block; font-size:0.72rem; opacity:0.7;">⏰ ${esc(p.time)}</em>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="text-align:end;">
+                  <b class="pos" style="font-size:1.05rem; font-weight:800;">+${money(p.amount)}</b>
+                  <em style="display:block; font-size:0.72rem; opacity:0.7;">⏰ ${esc(p.time)}</em>
+                </div>
+                <button type="button" class="tbl-action-icon" style="color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border-radius: 6px; width: 30px; height: 30px;" onclick="deleteManualPay('${p.id}')" title="حذف عملية السداد من السجل وتحديث الحسابات">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                </button>
               </div>
             </div>`).join("") : `<div class="mini-item muted">لا توجد عمليات سداد مسجلة للمحصل اليوم حتى الآن</div>`}
         </div>
@@ -2043,6 +2084,7 @@ function initTheme() {
 window.openResponseModal = openResponseModal;
 window.closeResponseModal = closeResponseModal;
 window.setClientPayment = setClientPayment;
+window.deleteManualPay = deleteManualPay;
 window.openWhatsAppShareModal = openWhatsAppShareModal;
 window.closeWhatsAppShareModal = closeWhatsAppShareModal;
 window.setCollectorTab = setCollectorTab;
