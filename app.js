@@ -635,89 +635,52 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- التخطيط الرئيسي: جدول العملاء التفاعلي + صندوق الإحصائيات المطابق للإكسل -->
-    <div class="route-interactive-layout">
-      <!-- 1. صندوق الإحصائيات (طِبق شيت الإكسل المرفق بالصورة) -->
-      <div class="excel-summary-card">
-        <div class="excel-summary-title">
-          <span>📊 ملخص التحصيل والمتابعة</span>
-          <span style="font-size:0.75rem; font-weight:600; opacity:0.7;">${fRep === "all" ? "كل المحصلين" : fRep}</span>
-        </div>
-
-        <table class="excel-table-summary">
-          <tbody>
-            <tr>
-              <td class="excel-lbl">اجمالي المطلوب</td>
-              <td class="excel-val c-total">${money(stats.totalDue)}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">المحصل</td>
-              <td class="excel-val c-collected">${money(stats.collected)}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">الباقي</td>
-              <td class="excel-val c-remaining">${money(stats.remaining)}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">نسبة التحصيل</td>
-              <td class="excel-val c-rate">${stats.collectionRate.toFixed(2)}%</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">تم التواصل</td>
-              <td class="excel-val c-contacted">${stats.contactedCount}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">عميل مستجيب</td>
-              <td class="excel-val c-responsive">${stats.responsiveCount}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">عميل غير مستجيب</td>
-              <td class="excel-val c-unresponsive">${stats.unresponsiveCount}</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">نسبة الاستجابة</td>
-              <td class="excel-val c-rate">${stats.responseRate.toFixed(2)}%</td>
-            </tr>
-            <tr>
-              <td class="excel-lbl">لم يتم التواصل</td>
-              <td class="excel-val c-not-visited">${stats.notContactedCount}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- شريط نسبة التحصيل -->
-        <div style="margin-top: 10px;">
-          <div style="display:flex; justify-content:space-between; font-size:0.76rem; font-weight:700; margin-bottom:4px;">
-            <span>نسبة إنجاز التحصيل</span>
-            <b>${stats.collectionRate.toFixed(1)}%</b>
-          </div>
-          <div class="bar-track" style="height: 8px;">
-            <div class="bar-fill" style="width: ${Math.min(100, stats.collectionRate)}%; background: ${stats.collectionRate >= 60 ? "var(--success)" : stats.collectionRate >= 30 ? "var(--warning)" : "var(--danger)"}"></div>
-          </div>
-        </div>
-
-        <div style="margin-top: 14px; font-size: 0.74rem; opacity: 0.7; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 8px;">
-          💡 يتم تحديث الإحصائيات تلقائياً عند تغيير حالة التواصل، تسجيل السداد، أو تعديل ردود الواتساب.
-        </div>
+    <!-- إحصائيات سريعة علوية نظيفة ومتناسقة بنسبة 100% -->
+    <div class="kpi-grid" style="margin-bottom: var(--space-4);">
+      <div class="kpi-card c-danger">
+        <div class="kpi-label">اجمالي المطلوب</div>
+        <div class="kpi-value">${money(stats.totalDue)}</div>
+        <div class="kpi-sub">${stats.totalCount} عميل</div>
       </div>
+      <div class="kpi-card c-success">
+        <div class="kpi-label">المحصل اليوم</div>
+        <div class="kpi-value">${money(stats.collected)}</div>
+        <div class="kpi-sub">نسبة التحصيل: ${stats.collectionRate.toFixed(1)}%</div>
+      </div>
+      <div class="kpi-card c-accent">
+        <div class="kpi-label">المتبقي</div>
+        <div class="kpi-value">${money(stats.remaining)}</div>
+        <div class="kpi-sub">قيد التحصيل</div>
+      </div>
+      <div class="kpi-card c-info">
+        <div class="kpi-label">تم التواصل / الزيارة</div>
+        <div class="kpi-value">${stats.contactedCount}</div>
+        <div class="kpi-sub">${stats.responsiveCount} مستجيب | ${stats.unresponsiveCount} غير مستجيب</div>
+      </div>
+      <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
+        <div class="kpi-label" style="color:var(--danger);">لم يذهب إليهم ❌</div>
+        <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
+        <div class="kpi-sub">عملاء لم يزرهم المحصل</div>
+      </div>
+    </div>
 
-      <!-- 2. الجدول التفاعلي الرئيسي (مطابق لأعمدة شيت الإكسل: م، العميل، المبلغ المستحق، المسدد، الحالة، التواصل، الرد) -->
-      <div class="card" style="padding: var(--space-4);">
-        <div class="table-wrap">
-          <table class="interactive-table">
-            <thead>
-              <tr>
-                <th class="row-num">م</th>
-                ${sortTh("route", "customer", "str", "العميل")}
-                ${sortTh("route", "balance", "num", "المبلغ المستحق")}
-                ${sortTh("route", "paid", "num", "المسدد")}
-                ${sortTh("route", "status", "str", "الحالة")}
-                ${sortTh("route", "comm", "str", "التواصل")}
-                ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
-                <th style="width: 90px; text-align: center;">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="routeTableBody">
+    <!-- الجدول التفاعلي الرئيسي بعرض كامل ونظيف 100% -->
+    <div class="card" style="padding: var(--space-4);">
+      <div class="table-wrap">
+        <table class="interactive-table">
+          <thead>
+            <tr>
+              <th class="row-num">م</th>
+              ${sortTh("route", "customer", "str", "العميل")}
+              ${sortTh("route", "balance", "num", "المبلغ المستحق")}
+              ${sortTh("route", "paid", "num", "المسدد")}
+              ${sortTh("route", "status", "str", "الحالة")}
+              ${sortTh("route", "comm", "str", "التواصل")}
+              ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
+              <th style="width: 90px; text-align: center;">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="routeTableBody">
               ${filtered.length ? filtered.map((c, idx) => {
                 const isNotVisited = c.notVisited || c.comm === "لم يذهب إليه المحصل";
                 const isPaid = c.paid > 0;
@@ -802,7 +765,6 @@ function viewRoute() {
           </table>
         </div>
       </div>
-    </div>
   `;
 
   // ربط الأحداث
