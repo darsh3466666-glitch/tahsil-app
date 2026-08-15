@@ -235,6 +235,49 @@ tbody tr.row-status-red:hover, tbody tr.row-not-visited:hover, tbody tr.row-dang
 th.row-num, td.row-num { width: 44px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted-text, #8a94a6); font-weight: 600; }
 td.row-num { font-size: .82rem; }
 
+/* ============ Top Horizontal Scroll Controls ============ */
+.table-top-scroll-bar {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 12px;
+  margin-bottom: 8px;
+  background: color-mix(in srgb, var(--muted) 70%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.table-top-scroll-bar::-webkit-scrollbar {
+  height: 10px;
+}
+.table-top-scroll-bar::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 5px;
+}
+.table-scroll-controls {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.scroll-nav-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--foreground);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.scroll-nav-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
 /* نموذج سداد جديد */
 .pay-form { display: grid; grid-template-columns: 1fr 2fr 1fr auto; gap: 12px; align-items: end; }
 .pay-field { display: flex; flex-direction: column; gap: 6px; }

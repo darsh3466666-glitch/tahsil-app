@@ -314,6 +314,8 @@ const state = {
     routeSearch: "",
     masterSearch: "",
     masterCollector: "all",
+    masterTodayStatus: "all",
+    masterActivity: "all",
     masterClass: "all",
     masterBalance: "all",
   },
@@ -1541,6 +1543,68 @@ function viewCycle() {
 }
 
 /* ---------- 7. MASTER DATA (عرض شيت البيانات الرئيسية لايف) ---------- */
+function getMasterActivityStats(master) {
+  const now = new Date(todayISO()).getTime();
+  const SIX_MO_MS = 180 * 24 * 60 * 60 * 1000;
+
+  let activeCount = 0;
+  let activeBal = 0;
+  let idleDebtCount = 0;
+  let idleDebtBal = 0;
+  let idleZeroCount = 0;
+
+  const enriched = master.map((m) => {
+    const dates = [m.last_invoice, m.last_payment, m.last_visit].filter(Boolean);
+    let latestTime = 0;
+    dates.forEach((dStr) => {
+      const t = new Date(dStr).getTime();
+      if (!isNaN(t) && t > latestTime) latestTime = t;
+    });
+
+    const bal = Number(m.balance) || 0;
+    const isIdle = latestTime === 0 || (now - latestTime) > SIX_MO_MS;
+    const isActive = !isIdle;
+    let activityKey = "active";
+
+    if (!isIdle) {
+      activeCount++;
+      activeBal += bal;
+      activityKey = "active";
+    } else if (bal > 0) {
+      idleDebtCount++;
+      idleDebtBal += bal;
+      activityKey = "idle_debt";
+    } else {
+      idleZeroCount++;
+      activityKey = "idle_zero";
+    }
+
+    const daysSince = latestTime > 0 ? Math.floor((now - latestTime) / (24 * 60 * 60 * 1000)) : null;
+
+    return {
+      ...m,
+      _isActive: isActive,
+      _isIdle: isIdle,
+      _activityKey: activityKey,
+      _daysSinceActivity: daysSince,
+    };
+  });
+
+  return {
+    enriched,
+    activeCount,
+    activeBal,
+    idleDebtCount,
+    idleDebtBal,
+    idleZeroCount,
+  };
+}
+
+function setMasterActivityFilter(val) {
+  state.filters.masterActivity = val;
+  viewMasterData();
+}
+
 function viewMasterData() {
   const d = state.data;
   if (!d) return;
@@ -1548,20 +1612,29 @@ function viewMasterData() {
   const master = d.master || [];
   const reps = ["مصطفى", "محمد شعبان"];
 
-  // التصنيفات الفريدة في الماستر داتا
+  // احتساب إحصائيات النشاط والركود وفق قاعدة الـ 6 شهور
+  const stats = getMasterActivityStats(master);
+  const enrichedMaster = stats.enriched;
+
+  // الخيارات الفريدة لموقف اليوم والتصنيفات
+  const todayStatuses = ["🟢 ساري", "🎯 هدف اليوم", "✅ خالص"];
   const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
 
   // تطبيق الفلاتر
   const fSearch = (state.filters.masterSearch || "").trim().toLowerCase();
   const fCollector = state.filters.masterCollector || "all";
+  const fTodayStatus = state.filters.masterTodayStatus || "all";
+  const fActivity = state.filters.masterActivity || "all";
   const fClass = state.filters.masterClass || "all";
   const fBalance = state.filters.masterBalance || "all";
 
-  let filtered = master.filter((m) => {
+  let filtered = enrichedMaster.filter((m) => {
     if (fCollector !== "all") {
       if (fCollector === "none" && m.collector) return false;
       if (fCollector !== "none" && m.collector !== fCollector) return false;
     }
+    if (fTodayStatus !== "all" && m.today_status !== fTodayStatus) return false;
+    if (fActivity !== "all" && m._activityKey !== fActivity) return false;
     if (fClass !== "all" && m.classification !== fClass) return false;
     if (fBalance === "has_debt" && (!m.balance || m.balance <= 0)) return false;
     if (fBalance === "zero_debt" && m.balance > 0) return false;
@@ -1581,68 +1654,81 @@ function viewMasterData() {
     return x[col] || "";
   });
 
-  // حساب المؤشرات
+  // الحسابات العامة
   const totalCount = master.length;
   const totalBal = master.reduce((s, m) => s + (Number(m.balance) || 0), 0);
-  const cycleClients = master.filter((m) => m.classification === "عملاء بالدورة");
-  const idleClients = master.filter((m) => m.classification === "عملاء راكدون");
-  const zeroClients = master.filter((m) => (Number(m.balance) || 0) === 0 || m.status === "عميل خالص");
 
   $("view-master").innerHTML = `
-    <!-- إحصائيات Master Data التنفيذية -->
+    <!-- إحصائيات Master Data والنشاط والركود (قاعدة الـ 6 شهور) -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
-      <div class="kpi-card c-danger">
+      <div class="kpi-card c-info" style="cursor: pointer;" onclick="setMasterActivityFilter('all')" title="عرض كل عملاء الشيت">
         <div class="kpi-label">إجمالي عملاء الشيت</div>
         <div class="kpi-value">${totalCount} عميل</div>
-        <div class="kpi-sub">قاعدة البيانات الكاملة لايف</div>
+        <div class="kpi-sub">${money(totalBal)} (كامل الشيت)</div>
       </div>
-      <div class="kpi-card c-warning">
-        <div class="kpi-label">إجمالي المديونيات الحالية</div>
-        <div class="kpi-value">${money(totalBal)}</div>
-        <div class="kpi-sub">رصيد الشيت الإجمالي</div>
+
+      <div class="kpi-card c-success" style="cursor: pointer;" onclick="setMasterActivityFilter('active')" title="عرض العملاء النشطين (نشاط خلال آخر 6 شهور)">
+        <div class="kpi-label">🟢 عملاء نشطون (نشاط خلال 6 شهور)</div>
+        <div class="kpi-value">${stats.activeCount} عميل</div>
+        <div class="kpi-sub">${money(stats.activeBal)} — حركة حديثة</div>
       </div>
-      <div class="kpi-card c-info">
-        <div class="kpi-label">عملاء بالدورة</div>
-        <div class="kpi-value">${cycleClients.length}</div>
-        <div class="kpi-sub">${money(cycleClients.reduce((s, m) => s + (Number(m.balance) || 0), 0))}</div>
+
+      <div class="kpi-card c-danger" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_debt')" title="عرض العملاء الراكدين ولديهم مديونية">
+        <div class="kpi-label">🔴 راكد وعليه مديونية (> 6 شهور)</div>
+        <div class="kpi-value">${stats.idleDebtCount} عميل</div>
+        <div class="kpi-sub">${money(stats.idleDebtBal)} — مديونية متوقفة</div>
       </div>
-      <div class="kpi-card c-accent">
-        <div class="kpi-label">عملاء راكدون</div>
-        <div class="kpi-value">${idleClients.length}</div>
-        <div class="kpi-sub">${money(idleClients.reduce((s, m) => s + (Number(m.balance) || 0), 0))}</div>
-      </div>
-      <div class="kpi-card c-success">
-        <div class="kpi-label">عملاء رصيدهم صفر (خالص)</div>
-        <div class="kpi-value">${zeroClients.length}</div>
-        <div class="kpi-sub">عملاء مسددون بالكامل</div>
+
+      <div class="kpi-card c-accent" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_zero')" title="عرض العملاء الراكدين الخالصين بدون رصيد">
+        <div class="kpi-label">⚪ راكد بدون رصيد (خالص > 6 شهور)</div>
+        <div class="kpi-value">${stats.idleZeroCount} عميل</div>
+        <div class="kpi-sub">0 ج.م — مسدد بالكامل</div>
       </div>
     </div>
 
     <!-- شريط الفلاتر والبحث لشيت Master Data -->
     <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1;">
           <input 
             class="search-input" 
             id="masterSearchInput" 
             placeholder="بحث بالاسم، الكود، المنطقة، الملاحظات…" 
             value="${esc(state.filters.masterSearch || "")}" 
-            style="min-width: 240px; flex: 1;"
+            style="min-width: 220px; flex: 1;"
           />
+
+          <!-- فلتر موقف اليوم -->
+          <select id="masterTodayStatusSelect" class="select" style="font-weight: 700;">
+            <option value="all" ${fTodayStatus === "all" ? "selected" : ""}>كل مواقف اليوم</option>
+            ${todayStatuses.map((st) => `<option value="${esc(st)}" ${fTodayStatus === st ? "selected" : ""}>${esc(st)}</option>`).join("")}
+          </select>
+
+          <!-- فلتر النشاط والركود (6 شهور) -->
+          <select id="masterActivitySelect" class="select" style="font-weight: 700;">
+            <option value="all" ${fActivity === "all" ? "selected" : ""}>كل حالات النشاط</option>
+            <option value="active" ${fActivity === "active" ? "selected" : ""}>🟢 نشط (< 6 شهور)</option>
+            <option value="idle_debt" ${fActivity === "idle_debt" ? "selected" : ""}>🔴 راكد بمديونية (> 6 شهور)</option>
+            <option value="idle_zero" ${fActivity === "idle_zero" ? "selected" : ""}>⚪ راكد بدون رصيد (خالص)</option>
+          </select>
+
           <select id="masterCollectorSelect" class="select">
             <option value="all" ${fCollector === "all" ? "selected" : ""}>كل المحصلين</option>
             ${reps.map((r) => `<option value="${esc(r)}" ${fCollector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
             <option value="none" ${fCollector === "none" ? "selected" : ""}>بدون محصل محدد</option>
           </select>
+
           <select id="masterClassSelect" class="select">
             <option value="all" ${fClass === "all" ? "selected" : ""}>كل التصنيفات</option>
             ${classifications.map((c) => `<option value="${esc(c)}" ${fClass === c ? "selected" : ""}>${esc(c)}</option>`).join("")}
           </select>
+
           <select id="masterBalanceSelect" class="select">
             <option value="all" ${fBalance === "all" ? "selected" : ""}>كل الأرصدة</option>
             <option value="has_debt" ${fBalance === "has_debt" ? "selected" : ""}>عليهم مديونية (> 0)</option>
             <option value="zero_debt" ${fBalance === "zero_debt" ? "selected" : ""}>خالص (الرصيد 0)</option>
           </select>
+
           ${clearSortBtn("master")}
         </div>
         <div style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
@@ -1653,13 +1739,29 @@ function viewMasterData() {
 
     <!-- جدول شيت Master Data الكامل لايف -->
     <div class="card" style="padding: var(--space-4);">
-      <div class="card-head" style="margin-bottom: var(--space-3);">
-        <span class="card-title">📄 شيت Master Data (البيانات الرئيسية المحدثة لايف)</span>
-        <span class="card-sub">عرض مباشر لكافة سجلات العملاء وحساباتهم ومواعيد الزيارات والاستحقاقات</span>
+      <div class="card-head" style="margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <span class="card-title">📄 شيت Master Data (البيانات الرئيسية المحدثة لايف)</span>
+          <span class="card-sub" style="display:block; margin-top:2px;">عرض مباشر لكافة سجلات العملاء وحساباتهم ومواعيد الزيارات والاستحقاقات</span>
+        </div>
+        <div class="table-scroll-controls">
+          <span style="font-size:0.75rem; font-weight:700; opacity:0.7;">تحريك الجدول أفقياً:</span>
+          <button type="button" class="scroll-nav-btn" id="masterScrollRightBtn" title="تحريك الجدول لليمين">
+            ◀ يمين
+          </button>
+          <button type="button" class="scroll-nav-btn" id="masterScrollLeftBtn" title="تحريك الجدول لليسار">
+            يسار ▶
+          </button>
+        </div>
       </div>
 
-      <div class="table-wrap">
-        <table class="interactive-table" style="font-size: 0.84rem;">
+      <!-- شريط التمرير الأفقي العلوي المتزامن مع الجدول -->
+      <div class="table-top-scroll-bar" id="masterTableTopScroll" title="شريط تحريك الجدول أفقياً من الأعلى">
+        <div id="masterTopScrollDummy" style="height: 1px;"></div>
+      </div>
+
+      <div class="table-wrap" id="masterTableWrap">
+        <table class="interactive-table" id="masterDataTable" style="font-size: 0.84rem;">
           <thead>
             <tr>
               <th class="row-num">م</th>
@@ -1670,6 +1772,7 @@ function viewMasterData() {
               ${sortTh("master", "balance", "num", "المديونية الحالية")}
               ${sortTh("master", "today_status", "str", "موقف اليوم")}
               ${sortTh("master", "classification", "str", "التصنيف")}
+              <th>نشاط العميل</th>
               ${sortTh("master", "last_invoice", "str", "آخر فاتورة")}
               ${sortTh("master", "last_payment", "str", "آخر سداد")}
               ${sortTh("master", "last_visit", "str", "آخر زيارة")}
@@ -1681,9 +1784,10 @@ function viewMasterData() {
           <tbody>
             ${filtered.length ? filtered.map((m, idx) => {
               const isZero = (Number(m.balance) || 0) === 0;
-              const rowClass = isZero ? "row-status-green" : "";
-              const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("متأخر") ? "chip-red" : "chip-gray";
+              const rowClass = isZero ? "row-status-green" : (m._activityKey === "idle_debt" ? "row-status-amber" : "");
+              const todayClass = (m.today_status || "").includes("خالص") ? "chip-green" : (m.today_status || "").includes("ساري") ? "chip-blue" : (m.today_status || "").includes("هدف") ? "chip-purple" : "chip-gray";
               const classChip = m.classification === "عملاء بالدورة" ? "chip-blue" : m.classification === "عملاء راكدون" ? "chip-amber" : "chip-gray";
+              const actChip = m._activityKey === "active" ? `<span class="chip chip-green" title="نشاط خلال آخر 6 شهور">🟢 نشط</span>` : (m._activityKey === "idle_debt" ? `<span class="chip chip-red" title="متوقف منذ أكثر من 6 شهور وعليه مديونية">🔴 راكد (مديونية)</span>` : `<span class="chip chip-gray" title="متوقف منذ أكثر من 6 شهور ومسدد">⚪ راكد (خالص)</span>`);
 
               return `
                 <tr class="${rowClass}">
@@ -1700,11 +1804,12 @@ function viewMasterData() {
                     ${money(m.balance)}
                   </td>
                   <td>
-                    <span class="chip ${todayClass}">${esc(m.today_status || "—")}</span>
+                    <span class="chip ${todayClass}" style="font-weight:800;">${esc(m.today_status || "—")}</span>
                   </td>
                   <td>
                     <span class="chip ${classChip}">${esc(m.classification || "—")}</span>
                   </td>
+                  <td>${actChip}</td>
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_invoice || "—")}</td>
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_payment || "—")}</td>
                   <td style="font-variant-numeric: tabular-nums; white-space: nowrap;">${esc(m.last_visit || "—")}</td>
@@ -1715,18 +1820,77 @@ function viewMasterData() {
                   </td>
                 </tr>
               `;
-            }).join("") : `<tr><td colspan="14" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`}
+            }).join("") : `<tr><td colspan="15" class="empty-state">لا توجد سجلات مطابقة للبحث أو الفلتر المحدد</td></tr>`}
           </tbody>
         </table>
       </div>
     </div>
   `;
 
+  // مزامنة شريط التمرير العلوي مع الجدول
+  const topScroll = $("masterTableTopScroll");
+  const topDummy = $("masterTopScrollDummy");
+  const tableWrap = $("masterTableWrap");
+  const dataTable = $("masterDataTable");
+
+  if (topScroll && tableWrap && topDummy && dataTable) {
+    const syncScrollWidth = () => {
+      topDummy.style.width = dataTable.offsetWidth + "px";
+    };
+    setTimeout(syncScrollWidth, 50);
+
+    let isSyncingTop = false;
+    let isSyncingBottom = false;
+
+    topScroll.onscroll = () => {
+      if (!isSyncingBottom) {
+        isSyncingTop = true;
+        tableWrap.scrollLeft = topScroll.scrollLeft;
+      }
+      isSyncingBottom = false;
+    };
+
+    tableWrap.onscroll = () => {
+      if (!isSyncingTop) {
+        isSyncingBottom = true;
+        topScroll.scrollLeft = tableWrap.scrollLeft;
+      }
+      isSyncingTop = false;
+    };
+
+    const btnRight = $("masterScrollRightBtn");
+    const btnLeft = $("masterScrollLeftBtn");
+    if (btnRight) {
+      btnRight.onclick = () => {
+        tableWrap.scrollBy({ left: 300, behavior: "smooth" });
+      };
+    }
+    if (btnLeft) {
+      btnLeft.onclick = () => {
+        tableWrap.scrollBy({ left: -300, behavior: "smooth" });
+      };
+    }
+  }
+
   // ربط أحداث الفلاتر
   const searchInp = $("masterSearchInput");
   if (searchInp) {
     searchInp.addEventListener("input", () => {
       state.filters.masterSearch = searchInp.value;
+      viewMasterData();
+    });
+  }
+  const todayStSel = $("masterTodayStatusSelect");
+  if (todayStSel) {
+    todayStSel.addEventListener("change", () => {
+      state.filters.masterTodayStatus = todayStSel.value;
+      viewMasterData();
+    });
+  }
+  const actSel = $("masterActivitySelect");
+  if (actSel) {
+    actSel.addEventListener("change", () => {
+      state.filters.masterActivity = actSel.value;
       viewMasterData();
     });
   }
@@ -1829,6 +1993,7 @@ window.closeWhatsAppShareModal = closeWhatsAppShareModal;
 window.setCollectorTab = setCollectorTab;
 window.copyCollectorSummaryReport = copyCollectorSummaryReport;
 window.switchView = switchView;
+window.setMasterActivityFilter = setMasterActivityFilter;
 
 /* ---------- Global Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {
