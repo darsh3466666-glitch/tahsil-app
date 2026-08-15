@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 13:14:25",
+  "generated_at": "2026-08-15 13:18:18",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -6691,14 +6691,14 @@
    "balance": 2400.0,
    "last_payment": "2026-07-09",
    "last_invoice": "2026-07-09",
-   "last_visit": "2026-08-10",
-   "agreement_days": "5",
-   "due_date": "2026-08-15",
+   "last_visit": "2026-08-15",
+   "agreement_days": "1",
+   "due_date": "2026-08-16",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
-   "notes": "السبت 15/8",
+   "notes": "بكرا 16/8",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 32400.0,
@@ -11186,24 +11186,6 @@
    "rating": "خطر 🔴 (متوقف/راكد)"
   },
   {
-   "prev_due": "2026-08-10",
-   "appt_status": "5",
-   "new_due": "2026-08-15",
-   "customer": "عمرو حسن عابد",
-   "target_debt": 2400.0,
-   "area": "الشركه",
-   "last_payment": "2026-07-09",
-   "last_invoice": "2026-07-09",
-   "last_response": "السبت 15/8",
-   "total_withdrawn": 32400.0,
-   "total_paid": 24450.0,
-   "collected": 0.0,
-   "remaining": 2400.0,
-   "collection_rate": "0",
-   "turnover": "13.5",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
    "prev_due": "2026-08-09",
    "appt_status": "7",
    "new_due": "2026-08-16",
@@ -11219,6 +11201,24 @@
    "remaining": 4790.6600000000035,
    "collection_rate": "0",
    "turnover": "22.207796003055929",
+   "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
+   "prev_due": "2026-08-15",
+   "appt_status": "1",
+   "new_due": "2026-08-16",
+   "customer": "عمرو حسن عابد",
+   "target_debt": 2400.0,
+   "area": "الشركه",
+   "last_payment": "2026-07-09",
+   "last_invoice": "2026-07-09",
+   "last_response": "بكرا 16/8",
+   "total_withdrawn": 32400.0,
+   "total_paid": 24450.0,
+   "collected": 0.0,
+   "remaining": 2400.0,
+   "collection_rate": "0",
+   "turnover": "13.5",
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
@@ -12064,7 +12064,7 @@
    "balance": 2400.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-15",
+   "due": "2026-08-16",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -12266,16 +12266,16 @@
   },
   {
    "A": "3",
-   "B": "عمرو حسن عابد",
-   "C": "2400",
+   "B": "حماده عبد الخالق قيصر",
+   "C": "4790.6600000000035",
    "I": "نسبة التحصيل ",
    "J": "0",
    "M": "رد "
   },
   {
    "A": "4",
-   "B": "حماده عبد الخالق قيصر",
-   "C": "4790.6600000000035",
+   "B": "عمرو حسن عابد",
+   "C": "2400",
    "I": "تم التواصل",
    "J": "0",
    "M": "لا يوجد رد"
@@ -12836,17 +12836,6 @@
    "last_visit": "2026-08-02"
   },
   {
-   "customer": "عمرو حسن عابد",
-   "balance": 2400.0,
-   "collector": "محمد شعبان",
-   "area": "الشركه",
-   "due": "2026-08-15",
-   "classification": "فاتورة بفاتورة",
-   "notes": "السبت 15/8",
-   "last_payment": "2026-07-09",
-   "last_visit": "2026-08-10"
-  },
-  {
    "customer": "د. عبد المجيد المرزوقي",
    "balance": 2380.0,
    "collector": "محمد شعبان",
@@ -12940,16 +12929,16 @@
      "last_payment": "2025-04-16"
     },
     {
-     "customer": "عمرو حسن عابد",
-     "balance": 2400.0,
-     "last_invoice": "2026-07-09",
-     "last_payment": "2026-07-09"
-    },
-    {
      "customer": "حماده عبد الخالق قيصر",
      "balance": 4790.6600000000035,
      "last_invoice": "2026-08-08",
      "last_payment": "2026-08-08"
+    },
+    {
+     "customer": "عمرو حسن عابد",
+     "balance": 2400.0,
+     "last_invoice": "2026-07-09",
+     "last_payment": "2026-07-09"
     },
     {
      "customer": "ممدوح عبد القادر محمد (قيصر)",

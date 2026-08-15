@@ -2,7 +2,7 @@
 # يعمل في الخلفية بصمت: كل 30 ثانية يفحص إذا تغيّر الشيت؛ عند أي تغيير يعيد تصدير data.json
 # ويدفع التحديث لـ GitHub (git add + commit + push) فيتحدث الموقع لايف.
 # السجلّ مكتوب في watcher.log (بدون أي نافذة)
-import os, sys, time, hashlib, subprocess
+import os, sys, time, hashlib, subprocess, traceback
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_PATH = os.path.join(SCRIPT_DIR, "watcher.log")
@@ -16,13 +16,27 @@ def log(msg):
         pass
 
 
-try:
-    sys.stdout.reconfigure(encoding="utf-8")
-except Exception:
-    if sys.stdout is None:
-        sys.stdout = open(os.devnull, "w")
-    if sys.stderr is None:
-        sys.stderr = open(os.devnull, "w")
+if sys.stdout is None:
+    try:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+    except Exception:
+        pass
+else:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+if sys.stderr is None:
+    try:
+        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+    except Exception:
+        pass
+else:
+    try:
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 SHEET_PATH = r"D:\Mostafa Ibrahim\شيت تحصيل.xlsm"
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
@@ -39,8 +53,23 @@ def file_fingerprint(path):
 
 
 def run(cmd, cwd):
-    creation_flags = 0x08000000 if sys.platform == "win32" else 0
-    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=creation_flags)
+    creation_flags = 0
+    startupinfo = None
+    if sys.platform == "win32":
+        creation_flags = subprocess.CREATE_NO_WINDOW
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+    r = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        creationflags=creation_flags,
+        startupinfo=startupinfo
+    )
     if r.returncode != 0:
         log(f"CMD FAIL {' '.join(cmd)}: {r.stderr[:500]}")
     return r
