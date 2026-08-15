@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-15 19:01:08",
+  "generated_at": "2026-08-15 19:03:47",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -1031,12 +1031,12 @@
    "balance": 634910.0999999996,
    "last_payment": "2026-07-26",
    "last_invoice": "2026-08-09",
-   "last_visit": "2026-06-30",
-   "agreement_days": "2",
-   "due_date": "2026-07-02",
+   "last_visit": "2026-08-15",
+   "agreement_days": "7",
+   "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "المزارع الكبيره",
    "notes": "سداد ع دفعتين بدا من الاسبوع القادم ",
    "agreements": "",
@@ -2951,12 +2951,12 @@
    "balance": 1265290.000000001,
    "last_payment": "2026-07-29",
    "last_invoice": "2026-08-11",
-   "last_visit": "2026-05-21",
-   "agreement_days": "40",
-   "due_date": "2026-06-30",
+   "last_visit": "2026-08-15",
+   "agreement_days": "100",
+   "due_date": "2026-11-23",
    "status": "نشط",
    "collector": "",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "المزارع الكبيره",
    "notes": "خارج برنامج التحصيل (أ علي منير)",
    "agreements": "",
@@ -11870,7 +11870,7 @@
    "balance": 634910.0999999996,
    "expected": 200000.0,
    "collected": 0.0,
-   "due": "2026-07-02",
+   "due": "2026-08-22",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 200000.0,
@@ -12510,17 +12510,6 @@
  ],
  "daily_targets": [
   {
-   "customer": "المزرعه",
-   "balance": 1265290.000000001,
-   "collector": "",
-   "area": "قيصر",
-   "due": "2026-06-30",
-   "classification": "المزارع الكبيره",
-   "notes": "خارج برنامج التحصيل (أ علي منير)",
-   "last_payment": "2026-07-29",
-   "last_visit": "2026-05-21"
-  },
-  {
    "customer": "حماده ابو خضره سيلا",
    "balance": 918290.0,
    "collector": "مصطفى",
@@ -12541,17 +12530,6 @@
    "notes": "جهينة",
    "last_payment": "2026-08-05",
    "last_visit": "2026-05-30"
-  },
-  {
-   "customer": "مزرعة بيور",
-   "balance": 634910.0999999996,
-   "collector": "مصطفى",
-   "area": "العاشر من رمضان",
-   "due": "2026-07-02",
-   "classification": "المزارع الكبيره",
-   "notes": "سداد ع دفعتين بدا من الاسبوع القادم ",
-   "last_payment": "2026-07-26",
-   "last_visit": "2026-06-30"
   },
   {
    "customer": "عيد احمد عبد الفتاح(ابو السعود)",
@@ -13080,12 +13058,6 @@
      "balance": 918290.0,
      "last_invoice": "2026-07-23",
      "last_payment": "2026-07-25"
-    },
-    {
-     "customer": "مزرعة بيور",
-     "balance": 634910.0999999996,
-     "last_invoice": "2026-08-09",
-     "last_payment": "2026-07-26"
     },
     {
      "customer": "المعلم/ عبد الفتاح ربيع",
