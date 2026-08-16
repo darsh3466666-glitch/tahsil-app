@@ -1,7 +1,7 @@
 {
   "data_json_path": "data/data.json",
   "telegram": {
-    "bot_token": "8996532656:AAF1OLSVtaW2CdTKk3bMud3JGijNxKWRAus",
+    "bot_token": "8850929584:AAGCkedmJxWTCgyeF3-WSngFS_e1QVx5I74",
     "work_chat_id": "",
     "morning_report_time": "10:00",
     "enable_instant_payment_alerts": true
