@@ -26,18 +26,25 @@ function dueLabel(due) {
 
 /* ---------- محرك البحث الذكي والسلس (تطبيع الحروف العربية والبحث المتعدد) ---------- */
 function normalizeArabic(s) {
-  if (!s) return "";
-  return String(s)
+  if (s === null || s === undefined) return "";
+  const easternDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  let str = String(s)
     .trim()
     .toLowerCase()
-    .replace(/[\u064B-\u065F\u0670]/g, "") // إزالة التشكيل والحركات
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "") // إزالة التشكيل والتطويل (ـ)
     .replace(/[أإآٱ]/g, "ا")
     .replace(/ة/g, "ه")
     .replace(/ى/g, "ي")
     .replace(/ؤ/g, "و")
     .replace(/ئ/g, "ي")
-    .replace(/[ـ\-_/\\,.]/g, " ")
-    .replace(/\s+/g, " ");
+    .replace(/[()[\]{}«»"']/g, " ")
+    .replace(/[ـ\-_/\\,.:;]/g, " ");
+
+  // تحويل الأرقام الشرقية لأرقام قياسية للبحث الذكي
+  for (let i = 0; i < 10; i++) {
+    str = str.replace(new RegExp(easternDigits[i], "g"), String(i));
+  }
+  return str.replace(/\s+/g, " ").trim();
 }
 
 function matchSearch(sourceText, query) {
@@ -576,11 +583,26 @@ function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, 
   const currentSelected = tableFilters[colKey];
   const isFiltered = Array.isArray(currentSelected) && currentSelected.length > 0;
 
-  // تحديد الموضع بالنسبة لزر الفلتر
+  // قياس موضع الزر والشاشة لتحديد الموضع الذكي المرن بحيث يظهر بالكامل دائماً
   const rect = triggerBtn.getBoundingClientRect();
-  let left = rect.left - 200;
+  const popupWidth = 285;
+  const estimatedHeight = 315;
+
+  let left = rect.left - 170;
+  if (left + popupWidth > window.innerWidth - 12) {
+    left = window.innerWidth - popupWidth - 12;
+  }
   if (left < 10) left = 10;
-  if (left + 280 > window.innerWidth) left = window.innerWidth - 285;
+
+  let top = rect.bottom + 6;
+  if (top + estimatedHeight > window.innerHeight - 12) {
+    const topAbove = rect.top - estimatedHeight - 6;
+    if (topAbove > 10) {
+      top = topAbove;
+    } else {
+      top = Math.max(10, window.innerHeight - estimatedHeight - 12);
+    }
+  }
 
   const curSort = state.sort[tableKey];
   const isAsc = curSort && curSort.col === colKey && curSort.dir === 1;
@@ -595,32 +617,38 @@ function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, 
   const popup = document.createElement("div");
   popup.id = "excelFilterPopup";
   popup.className = "excel-filter-popup";
-  popup.style.top = `${rect.bottom + 6}px`;
+  popup.style.top = `${top}px`;
   popup.style.left = `${left}px`;
 
   popup.innerHTML = `
     <div class="ef-header">
-      <span class="ef-title">🔍 فلترة وترتيب: ${esc(colLabel)}</span>
-      <button type="button" class="ef-close-btn" onclick="closeExcelColumnFilter()" title="إغلاق">&times;</button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="ef-title">🔍 ${esc(colLabel)}</span>
+        <span class="chip chip-blue" style="font-size:0.7rem; padding:1px 6px;">${options.length}</span>
+      </div>
+      <button type="button" class="ef-close-btn" onclick="closeExcelColumnFilter()" title="إغلاق">✕</button>
     </div>
 
-    <div class="ef-sort-group">
-      <button type="button" class="ef-sort-btn ${isAsc ? "active" : ""}" id="efSortAscBtn">
-        <span>▲</span> فرز تصاعدي (أ ➔ ي / الأصغر ➔ الأكبر)
+    <div class="ef-sort-row">
+      <button type="button" class="ef-sort-pill ${isAsc ? "active" : ""}" id="efSortAscBtn" title="ترتيب تصاعدي">
+        ▲ تصاعدي
       </button>
-      <button type="button" class="ef-sort-btn ${isDesc ? "active" : ""}" id="efSortDescBtn">
-        <span>▼</span> فرز تنازلي (ي ➔ أ / الأكبر ➔ الأصغر)
+      <button type="button" class="ef-sort-pill ${isDesc ? "active" : ""}" id="efSortDescBtn" title="ترتيب تنازلي">
+        ▼ تنازلي
       </button>
+      ${isAsc || isDesc ? `
+        <button type="button" class="ef-sort-pill" id="efSortResetBtn" title="إلغاء الترتيب" style="color:var(--danger); flex: 0.7;">
+          ↺ إلغاء
+        </button>
+      ` : ""}
     </div>
 
-    <div class="ef-divider"></div>
-
-    <input type="search" class="ef-search-box" id="efSearchInput" placeholder="بحث داخل قيم ${esc(colLabel)}…" />
+    <input type="search" class="ef-search-box" id="efSearchInput" placeholder="بحث سريع في ${esc(colLabel)}…" autocomplete="off" />
 
     <div class="ef-actions-bar">
-      <button type="button" class="ef-action-link" id="efSelectAllBtn">تحديد الكل</button>
-      <button type="button" class="ef-action-link" id="efClearAllBtn">إلغاء التحديد</button>
-      <span style="opacity:0.65; font-size:0.75rem; font-weight:700;">${options.length} خيار</span>
+      <button type="button" class="ef-action-link" id="efSelectAllBtn">☑ تحديد الكل</button>
+      <button type="button" class="ef-action-link" id="efClearAllBtn">◻ إلغاء التحديد</button>
+      <span id="efVisibleCount" style="font-size:0.74rem; font-weight:700; opacity:0.65;">(${options.length})</span>
     </div>
 
     <div class="ef-options-list" id="efOptionsList">
@@ -637,22 +665,26 @@ function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, 
     </div>
 
     <div class="ef-footer">
-      <button type="button" class="btn btn-primary" id="efApplyBtn">تطبيق الفلتر</button>
-      <button type="button" class="btn btn-ghost" id="efClearFilterBtn" style="color:var(--danger);">مسح الفلتر</button>
+      <button type="button" class="btn btn-primary" id="efApplyBtn" style="flex:1;">تطبيق الفلتر</button>
+      ${isFiltered ? `<button type="button" class="btn btn-ghost" id="efClearFilterBtn" style="color:var(--danger); padding:6px 10px;">مسح</button>` : ""}
     </div>
   `;
 
   document.body.appendChild(popup);
 
   const searchInput = popup.querySelector("#efSearchInput");
-  if (searchInput) setTimeout(() => searchInput.focus(), 50);
+  const countSpan = popup.querySelector("#efVisibleCount");
+  if (searchInput) setTimeout(() => searchInput.focus(), 40);
 
   searchInput.addEventListener("input", (e) => {
-    const q = normalizeArabic(e.target.value);
+    const q = e.target.value;
+    let visible = 0;
     popup.querySelectorAll(".ef-option-item").forEach((item) => {
-      const txt = normalizeArabic(item.textContent);
-      item.style.display = (!q || txt.includes(q)) ? "flex" : "none";
+      const isMatch = matchSearch(item.textContent, q);
+      item.style.display = isMatch ? "flex" : "none";
+      if (isMatch) visible++;
     });
+    if (countSpan) countSpan.textContent = `(${visible} من ${options.length})`;
   });
 
   popup.querySelector("#efSortAscBtn").onclick = () => {
@@ -665,6 +697,14 @@ function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, 
     closeExcelColumnFilter();
     viewFn(state.view)();
   };
+  const resetSortBtn = popup.querySelector("#efSortResetBtn");
+  if (resetSortBtn) {
+    resetSortBtn.onclick = () => {
+      state.sort[tableKey] = null;
+      closeExcelColumnFilter();
+      viewFn(state.view)();
+    };
+  }
 
   popup.querySelector("#efSelectAllBtn").onclick = () => {
     popup.querySelectorAll(".ef-option-item input[type='checkbox']").forEach((cb) => {
@@ -703,13 +743,16 @@ function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, 
     viewFn(state.view)();
   };
 
-  popup.querySelector("#efClearFilterBtn").onclick = () => {
-    if (state.columnFilters && state.columnFilters[tableKey]) {
-      delete state.columnFilters[tableKey][colKey];
-    }
-    closeExcelColumnFilter();
-    viewFn(state.view)();
-  };
+  const clearFilterBtn = popup.querySelector("#efClearFilterBtn");
+  if (clearFilterBtn) {
+    clearFilterBtn.onclick = () => {
+      if (state.columnFilters && state.columnFilters[tableKey]) {
+        delete state.columnFilters[tableKey][colKey];
+      }
+      closeExcelColumnFilter();
+      viewFn(state.view)();
+    };
+  }
 }
 
 /* ---------- Sorting ---------- */

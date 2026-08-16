@@ -461,12 +461,13 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   margin-inline-start: 2px;
 }
 
-/* النافذة المنبثقة لفلتر العمود بنمط الإكسل */
+/* النافذة المنبثقة لفلتر العمود بنمط الإكسل (تصميم ذكي، مدمج، مرن بالكامل) */
 .excel-filter-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 99998;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(1px);
 }
 .excel-filter-popup {
   position: fixed;
@@ -474,14 +475,16 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 14px 35px -4px rgba(0, 0, 0, 0.28), 0 6px 14px rgba(0, 0, 0, 0.12);
-  width: 270px;
-  max-width: 92vw;
-  padding: 10px;
+  box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.32), 0 6px 18px rgba(0, 0, 0, 0.12);
+  width: 285px;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 25px);
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
   gap: 7px;
-  animation: msFadeIn 0.15s ease-out;
+  box-sizing: border-box;
+  animation: msFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
 }
 .ef-header {
@@ -492,7 +495,7 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   padding-bottom: 6px;
 }
 .ef-title {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 900;
   color: var(--foreground);
 }
@@ -501,99 +504,106 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   border: none;
   cursor: pointer;
   color: var(--muted-foreground);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1;
-  padding: 2px 4px;
-}
-.ef-close-btn:hover {
-  color: var(--danger);
-}
-.ef-sort-group {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.ef-sort-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 5px 8px;
-  border: 1px solid transparent;
-  background: none;
-  border-radius: var(--radius-sm);
-  color: var(--foreground);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: start;
+  padding: 3px 6px;
+  border-radius: 4px;
   transition: all 0.12s;
 }
-.ef-sort-btn:hover {
+.ef-close-btn:hover {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+.ef-sort-row {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+.ef-sort-pill {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 6px;
+  border: 1.2px solid var(--border);
   background: var(--muted);
-  border-color: var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
 }
-.ef-sort-btn.active {
-  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
-  color: var(--primary);
+.ef-sort-pill:hover {
   border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
 }
-.ef-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 2px 0;
+.ef-sort-pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 .ef-search-box {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--border);
+  border: 1.2px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--muted);
   color: var(--foreground);
   font-size: 0.82rem;
   font-weight: 600;
   outline: none;
+  box-sizing: border-box;
+  transition: all 0.15s;
 }
 .ef-search-box:focus {
   border-color: var(--primary);
   background: var(--surface);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .ef-actions-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.76rem;
-  padding: 0 2px;
+  padding: 1px 2px;
 }
 .ef-action-link {
   color: var(--primary);
   background: none;
   border: none;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: background 0.12s;
 }
 .ef-action-link:hover {
-  text-decoration: underline;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 .ef-options-list {
-  max-height: 170px;
+  flex: 1;
+  min-height: 90px;
+  max-height: 180px;
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--muted);
-  padding: 4px;
+  padding: 3px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-sizing: border-box;
 }
 .ef-option-item {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 4px 6px;
+  padding: 5px 7px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.82rem;
@@ -604,11 +614,12 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   transition: background 0.1s;
 }
 .ef-option-item:hover {
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
 }
 .ef-option-item.selected {
   font-weight: 800;
   color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
 }
 .ef-option-item input[type="checkbox"] {
   accent-color: var(--primary);
@@ -635,8 +646,9 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   border-top: 1px solid var(--border);
 }
 .ef-footer .btn {
-  padding: 5px 12px;
-  font-size: 0.8rem;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
   border-radius: var(--radius-sm);
 }
 .ms-chevron {
