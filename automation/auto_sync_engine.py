@@ -54,6 +54,9 @@ def scheduler_loop():
             target_time = cfg.get("telegram", {}).get("morning_report_time", "10:00")
             current_time_str = now.strftime("%H:%M")
 
+            # فحص واكتشاف أي رسالة جديدة لربط الشات تلقائياً
+            telegram_notifier.auto_detect_chat_id()
+
             # التحقق إذا وصلنا لموعد التقرير الصباحي (10:00) ولم يتم إرساله اليوم بعد
             if current_time_str == target_time and last_report_sent_date != today_str:
                 print(f"📢 [Scheduler] حلول موعد التقرير الصباحي ({target_time})! جارِ الإرسال على تليجرام...")
@@ -62,7 +65,7 @@ def scheduler_loop():
                     last_report_sent_date = today_str
                     print(f"✅ [Scheduler] تم إرسال تقرير صباح {today_str} بنجاح.")
 
-            time.sleep(30)
+            time.sleep(15)
         except Exception as e:
             print(f"[Scheduler Error] {e}")
             time.sleep(30)

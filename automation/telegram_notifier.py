@@ -38,6 +38,53 @@ def load_config() -> dict:
     }
 
 
+def save_config(cfg: dict) -> bool:
+    """حفظ الإعدادات"""
+    try:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception:
+        return False
+
+
+def auto_detect_chat_id() -> str | None:
+    """اكتشاف معرف الشات أو الجروب تلقائياً عند بدء المحادثة أو إرسال أي رسالة للبوت"""
+    cfg = load_config()
+    token = cfg.get("telegram", {}).get("bot_token")
+    if not token:
+        return None
+
+    url = f"https://api.telegram.org/bot{token}/getUpdates"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "TahsilBot/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            results = data.get("result", [])
+            if results:
+                last_msg = results[-1]
+                chat = last_msg.get("message", {}).get("chat") or last_msg.get("channel_post", {}).get("chat")
+                if chat and "id" in chat:
+                    chat_id = str(chat["id"])
+                    chat_title = chat.get("title") or chat.get("first_name") or "شات العمل"
+                    if cfg.get("telegram", {}).get("work_chat_id") != chat_id:
+                        cfg["telegram"]["work_chat_id"] = chat_id
+                        save_config(cfg)
+                        print(f"✅ [Telegram] تم ربط الشات تلقائياً: {chat_title} (Chat ID: {chat_id})")
+                        welcome_text = (
+                            f"🎉 *تم ربط بوت 'النور للاعلاف' بنظام التحصيل بنجاح! ✓*\n"
+                            f"━━━━━━━━━━━━━━━━━━━━━\n"
+                            f"⏰ سيصلك هنا يومياً *تقرير المتابعات والتحصيلات الصباحي الساعة 10:00 صباحاً*.\n"
+                            f"💸 سيتم إشعارك فورياً بأي عملية تحصيل أو سداد جديدة.\n\n"
+                            f"🎯 يمكنك كتابة `/today` أو `/report` في أي وقت لعرض تقرير اليوم فوراً."
+                        )
+                        send_telegram_message(welcome_text, chat_id=chat_id, bot_token=token)
+                    return chat_id
+    except Exception:
+        pass
+    return None
+
+
 def format_money(val) -> str:
     """تنسيق المبالغ المالية بالأرقام والفواصل"""
     try:
