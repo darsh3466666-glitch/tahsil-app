@@ -270,6 +270,24 @@ function formatNoteDisplay(val) {
   return esc(cleaned);
 }
 
+function inferCommFromResponse(resp, paid = 0, currentComm = "") {
+  if (paid > 0) return "تم الرد / مستجيب";
+  const cleaned = cleanResponse(resp);
+  if (!cleaned) return currentComm ? normalizeComm(currentComm) : "قيد المتابعة";
+
+  const norm = normalizeArabic(cleaned);
+  // حالات عدم الرد / الإغلاق / عدم التواجد
+  if (/(?:^|\s)(مابيردش|لا يرد|مقفول|غير متاح|مغلق|مش موجود|مسافر|محدش بيرد|الرقم غلط|غير صحيح)(?:\s|$)/.test(norm)) {
+    return "لا يرد / غير متاح";
+  }
+  // حالات عدم الذهاب أو الاتصال
+  if (/(?:^|\s)(لم يذهب|لم يتصل|مرحش|ماراحش)(?:\s|$)/.test(norm)) {
+    return "لم يذهب ولم يتصل";
+  }
+  // إذا وجد أي رد حقيقي آخر (اتفاق، موعد، دفعة، وعد، سبب)
+  return "تم الرد / مستجيب";
+}
+
 function initInteractiveRouteIfNeeded() {
   if (!state.data) return;
   const d = state.data;
@@ -279,6 +297,10 @@ function initInteractiveRouteIfNeeded() {
   if (existing && Array.isArray(existing) && existing.length > 0) {
     existing.forEach((x) => {
       x.response = cleanResponse(x.response);
+      if (!x.comm || x.comm === "قيد المتابعة" || (hasRealResponse(x.response) && x.comm === "قيد المتابعة")) {
+        x.comm = inferCommFromResponse(x.response, x.paid, x.comm);
+      }
+      x.notVisited = x.comm === "لم يذهب ولم يتصل";
       const mm = masterMap.get(x.customer);
       if (mm) {
         if (!x.last_invoice) x.last_invoice = mm.last_invoice || "";
@@ -316,7 +338,7 @@ function initInteractiveRouteIfNeeded() {
       balance: bal,
       paid: 0,
       status: "لم يسدد",
-      comm: "قيد المتابعة",
+      comm: inferCommFromResponse(lastResp, 0, "قيد المتابعة"),
       response: lastResp,
       notVisited: false,
       last_invoice: mm ? (mm.last_invoice || "") : "",
@@ -339,6 +361,7 @@ function initInteractiveRouteIfNeeded() {
       const mm = masterMap.get(c.customer);
       const bal = Number(c.balance) || (mm ? Number(mm.balance) : 0) || 0;
       const rawResp = rl ? rl.last_response : (mm ? mm.notes : "");
+      const lastResp = cleanResponse(rawResp);
       routeList.push({
         customer: c.customer,
         collector: repName,
@@ -346,8 +369,8 @@ function initInteractiveRouteIfNeeded() {
         balance: bal,
         paid: 0,
         status: "لم يسدد",
-        comm: "قيد المتابعة",
-        response: cleanResponse(rawResp),
+        comm: inferCommFromResponse(lastResp, 0, "قيد المتابعة"),
+        response: lastResp,
         notVisited: false,
         last_invoice: mm ? (mm.last_invoice || "") : "",
         last_payment: c.last_payment || (mm ? mm.last_payment : "") || "",
@@ -2654,7 +2677,10 @@ function openResponseModal(customerName) {
   const mm = master.find((x) => x.name === customerName);
 
   const currentResp = cleanResponse(item ? item.response : (mm ? mm.notes : ""));
-  const currentComm = normalizeComm(item ? item.comm : "قيد المتابعة");
+  let currentComm = normalizeComm(item ? item.comm : "قيد المتابعة");
+  if (currentComm === "قيد المتابعة" && hasRealResponse(currentResp)) {
+    currentComm = inferCommFromResponse(currentResp, item ? item.paid : 0);
+  }
 
   $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
   $("respModalInput").value = currentResp;
@@ -2951,7 +2977,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const cust = state.activeEditingCustomer;
     if (!cust) return closeResponseModal();
     const text = $("respModalInput").value.trim();
-    const comm = $("respModalComm").value;
+    let comm = $("respModalComm").value;
+    if (comm === "قيد المتابعة" && hasRealResponse(text)) {
+      comm = inferCommFromResponse(text, 0, comm);
+    }
 
     const item = (state.interactiveRoute || []).find((x) => x.customer === cust);
     if (item) {
@@ -2968,7 +2997,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (rl) rl.last_response = text;
     }
 
-    toast("تم الحفظ ✓", `تم تحديث رد العميل ${cust} بنجاح`, "pay");
+    toast("تم الحفظ ✓", `تم تحديث رد وحالة العميل ${cust} بنجاح إلى (${comm})`, "pay");
     closeResponseModal();
     if (state.view === "route") viewRoute();
     else if (state.view === "collectors") viewCollectors();
