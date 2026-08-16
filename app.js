@@ -1143,7 +1143,13 @@ function viewRoute() {
           <button type="button" id="addClientBtn" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.82rem;">إضافة ＋</button>
         </div>
 
-        <div class="route-actions-group">
+        <div class="route-actions-group" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" onclick="openWhatsAppParserModal()" style="padding:6px 12px; font-size:0.82rem; font-weight:800;" title="لصق رسائل الواتساب ومطابقتها وتحديث الشيت وتليجرام آلياً">
+            📥 سحب ذكي من الواتساب
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="openWhatsAppShareModal('${fRep}')" style="padding:6px 12px; font-size:0.82rem; font-weight:700;" title="نسخ رسالة خط السير لإرسالها للمحصلين">
+            📋 ملخص الواتساب
+          </button>
           <button type="button" id="resetRouteBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
         </div>
       </div>
@@ -2437,6 +2443,10 @@ function viewMasterData() {
             <option value="zero_debt" ${fBalance === "zero_debt" ? "selected" : ""}>خالص (الرصيد 0)</option>
           </select>
 
+          <button type="button" class="btn btn-secondary" onclick="openWhatsAppParserModal()" style="padding:6px 12px; font-size:0.82rem; font-weight:800;" title="لصق رسائل الواتساب ومطابقتها وتحديث الشيت وتليجرام آلياً">
+            📥 سحب ذكي من الواتساب
+          </button>
+
           ${clearSortBtn("master")}
         </div>
         <div id="masterFilteredCount" style="font-size: 0.82rem; font-weight: 800; opacity: 0.75; white-space: nowrap;">
@@ -2695,7 +2705,161 @@ function closeWhatsAppShareModal() {
   $("whatsappModal").hidden = true;
 }
 
-/* ---------- 8. Theme & Init ---------- */
+/* ---------- 8. Smart WhatsApp Parser & Automator Engine ---------- */
+let currentParsedWaRecords = [];
+
+function openWhatsAppParserModal() {
+  currentParsedWaRecords = [];
+  $("waParserInput").value = "";
+  $("waParserCountBadge").textContent = "";
+  $("waParserPreviewWrap").style.display = "none";
+  $("waParserPreviewBody").innerHTML = "";
+  $("waParserApplyBtn").style.display = "none";
+  $("waParserModal").hidden = false;
+  $("waParserInput").focus();
+}
+
+function closeWhatsAppParserModal() {
+  $("waParserModal").hidden = true;
+  currentParsedWaRecords = [];
+}
+
+function parseEgyptianDateInJs(text) {
+  const norm = normalizeArabic(text);
+  const now = new Date();
+
+  if (/(?:^|\s)(بكرا|بكره|غدا|بكرة)(?:\s|$)/.test(norm)) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + 1);
+    return { date: d.toISOString().split("T")[0], desc: "غداً (بكرا)" };
+  }
+  if (/(?:^|\s)(بعد بكرا|بعد بكره|بعد بكرة|بعد يومين|يومين كدا|يومين كده)(?:\s|$)/.test(norm)) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + 2);
+    return { date: d.toISOString().split("T")[0], desc: "بعد يومين" };
+  }
+  if (/(?:^|\s)(الاسبوع الجاي|الاسبوع القادم|بعد اسبوع)(?:\s|$)/.test(norm)) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + 7);
+    return { date: d.toISOString().split("T")[0], desc: "الأسبوع القادم" };
+  }
+  if (/(?:^|\s)(اخر الشهر|نهاية الشهر|مع القبض|اواخر الشهر)(?:\s|$)/.test(norm)) {
+    const d = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return { date: d.toISOString().split("T")[0], desc: "نهاية الشهر" };
+  }
+  if (/(?:^|\s)(اول الشهر|اول الشهر الجاي|بدايه الشهر)(?:\s|$)/.test(norm)) {
+    const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return { date: d.toISOString().split("T")[0], desc: "أول الشهر القادم" };
+  }
+
+  const mDate = norm.match(/(?:^|\s)(\d{1,2})[/\-](\d{1,2})(?:[/\-](\d{2,4}))?(?:\s|$)/);
+  if (mDate) {
+    const day = parseInt(mDate[1]);
+    const month = parseInt(mDate[2]) - 1;
+    let year = mDate[3] ? parseInt(mDate[3]) : now.getFullYear();
+    if (year < 100) year += 2000;
+    const d = new Date(year, month, day);
+    return { date: d.toISOString().split("T")[0], desc: `${day}/${month + 1}/${year}` };
+  }
+
+  const mDay = norm.match(/(?:^|\s)يوم\s+(\d{1,2})(?:\s|$)/);
+  if (mDay) {
+    const day = parseInt(mDay[1]);
+    let d = new Date(now.getFullYear(), now.getMonth(), day);
+    if (d <= now) d = new Date(now.getFullYear(), now.getMonth() + 1, day);
+    return { date: d.toISOString().split("T")[0], desc: `يوم ${day} من الشهر` };
+  }
+
+  return { date: "", desc: "" };
+}
+
+function parsePaymentAmountInJs(text) {
+  const norm = normalizeArabic(text);
+  const m = norm.match(/(?:^|\s)(?:سدد|دفع|قبضت|خدت|حصلت|استلمت|وصل|سداد|دفعه|دفعة|مبلغ)\s*[:=]?\s*(\d+(?:[.,]\d+)?)/) ||
+            norm.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(?:ج|جم|جنيه|الف|ألف)?\s*(?:سدد|دفع|كاش|فودافون كاش|انستاباي)/);
+  if (m) {
+    let val = parseFloat(m[1].replace(/,/g, ""));
+    if ((norm.includes("الف") || norm.includes("ألف")) && val < 1000) val *= 1000;
+    return val;
+  }
+  return 0;
+}
+
+function findCustomerMatchInJs(text) {
+  const norm = normalizeArabic(text);
+  const master = (state.data && state.data.master) || [];
+  const words = norm.split(" ").filter(Boolean);
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const m of master) {
+    const normName = normalizeArabic(m.name);
+    const normArea = normalizeArabic(m.area || "");
+    const code = String(m.code || "");
+    let score = 0;
+
+    if (code && words.includes(code)) return m;
+    if (norm.includes(normName)) score += 100;
+
+    const tokens = normName.split(" ").filter(Boolean);
+    const matches = tokens.filter((t) => words.includes(t)).length;
+    score += matches * 20;
+
+    if (normArea && words.includes(normArea) && matches > 0) score += 30;
+
+    if (score > bestScore && score >= 40) {
+      bestScore = score;
+      best = m;
+    }
+  }
+  return best;
+}
+
+function parseWhatsAppBatchInJs(rawText) {
+  const lines = rawText.split("\n").filter((l) => l.trim());
+  const results = [];
+
+  lines.forEach((line) => {
+    let clean = line.replace(/^\[?\d{1,2}:\d{2}(?::\d{2})?\s*(?:ص|م|AM|PM)?,?\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\]?\s*[^:]+:\s*/, "").trim();
+    const parts = clean.split(/[:=\-–]/);
+    const custPart = parts.length > 1 ? parts[0].trim() : clean;
+    const respPart = parts.length > 1 ? parts[1].trim() : clean;
+
+    const matched = findCustomerMatchInJs(custPart) || findCustomerMatchInJs(clean);
+    const custName = matched ? matched.name : custPart;
+    const collector = matched ? (matched.collector || "") : "";
+    const area = matched ? (matched.area || "") : "";
+    const balance = matched ? Number(matched.balance) || 0 : 0;
+
+    const paid = parsePaymentAmountInJs(respPart);
+    const { date: dueDate, desc: dateDesc } = parseEgyptianDateInJs(respPart);
+
+    let comm = "تم الرد / مستجيب";
+    const normResp = normalizeArabic(respPart);
+    if (/\b(مابيردش|لا يرد|مقفول|غير متاح|مغلق|مش موجود|مسافر)\b/.test(normResp)) {
+      comm = "لا يرد / غير متاح";
+    }
+
+    results.push({
+      customer: custName,
+      code: matched ? matched.code : "",
+      collector,
+      area,
+      balance,
+      response_text: respPart,
+      paid_amount: paid,
+      due_date: dueDate,
+      date_description: dateDesc,
+      comm_status: comm,
+      matched: !!matched
+    });
+  });
+
+  return results;
+}
+
+/* ---------- 9. Theme & Init ---------- */
 function applyTheme(mode) {
   document.documentElement.classList.toggle("dark", mode === "dark");
   document.documentElement.classList.toggle("light", mode === "light");
@@ -2715,6 +2879,8 @@ window.setClientPayment = setClientPayment;
 window.deleteManualPay = deleteManualPay;
 window.openWhatsAppShareModal = openWhatsAppShareModal;
 window.closeWhatsAppShareModal = closeWhatsAppShareModal;
+window.openWhatsAppParserModal = openWhatsAppParserModal;
+window.closeWhatsAppParserModal = closeWhatsAppParserModal;
 window.setCollectorTab = setCollectorTab;
 window.copyCollectorSummaryReport = copyCollectorSummaryReport;
 window.switchView = switchView;
@@ -2828,6 +2994,111 @@ document.addEventListener("DOMContentLoaded", () => {
       toast("تم النسخ", "تم نسخ نص خط السير إلى الحافظة", "pay");
     });
   });
+
+  // ربط معالج رسائل الواتساب الذكي والأتمتة
+  if ($("waParserCloseBtn")) $("waParserCloseBtn").addEventListener("click", closeWhatsAppParserModal);
+  if ($("waParserCancel")) $("waParserCancel").addEventListener("click", closeWhatsAppParserModal);
+  if ($("waParserModal")) $("waParserModal").addEventListener("click", (e) => { if (e.target === $("waParserModal")) closeWhatsAppParserModal(); });
+
+  if ($("waParserAnalyzeBtn")) {
+    $("waParserAnalyzeBtn").addEventListener("click", async () => {
+      const raw = $("waParserInput").value.trim();
+      if (!raw) return toast("تنبيه", "يرجى لصق رسائل الواتساب أولاً", "warn");
+
+      let records = [];
+      try {
+        const resp = await fetch("http://127.0.0.1:8765/api/parse-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: raw })
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          records = json.records || [];
+        }
+      } catch (e) {}
+
+      if (!records || !records.length) {
+        records = parseWhatsAppBatchInJs(raw);
+      }
+
+      currentParsedWaRecords = records;
+      $("waParserCountBadge").textContent = `✅ تم استخراج ومطابقة ${records.length} عميل بنجاح`;
+
+      const tbody = $("waParserPreviewBody");
+      tbody.innerHTML = records.map((r, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><b>${esc(r.customer)}</b> ${r.matched ? "" : "<span style='color:var(--danger); font-size:0.7rem;'>(غير مطابق)</span>"}</td>
+          <td>${esc(r.collector || "—")}</td>
+          <td>${esc(r.response_text)}</td>
+          <td style="color:var(--success); font-weight:800;">${r.paid_amount > 0 ? money(r.paid_amount) : "—"}</td>
+          <td style="color:var(--primary); font-weight:700;">${r.due_date ? `📅 ${r.due_date} (${r.date_description})` : "—"}</td>
+          <td><span class="chip ${r.comm_status.includes('تم الرد') ? 'chip-green' : 'chip-amber'}">${esc(r.comm_status)}</span></td>
+        </tr>
+      `).join("");
+
+      $("waParserPreviewWrap").style.display = "block";
+      $("waParserApplyBtn").style.display = "inline-flex";
+    });
+  }
+
+  if ($("waParserApplyBtn")) {
+    $("waParserApplyBtn").addEventListener("click", async () => {
+      if (!currentParsedWaRecords || !currentParsedWaRecords.length) return;
+
+      let appliedCount = 0;
+      let paidCount = 0;
+
+      currentParsedWaRecords.forEach((r) => {
+        // 1. تحديث خط السير التفاعلي
+        const routeItem = (state.interactiveRoute || []).find((x) => x.customer === r.customer);
+        if (routeItem) {
+          routeItem.response = r.response_text;
+          routeItem.comm = r.comm_status;
+          if (r.paid_amount > 0) {
+            routeItem.paid = (routeItem.paid || 0) + r.paid_amount;
+          }
+          if (r.due_date) routeItem.due_date = r.due_date;
+          routeItem.updatedAt = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+        }
+
+        // 2. تحديث ماستر داتا
+        if (state.data && state.data.master) {
+          const mm = state.data.master.find((m) => m.name === r.customer);
+          if (mm) {
+            mm.notes = r.response_text;
+            if (r.due_date) mm.due_date = r.due_date;
+          }
+        }
+
+        // 3. تسجيل سداد نقدي إن وجد
+        if (r.paid_amount > 0) {
+          addManualPay(r.customer, r.paid_amount, r.collector);
+          paidCount++;
+        }
+
+        appliedCount++;
+      });
+
+      saveInteractiveRoute();
+
+      // محاولة المزامنة مع سرفيس البايثون في الخلفية وتليجرام
+      try {
+        await fetch("http://127.0.0.1:8765/api/sync-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records: currentParsedWaRecords })
+        });
+      } catch (e) {}
+
+      toast("تمت المزامنة بنجاح ✓", `تم تطبيق ${appliedCount} رد وجدولة التنبيهات وإشعار تليجرام`, "pay");
+      closeWhatsAppParserModal();
+      if (state.view === "route") viewRoute();
+      else if (state.view === "master") viewMasterData();
+      else if (state.view === "dashboard") viewDashboard();
+    });
+  }
 
   // تفاعل القوائم متعددة الاختيار (فتح، إغلاق، بحث، تحديد الكل)
   document.addEventListener("click", (e) => {

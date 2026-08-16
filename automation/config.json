@@ -1,0 +1,12 @@
+{
+  "excel_path": "D:\\Mostafa Ibrahim\\شيت تحصيل.xlsm",
+  "data_json_path": "data/data.json",
+  "telegram": {
+    "bot_token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "work_chat_id": "YOUR_WORK_CHAT_OR_GROUP_ID",
+    "morning_report_time": "10:00",
+    "enable_instant_payment_alerts": true
+  },
+  "collectors": ["مصطفى", "محمد شعبان"],
+  "schedule_check_interval_seconds": 60
+}

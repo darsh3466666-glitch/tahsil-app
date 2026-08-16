@@ -183,6 +183,56 @@
   </div>
 </div>
 
+<!-- نافذة معالج ومطابق رسائل الواتساب الذكي والأتمتة -->
+<div class="modal" id="waParserModal" hidden>
+  <div class="modal-card" style="max-width: 760px; width: 95vw;">
+    <div class="modal-head">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">📥</span>
+        <h2 style="font-size:1.1rem; font-weight:900; margin:0;">معالج وسحب رسائل الواتساب الذكي</h2>
+      </div>
+      <button type="button" class="modal-close-btn" id="waParserCloseBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <p class="modal-subtitle" style="margin-bottom:10px;">انسخ رسائل المحصلين من الواتساب والصقها هنا، وسيقوم المحرك الذكي بمطابقة العملاء واستخراج الردود والمبالغ ومواعيد التنبيه تلقائياً</p>
+    
+    <div class="form-group" style="text-align: right; margin-bottom: 12px;">
+      <textarea id="waParserInput" class="modal-textarea" rows="4" placeholder="الصق هنا رسائل الواتساب من الجروب أو الشات...&#10;مثال:&#10;حجاج حامد: بكرا هيسدد ان شاء الله&#10;محمد سيف سدد 5000 والباقي الاسبوع الجاي&#10;احمد سعد: مابيردش"></textarea>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <button type="button" class="btn btn-secondary" id="waParserAnalyzeBtn" style="padding:6px 14px; font-size:0.84rem; font-weight:800;">
+        🔍 استخراج ومطابقة البيانات
+      </button>
+      <span id="waParserCountBadge" style="font-size:0.8rem; font-weight:800; opacity:0.8;"></span>
+    </div>
+
+    <!-- جدول المعاينة قبل التطبيق -->
+    <div id="waParserPreviewWrap" style="display:none; margin-bottom:14px; max-height:240px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
+      <table style="font-size:0.82rem; margin:0;">
+        <thead>
+          <tr style="background:var(--muted);">
+            <th>م</th>
+            <th>العميل المطابق</th>
+            <th>المحصل</th>
+            <th>الرد المستخرج</th>
+            <th>المسدد</th>
+            <th>موعد المتابعة المحسوب</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="waParserPreviewBody"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions" style="justify-content: space-between;">
+      <button type="button" class="btn btn-ghost" id="waParserCancel">إلغاء</button>
+      <button type="button" class="btn btn-primary" id="waParserApplyBtn" style="display:none;">
+        اعتماد وتحديث الشيت وتليجرام بنقرة واحدة ✓
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
