@@ -435,16 +435,16 @@ const state = {
   sort: {},
   filters: {
     routeRep: "all",
-    routeArea: "all",
-    routeCustomer: "all",
-    routeStatus: "all",
+    routeAreas: [],
+    routeCustomers: [],
+    routeStatuses: [],
     routeSearch: "",
     masterSearch: "",
-    masterCollector: "all",
-    masterArea: "all",
-    masterTodayStatus: "all",
-    masterActivity: "all",
-    masterClass: "all",
+    masterCollectors: [],
+    masterAreas: [],
+    masterTodayStatuses: [],
+    masterActivities: [],
+    masterClasses: [],
     masterBalance: "all",
   },
   manualPays: loadManualPays(),
@@ -454,6 +454,88 @@ const state = {
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- مكوّن الاختيار المتعدد الذكي (Multi-Select Component) ---------- */
+function renderMultiSelect({ id, label, icon, options, selected, showSearch = true }) {
+  const selectedArr = Array.isArray(selected) ? selected : (selected && selected !== "all" ? [selected] : []);
+  const count = selectedArr.length;
+  const isAll = count === 0;
+
+  let triggerText = `${icon ? icon + " " : ""}${label}`;
+  if (isAll) {
+    triggerText += " (الكل)";
+  } else if (count === 1) {
+    const singleOpt = options.find((o) => o.value === selectedArr[0]);
+    const valText = singleOpt ? singleOpt.label.replace(/^[📍👤🏷️🟢🔴⚪⏳✅⚠️❌💰]\s*/, "") : selectedArr[0];
+    triggerText += `: ${valText}`;
+  }
+
+  return `
+    <div class="ms-container" id="${id}Container" data-ms-id="${id}">
+      <button type="button" class="ms-trigger ${count > 0 ? "has-selection" : ""}" data-action="ms-toggle" data-ms-target="${id}">
+        <span class="ms-label">${esc(triggerText)}</span>
+        ${count > 1 ? `<span class="ms-badge">${count}</span>` : ""}
+        <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="ms-dropdown" id="${id}Dropdown">
+        ${showSearch && options.length > 5 ? `
+          <input type="search" class="ms-search-input" placeholder="بحث في القائمة…" data-ms-search="${id}" />
+        ` : ""}
+        <div class="ms-actions">
+          <button type="button" class="ms-action-btn" data-ms-action="select-all" data-ms-target="${id}">تحديد الكل</button>
+          <button type="button" class="ms-action-btn" data-ms-action="clear-all" data-ms-target="${id}">إلغاء التحديد</button>
+        </div>
+        <div class="ms-options-list" id="${id}List">
+          ${options.map((opt) => {
+            const isChecked = selectedArr.includes(opt.value);
+            return `
+              <label class="ms-option ${isChecked ? "selected" : ""}" data-ms-val="${esc(opt.value)}" data-ms-search-text="${esc(opt.label)}">
+                <input type="checkbox" value="${esc(opt.value)}" ${isChecked ? "checked" : ""} data-ms-id="${id}" />
+                <span class="ms-opt-text">${esc(opt.label)}</span>
+                ${opt.count !== undefined ? `<span class="ms-opt-count">(${opt.count})</span>` : ""}
+              </label>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateMultiSelectTrigger(id, label, icon, options, selected) {
+  const container = $(id + "Container");
+  if (!container) return;
+  const trigger = container.querySelector(".ms-trigger");
+  if (!trigger) return;
+  const selectedArr = Array.isArray(selected) ? selected : [];
+  const count = selectedArr.length;
+  const isAll = count === 0;
+
+  let triggerText = `${icon ? icon + " " : ""}${label}`;
+  if (isAll) {
+    triggerText += " (الكل)";
+  } else if (count === 1) {
+    const singleOpt = options.find((o) => o.value === selectedArr[0]);
+    const valText = singleOpt ? singleOpt.label.replace(/^[📍👤🏷️🟢🔴⚪⏳✅⚠️❌💰]\s*/, "") : selectedArr[0];
+    triggerText += `: ${valText}`;
+  }
+
+  trigger.classList.toggle("has-selection", count > 0);
+  const labelSpan = trigger.querySelector(".ms-label");
+  if (labelSpan) labelSpan.textContent = triggerText;
+
+  let badge = trigger.querySelector(".ms-badge");
+  if (count > 1) {
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "ms-badge";
+      trigger.insertBefore(badge, trigger.querySelector(".ms-chevron"));
+    }
+    badge.textContent = count;
+  } else if (badge) {
+    badge.remove();
+  }
+}
 
 /* ---------- Sorting ---------- */
 const RATE_ORDER = { "خطر 🔴 (متوقف/راكد)": 0, "سيء ⚫ (بطيء جداً)": 1, "جيد 🟡 (منتظم)": 2, "ممتاز 🟢 (سريع الدوران)": 3 };
@@ -756,11 +838,28 @@ function viewRoute() {
   const areas = [...new Set(allRoute.map((x) => x.area).filter((a) => a && a !== "—" && a !== "__"))].sort((a, b) => a.localeCompare(b, "ar"));
   const customers = [...new Set(allRoute.map((x) => x.customer).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
 
+  // خيارات القوائم المنسدلة متعددة الاختيار
+  const areaOptions = areas.map((a) => ({
+    value: a,
+    label: `📍 ${a}`,
+    count: allRoute.filter((x) => x.area === a).length,
+  }));
+
+  const customerOptions = customers.map((c) => ({
+    value: c,
+    label: `👤 ${c}`,
+  }));
+
+  const statusOptions = [
+    { value: "responded", label: "✅ تم الرد / مستجيب", count: allRoute.filter((x) => normalizeComm(x.comm) === "تم الرد / مستجيب").length },
+    { value: "no_answer", label: "⚠️ لا يرد / غير متاح", count: allRoute.filter((x) => normalizeComm(x.comm) === "لا يرد / غير متاح").length },
+    { value: "not_visited", label: "❌ لم يذهب ولم يتصل", count: allRoute.filter((x) => normalizeComm(x.comm) === "لم يذهب ولم يتصل" || x.notVisited).length },
+    { value: "pending", label: "⏳ قيد المتابعة", count: allRoute.filter((x) => normalizeComm(x.comm) === "قيد المتابعة" && !x.notVisited).length },
+    { value: "paid", label: "💰 تم السداد اليوم", count: allRoute.filter((x) => x.paid > 0).length },
+  ];
+
   // تطبيق الفلاتر
   const fRep = state.filters.routeRep || "all";
-  const fArea = state.filters.routeArea || "all";
-  const fCustomer = state.filters.routeCustomer || "all";
-  const fStatus = state.filters.routeStatus || "all";
 
   // حساب المؤشرات المطابقة لشيت الإكسل
   const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
@@ -786,7 +885,7 @@ function viewRoute() {
         </div>
       </div>
 
-      <!-- تصفيات سريعة وفلاتر متكاملة للمنطقة والعميل والحالة -->
+      <!-- تصفيات سريعة وفلاتر متكاملة متعددة الاختيار -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
         <div class="seg" id="routeRepSeg">
           <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
@@ -797,27 +896,14 @@ function viewRoute() {
           <!-- حقل البحث الفوري السلس -->
           <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث باسم العميل، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:180px;">
 
-          <!-- فلتر المنطقة -->
-          <select id="routeAreaFilter" class="select" style="padding:6px 10px; font-weight:700;">
-            <option value="all" ${fArea === "all" ? "selected" : ""}>كل المناطق (${areas.length})</option>
-            ${areas.map((a) => `<option value="${esc(a)}" ${fArea === a ? "selected" : ""}>📍 ${esc(a)} (${allRoute.filter((x) => x.area === a).length})</option>`).join("")}
-          </select>
+          <!-- فلتر المناطق متعدد الاختيار -->
+          ${renderMultiSelect({ id: "routeAreaFilter", label: "المناطق", icon: "📍", options: areaOptions, selected: state.filters.routeAreas })}
 
-          <!-- فلتر العميل -->
-          <select id="routeCustomerFilter" class="select" style="padding:6px 10px; font-weight:700; max-width:180px;">
-            <option value="all" ${fCustomer === "all" ? "selected" : ""}>كل العملاء (${customers.length})</option>
-            ${customers.map((c) => `<option value="${esc(c)}" ${fCustomer === c ? "selected" : ""}>👤 ${esc(c)}</option>`).join("")}
-          </select>
+          <!-- فلتر العملاء متعدد الاختيار -->
+          ${renderMultiSelect({ id: "routeCustomerFilter", label: "العملاء", icon: "👤", options: customerOptions, selected: state.filters.routeCustomers })}
 
-          <!-- فلتر حالة التواصل -->
-          <select id="routeStatusFilter" class="select" style="padding:6px 10px; font-weight:700;">
-            <option value="all" ${fStatus === "all" ? "selected" : ""}>كل حالات التواصل</option>
-            <option value="responded" ${fStatus === "responded" ? "selected" : ""}>✅ تم الرد / مستجيب (${allRoute.filter((x) => normalizeComm(x.comm) === "تم الرد / مستجيب").length})</option>
-            <option value="no_answer" ${fStatus === "no_answer" ? "selected" : ""}>⚠️ لا يرد / غير متاح (${allRoute.filter((x) => normalizeComm(x.comm) === "لا يرد / غير متاح").length})</option>
-            <option value="not_visited" ${fStatus === "not_visited" ? "selected" : ""}>❌ لم يذهب ولم يتصل (${allRoute.filter((x) => normalizeComm(x.comm) === "لم يذهب ولم يتصل" || x.notVisited).length})</option>
-            <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة (${allRoute.filter((x) => normalizeComm(x.comm) === "قيد المتابعة" && !x.notVisited).length})</option>
-            <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد اليوم (${allRoute.filter((x) => x.paid > 0).length})</option>
-          </select>
+          <!-- فلتر حالات التواصل متعدد الاختيار -->
+          ${renderMultiSelect({ id: "routeStatusFilter", label: "حالات التواصل", icon: "", options: statusOptions, selected: state.filters.routeStatuses, showSearch: false })}
 
           ${clearSortBtn("route")}
         </div>
@@ -883,21 +969,28 @@ function viewRoute() {
 
   const drawRouteRows = () => {
     const fSearch = (state.filters.routeSearch || "").trim();
-    const fStatus = state.filters.routeStatus || "all";
     const fRep = state.filters.routeRep || "all";
-    const fArea = state.filters.routeArea || "all";
-    const fCustomer = state.filters.routeCustomer || "all";
+    const selAreas = state.filters.routeAreas || [];
+    const selCusts = state.filters.routeCustomers || [];
+    const selStatuses = state.filters.routeStatuses || [];
 
     let filtered = allRoute.filter((item) => {
       if (fRep !== "all" && item.collector !== fRep) return false;
-      if (fArea !== "all" && item.area !== fArea) return false;
-      if (fCustomer !== "all" && item.customer !== fCustomer) return false;
-      const nComm = normalizeComm(item.comm);
-      if (fStatus === "responded" && nComm !== "تم الرد / مستجيب") return false;
-      if (fStatus === "no_answer" && nComm !== "لا يرد / غير متاح") return false;
-      if (fStatus === "not_visited" && nComm !== "لم يذهب ولم يتصل" && !item.notVisited) return false;
-      if (fStatus === "pending" && (nComm !== "قيد المتابعة" || item.notVisited)) return false;
-      if (fStatus === "paid" && (!item.paid || item.paid <= 0)) return false;
+      if (selAreas.length > 0 && !selAreas.includes(item.area)) return false;
+      if (selCusts.length > 0 && !selCusts.includes(item.customer)) return false;
+      if (selStatuses.length > 0) {
+        const nComm = normalizeComm(item.comm);
+        const isPaid = item.paid > 0;
+        const matchesAny = selStatuses.some((st) => {
+          if (st === "responded") return nComm === "تم الرد / مستجيب";
+          if (st === "no_answer") return nComm === "لا يرد / غير متاح";
+          if (st === "not_visited") return nComm === "لم يذهب ولم يتصل" || item.notVisited;
+          if (st === "pending") return nComm === "قيد المتابعة" && !item.notVisited;
+          if (st === "paid") return isPaid;
+          return false;
+        });
+        if (!matchesAny) return false;
+      }
       if (fSearch && !matchSearch(`${item.customer} ${item.area} ${item.collector} ${item.response || ""}`, fSearch)) return false;
       return true;
     });
@@ -1028,35 +1121,31 @@ function bindRouteEvents(drawRouteRows) {
     });
   });
 
-  // 2. تصفية الحالة والبحث السلس فوري بدون وميض
-  const statusSelect = $("routeStatusFilter");
-  if (statusSelect) {
-    statusSelect.addEventListener("change", (e) => {
-      state.filters.routeStatus = e.target.value;
-      if (drawRouteRows) drawRouteRows();
-      else viewRoute();
-    });
-  }
-
-  // فلتر المنطقة
-  const areaSelect = $("routeAreaFilter");
-  if (areaSelect) {
-    areaSelect.addEventListener("change", (e) => {
-      state.filters.routeArea = e.target.value;
-      if (drawRouteRows) drawRouteRows();
-      else viewRoute();
-    });
-  }
-
-  // فلتر العميل
-  const custSelect = $("routeCustomerFilter");
-  if (custSelect) {
-    custSelect.addEventListener("change", (e) => {
-      state.filters.routeCustomer = e.target.value;
-      if (drawRouteRows) drawRouteRows();
-      else viewRoute();
-    });
-  }
+  // 2. ربط القوائم متعددة الاختيار في خط السير
+  ["routeAreaFilter", "routeCustomerFilter", "routeStatusFilter"].forEach((filterId) => {
+    const container = $(filterId + "Container");
+    if (container) {
+      container.addEventListener("change", (e) => {
+        if (e.target.type === "checkbox") {
+          const opt = e.target.closest(".ms-option");
+          if (opt) opt.classList.toggle("selected", e.target.checked);
+        }
+        const checkedVals = Array.from(container.querySelectorAll("input[type='checkbox']:checked")).map((cb) => cb.value);
+        if (filterId === "routeAreaFilter") {
+          state.filters.routeAreas = checkedVals;
+          updateMultiSelectTrigger(filterId, "المناطق", "📍", areaOptions, checkedVals);
+        } else if (filterId === "routeCustomerFilter") {
+          state.filters.routeCustomers = checkedVals;
+          updateMultiSelectTrigger(filterId, "العملاء", "👤", customerOptions, checkedVals);
+        } else if (filterId === "routeStatusFilter") {
+          state.filters.routeStatuses = checkedVals;
+          updateMultiSelectTrigger(filterId, "حالات التواصل", "", statusOptions, checkedVals);
+        }
+        if (drawRouteRows) drawRouteRows();
+        else viewRoute();
+      });
+    }
+  });
 
   const tableSearch = $("routeTableSearch");
   if (tableSearch) {
@@ -2015,7 +2104,7 @@ function getMasterActivityStats(master) {
 }
 
 function setMasterActivityFilter(val) {
-  state.filters.masterActivity = val;
+  state.filters.masterActivities = (val && val !== "all") ? [val] : [];
   viewMasterData();
 }
 
@@ -2035,41 +2124,37 @@ function viewMasterData() {
   const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
   const masterAreas = [...new Set(master.map((m) => m.area).filter((a) => a && a !== "—" && a !== "__"))].sort((a, b) => a.localeCompare(b, "ar"));
 
-  // تطبيق الفلاتر
-  const fSearch = (state.filters.masterSearch || "").trim().toLowerCase();
-  const fCollector = state.filters.masterCollector || "all";
-  const fArea = state.filters.masterArea || "all";
-  const fTodayStatus = state.filters.masterTodayStatus || "all";
-  const fActivity = state.filters.masterActivity || "all";
-  const fClass = state.filters.masterClass || "all";
+  // إعداد خيارات الفلاتر متعددة الاختيار في Master Data
+  const collectorOptions = [
+    ...reps.map((r) => ({ value: r, label: `👤 ${r}`, count: master.filter((m) => m.collector === r).length })),
+    { value: "none", label: "بدون محصل محدد", count: master.filter((m) => !m.collector).length }
+  ];
+
+  const masterAreaOptions = masterAreas.map((a) => ({
+    value: a,
+    label: `📍 ${a}`,
+    count: master.filter((m) => m.area === a).length,
+  }));
+
+  const todayStatusOptions = todayStatuses.map((st) => ({
+    value: st,
+    label: st,
+    count: master.filter((m) => m.today_status === st).length,
+  }));
+
+  const activityOptions = [
+    { value: "active", label: "🟢 نشط (< 6 شهور)", count: stats.activeCount },
+    { value: "idle_debt", label: "🔴 راكد بمديونية (> 6 شهور)", count: stats.idleDebtCount },
+    { value: "idle_zero", label: "⚪ راكد بدون رصيد (خالص)", count: stats.idleZeroCount },
+  ];
+
+  const classOptions = classifications.map((c) => ({
+    value: c,
+    label: `🏷️ ${c}`,
+    count: master.filter((m) => m.classification === c).length,
+  }));
+
   const fBalance = state.filters.masterBalance || "all";
-
-  let filtered = enrichedMaster.filter((m) => {
-    if (fCollector !== "all") {
-      if (fCollector === "none" && m.collector) return false;
-      if (fCollector !== "none" && m.collector !== fCollector) return false;
-    }
-    if (fTodayStatus !== "all" && m.today_status !== fTodayStatus) return false;
-    if (fActivity !== "all" && m._activityKey !== fActivity) return false;
-    if (fClass !== "all" && m.classification !== fClass) return false;
-    if (fBalance === "has_debt" && (!m.balance || m.balance <= 0)) return false;
-    if (fBalance === "zero_debt" && m.balance > 0) return false;
-    if (fSearch) {
-      const matchName = (m.name || "").toLowerCase().includes(fSearch);
-      const matchCode = String(m.code || "").toLowerCase().includes(fSearch);
-      const matchArea = (m.area || "").toLowerCase().includes(fSearch);
-      const matchNotes = (m.notes || "").toLowerCase().includes(fSearch);
-      if (!matchName && !matchCode && !matchArea && !matchNotes) return false;
-    }
-    return true;
-  });
-
-  // الفرز التفاعلي
-  filtered = sortArray(filtered, "master", (x, col) => {
-    if (col === "activity") return x._activityKey || "";
-    if (col === "balance" || col === "agreement_days") return Number(x[col]) || 0;
-    return x[col] || "";
-  });
 
   // الحسابات العامة
   const totalCount = master.length;
@@ -2103,7 +2188,7 @@ function viewMasterData() {
       </div>
     </div>
 
-    <!-- شريط الفلاتر والبحث لشيت Master Data -->
+    <!-- شريط الفلاتر والبحث لشيت Master Data (متعدد الاختيار) -->
     <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1;">
@@ -2113,39 +2198,23 @@ function viewMasterData() {
             type="search"
             placeholder="بحث فوري وسلس بالاسم، الكود، المنطقة، الملاحظات…" 
             value="${esc(state.filters.masterSearch || "")}" 
-            style="min-width: 260px; flex: 1;"
+            style="min-width: 240px; flex: 1;"
           />
 
-          <!-- فلتر موقف اليوم -->
-          <select id="masterTodayStatusSelect" class="select" style="font-weight: 700;">
-            <option value="all" ${fTodayStatus === "all" ? "selected" : ""}>كل مواقف اليوم</option>
-            ${todayStatuses.map((st) => `<option value="${esc(st)}" ${fTodayStatus === st ? "selected" : ""}>${esc(st)}</option>`).join("")}
-          </select>
+          <!-- المحصلين متعدد الاختيار -->
+          ${renderMultiSelect({ id: "masterCollectorFilter", label: "المحصلين", icon: "👤", options: collectorOptions, selected: state.filters.masterCollectors, showSearch: false })}
 
-          <!-- فلتر النشاط والركود (6 شهور) -->
-          <select id="masterActivitySelect" class="select" style="font-weight: 700;">
-            <option value="all" ${fActivity === "all" ? "selected" : ""}>كل حالات النشاط</option>
-            <option value="active" ${fActivity === "active" ? "selected" : ""}>🟢 نشط (< 6 شهور)</option>
-            <option value="idle_debt" ${fActivity === "idle_debt" ? "selected" : ""}>🔴 راكد بمديونية (> 6 شهور)</option>
-            <option value="idle_zero" ${fActivity === "idle_zero" ? "selected" : ""}>⚪ راكد بدون رصيد (خالص)</option>
-          </select>
+          <!-- المناطق متعدد الاختيار -->
+          ${renderMultiSelect({ id: "masterAreaFilter", label: "المناطق", icon: "📍", options: masterAreaOptions, selected: state.filters.masterAreas })}
 
-          <select id="masterCollectorSelect" class="select">
-            <option value="all" ${fCollector === "all" ? "selected" : ""}>كل المحصلين</option>
-            ${reps.map((r) => `<option value="${esc(r)}" ${fCollector === r ? "selected" : ""}>${esc(r)}</option>`).join("")}
-            <option value="none" ${fCollector === "none" ? "selected" : ""}>بدون محصل محدد</option>
-          </select>
+          <!-- موقف اليوم متعدد الاختيار -->
+          ${renderMultiSelect({ id: "masterTodayStatusFilter", label: "موقف اليوم", icon: "🎯", options: todayStatusOptions, selected: state.filters.masterTodayStatuses, showSearch: false })}
 
-          <!-- فلتر المنطقة في ماستر داتا -->
-          <select id="masterAreaSelect" class="select">
-            <option value="all" ${fArea === "all" ? "selected" : ""}>كل المناطق (${masterAreas.length})</option>
-            ${masterAreas.map((a) => `<option value="${esc(a)}" ${fArea === a ? "selected" : ""}>📍 ${esc(a)} (${master.filter((m) => m.area === a).length})</option>`).join("")}
-          </select>
+          <!-- النشاط والركود متعدد الاختيار -->
+          ${renderMultiSelect({ id: "masterActivityFilter", label: "النشاط", icon: "", options: activityOptions, selected: state.filters.masterActivities, showSearch: false })}
 
-          <select id="masterClassSelect" class="select">
-            <option value="all" ${fClass === "all" ? "selected" : ""}>كل التصنيفات</option>
-            ${classifications.map((c) => `<option value="${esc(c)}" ${fClass === c ? "selected" : ""}>${esc(c)}</option>`).join("")}
-          </select>
+          <!-- التصنيفات متعدد الاختيار -->
+          ${renderMultiSelect({ id: "masterClassFilter", label: "التصنيفات", icon: "🏷️", options: classOptions, selected: state.filters.masterClasses })}
 
           <select id="masterBalanceSelect" class="select">
             <option value="all" ${fBalance === "all" ? "selected" : ""}>كل الأرصدة</option>
@@ -2213,20 +2282,23 @@ function viewMasterData() {
 
   const drawMaster = () => {
     const q = (state.filters.masterSearch || "").trim();
-    const st = state.filters.masterTodayStatus || "all";
-    const act = state.filters.masterActivity || "all";
-    const col = state.filters.masterCollector || "all";
-    const area = state.filters.masterArea || "all";
-    const cls = state.filters.masterClass || "all";
+    const selCollectors = state.filters.masterCollectors || [];
+    const selAreas = state.filters.masterAreas || [];
+    const selTodayStatuses = state.filters.masterTodayStatuses || [];
+    const selActivities = state.filters.masterActivities || [];
+    const selClasses = state.filters.masterClasses || [];
     const bal = state.filters.masterBalance || "all";
 
     let filtered = enrichedMaster.filter((m) => {
       if (q && !matchSearch(`${m.code} ${m.name} ${m.collector} ${m.area} ${m.classification} ${m.notes || ""}`, q)) return false;
-      if (st !== "all" && m.today_status !== st) return false;
-      if (act !== "all" && m._activityKey !== act) return false;
-      if (col !== "all" && (col === "none" ? m.collector : m.collector !== col)) return false;
-      if (area !== "all" && m.area !== area) return false;
-      if (cls !== "all" && m.classification !== cls) return false;
+      if (selCollectors.length > 0) {
+        const matchesCol = selCollectors.some((c) => (c === "none" ? !m.collector : m.collector === c));
+        if (!matchesCol) return false;
+      }
+      if (selAreas.length > 0 && !selAreas.includes(m.area)) return false;
+      if (selTodayStatuses.length > 0 && !selTodayStatuses.includes(m.today_status)) return false;
+      if (selActivities.length > 0 && !selActivities.includes(m._activityKey)) return false;
+      if (selClasses.length > 0 && !selClasses.includes(m.classification)) return false;
       if (bal === "has_debt" && m.balance <= 0) return false;
       if (bal === "zero_debt" && m.balance > 0) return false;
       return true;
@@ -2336,7 +2408,31 @@ function viewMasterData() {
     }
   }
 
-  // ربط أحداث الفلاتر بسلاسة بدون وميض
+  // ربط القوائم متعددة الاختيار في Master Data
+  const masterFilters = [
+    { id: "masterCollectorFilter", label: "المحصلين", icon: "👤", options: collectorOptions, key: "masterCollectors" },
+    { id: "masterAreaFilter", label: "المناطق", icon: "📍", options: masterAreaOptions, key: "masterAreas" },
+    { id: "masterTodayStatusFilter", label: "موقف اليوم", icon: "🎯", options: todayStatusOptions, key: "masterTodayStatuses" },
+    { id: "masterActivityFilter", label: "النشاط", icon: "", options: activityOptions, key: "masterActivities" },
+    { id: "masterClassFilter", label: "التصنيفات", icon: "🏷️", options: classOptions, key: "masterClasses" },
+  ];
+
+  masterFilters.forEach(({ id, label, icon, options, key }) => {
+    const container = $(id + "Container");
+    if (container) {
+      container.addEventListener("change", (e) => {
+        if (e.target.type === "checkbox") {
+          const opt = e.target.closest(".ms-option");
+          if (opt) opt.classList.toggle("selected", e.target.checked);
+        }
+        const checkedVals = Array.from(container.querySelectorAll("input[type='checkbox']:checked")).map((cb) => cb.value);
+        state.filters[key] = checkedVals;
+        updateMultiSelectTrigger(id, label, icon, options, checkedVals);
+        drawMaster();
+      });
+    }
+  });
+
   const searchInp = $("masterSearchInput");
   if (searchInp) {
     searchInp.addEventListener("input", () => {
@@ -2344,41 +2440,7 @@ function viewMasterData() {
       drawMaster();
     });
   }
-  const todayStSel = $("masterTodayStatusSelect");
-  if (todayStSel) {
-    todayStSel.addEventListener("change", () => {
-      state.filters.masterTodayStatus = todayStSel.value;
-      drawMaster();
-    });
-  }
-  const actSel = $("masterActivitySelect");
-  if (actSel) {
-    actSel.addEventListener("change", () => {
-      state.filters.masterActivity = actSel.value;
-      drawMaster();
-    });
-  }
-  const colSel = $("masterCollectorSelect");
-  if (colSel) {
-    colSel.addEventListener("change", () => {
-      state.filters.masterCollector = colSel.value;
-      drawMaster();
-    });
-  }
-  const areaSel = $("masterAreaSelect");
-  if (areaSel) {
-    areaSel.addEventListener("change", () => {
-      state.filters.masterArea = areaSel.value;
-      drawMaster();
-    });
-  }
-  const clsSel = $("masterClassSelect");
-  if (clsSel) {
-    clsSel.addEventListener("change", () => {
-      state.filters.masterClass = clsSel.value;
-      drawMaster();
-    });
-  }
+
   const balSel = $("masterBalanceSelect");
   if (balSel) {
     balSel.addEventListener("change", () => {
@@ -2567,6 +2629,72 @@ document.addEventListener("DOMContentLoaded", () => {
       document.execCommand("copy");
       toast("تم النسخ", "تم نسخ نص خط السير إلى الحافظة", "pay");
     });
+  });
+
+  // تفاعل القوائم متعددة الاختيار (فتح، إغلاق، بحث، تحديد الكل)
+  document.addEventListener("click", (e) => {
+    const toggleBtn = e.target.closest("[data-action='ms-toggle']");
+    if (toggleBtn) {
+      e.stopPropagation();
+      const id = toggleBtn.dataset.msTarget;
+      const container = $(id + "Container");
+      if (container) {
+        const isOpen = container.classList.contains("open");
+        document.querySelectorAll(".ms-container.open").forEach((c) => {
+          if (c !== container) c.classList.remove("open");
+        });
+        container.classList.toggle("open", !isOpen);
+        if (!isOpen) {
+          const searchInput = container.querySelector(".ms-search-input");
+          if (searchInput) setTimeout(() => searchInput.focus(), 50);
+        }
+      }
+      return;
+    }
+
+    const actionBtn = e.target.closest("[data-ms-action]");
+    if (actionBtn) {
+      e.stopPropagation();
+      const action = actionBtn.dataset.msAction;
+      const id = actionBtn.dataset.msTarget;
+      const list = $(id + "List");
+      if (!list) return;
+      const checkboxes = list.querySelectorAll("input[type='checkbox']");
+      checkboxes.forEach((cb) => {
+        cb.checked = (action === "select-all");
+        const opt = cb.closest(".ms-option");
+        if (opt) opt.classList.toggle("selected", cb.checked);
+      });
+      list.dispatchEvent(new Event("change", { bubbles: true }));
+      return;
+    }
+
+    if (e.target.closest(".ms-dropdown")) {
+      return;
+    }
+
+    // النقر خارج القوائم المنسدلة: إغلاق الكل
+    document.querySelectorAll(".ms-container.open").forEach((c) => c.classList.remove("open"));
+  });
+
+  document.addEventListener("input", (e) => {
+    if (e.target.dataset.msSearch) {
+      const id = e.target.dataset.msSearch;
+      const query = normalizeArabic(e.target.value);
+      const list = $(id + "List");
+      if (list) {
+        list.querySelectorAll(".ms-option").forEach((opt) => {
+          const text = normalizeArabic(opt.dataset.msSearchText || "");
+          opt.style.display = (!query || text.includes(query)) ? "flex" : "none";
+        });
+      }
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".ms-container.open").forEach((c) => c.classList.remove("open"));
+    }
   });
 
   const initHash = location.hash.replace("#", "");

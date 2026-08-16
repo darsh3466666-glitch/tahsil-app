@@ -391,6 +391,174 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
+
+/* ============ Multi-Select Dropdowns (اختيار متعدد أنيق وسريع) ============ */
+.ms-container {
+  position: relative;
+  display: inline-block;
+}
+.ms-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  user-select: none;
+  min-height: 35px;
+}
+.ms-trigger:hover, .ms-trigger.active {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.ms-trigger.has-selection {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  color: var(--primary);
+}
+.ms-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  line-height: 1;
+}
+.ms-chevron {
+  width: 13px;
+  height: 13px;
+  opacity: 0.65;
+  transition: transform 0.2s ease;
+}
+.ms-container.open .ms-chevron {
+  transform: rotate(180deg);
+}
+.ms-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 1050;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  min-width: 240px;
+  max-width: 320px;
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  animation: msFadeIn 0.15s ease;
+}
+.ms-container.open .ms-dropdown {
+  display: flex;
+}
+@keyframes msFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ms-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+  outline: none;
+}
+.ms-search-input:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+.ms-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem;
+}
+.ms-action-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.ms-action-btn:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.ms-options-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+.ms-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--foreground);
+  transition: background 0.12s;
+  user-select: none;
+}
+.ms-option:hover {
+  background: var(--muted);
+}
+.ms-option.selected {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--primary);
+  font-weight: 700;
+}
+.ms-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.ms-opt-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-opt-count {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  font-weight: 700;
+}
+.ms-empty {
+  padding: 10px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
 .seg { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
 .seg button {
   border: none; background: none; padding: 7px 16px; border-radius: 8px;
