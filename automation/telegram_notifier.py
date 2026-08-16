@@ -4,12 +4,19 @@
 Zero-Dependency Telegram Bot API Client & Scheduled 10:00 AM Reporter
 """
 
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    try: sys.stdout.reconfigure(encoding="utf-8")
+    except Exception: pass
+if hasattr(sys.stderr, "reconfigure"):
+    try: sys.stderr.reconfigure(encoding="utf-8")
+    except Exception: pass
+
 import urllib.request
 import urllib.parse
 import json
 import datetime
 import os
-import sys
 
 # استيراد مدير قاعدة البيانات
 try:

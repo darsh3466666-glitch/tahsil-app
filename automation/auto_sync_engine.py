@@ -6,6 +6,14 @@ Master Tahsil Automation Service & Daily 10:00 AM Scheduler
 
 import sys
 import os
+
+if hasattr(sys.stdout, "reconfigure"):
+    try: sys.stdout.reconfigure(encoding="utf-8")
+    except Exception: pass
+if hasattr(sys.stderr, "reconfigure"):
+    try: sys.stderr.reconfigure(encoding="utf-8")
+    except Exception: pass
+
 import json
 import time
 import datetime
