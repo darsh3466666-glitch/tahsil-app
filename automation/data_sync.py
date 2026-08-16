@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 محرك إدارة الردود والسدادات والتنبيهات المجدولة وتطبيق الويب
-ملاحظة أمان: ملف الإكسل الأصلي (شيت تحصيل.xlsm) محمي وهو للقراءة فقط (Read-Only) تماماً وممنوع تعديله نهائياً.
-يتم حفظ كل التحديثات والردود والمواعيد بأمان في قاعدة البيانات والتطبيق.
+ملاحظة: هذا المحرك مستقل تماماً ويعمل فقط على قاعدة بيانات التطبيق (data.json) وقاعدة بيانات التنبيهات (SQLite) دون أي تعامل مع ملفات الإكسل.
 """
 
 import os
 import json
 import datetime
-import subprocess
 
 try:
     from . import db_manager
@@ -19,11 +17,10 @@ except ImportError:
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_JSON_PATH = os.path.join(BASE_DIR, "data", "data.json")
-EXTRACT_SCRIPT_PATH = os.path.join(BASE_DIR, "sync", "extract.py")
 
 
 def load_app_data() -> dict:
-    """قراءة ملف data.json الحالي"""
+    """قراءة ملف data.json الخاص بتطبيق الويب"""
     if os.path.exists(DATA_JSON_PATH):
         try:
             with open(DATA_JSON_PATH, "r", encoding="utf-8") as f:
@@ -47,7 +44,7 @@ def save_app_data(data: dict) -> bool:
 def apply_parsed_record(parsed: dict, notify_telegram: bool = True) -> dict:
     """
     تطبيق السجل المستخرج من الواتساب وتحديث كل المسارات تلقائياً:
-    1. قاعدة بيانات التنبيهات المجدولة (SQLite)
+    1. قاعدة بيانات التنبيهات المجدولة لبوت تليجرام (SQLite)
     2. قاعدة بيانات التطبيق (data.json)
     3. إرسال إشعار فوري على تليجرام في حالة السداد
     """

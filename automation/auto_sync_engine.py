@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nlp_engine
 import db_manager
 import telegram_notifier
-import excel_sync
+import data_sync
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 PORT = 8765
@@ -126,20 +126,20 @@ class AutomationHttpHandler(http.server.BaseHTTPRequestHandler):
         if path == "/api/parse-whatsapp":
             # تحليل نصوص الواتساب وإرجاع النتائج المستخرجة
             raw_text = req_data.get("text", "")
-            app_data = excel_sync.load_app_data()
+            app_data = data_sync.load_app_data()
             master = app_data.get("master", [])
             parsed_list = nlp_engine.parse_whatsapp_batch(raw_text, master)
             self._set_headers(200)
             self.wfile.write(json.dumps({"count": len(parsed_list), "records": parsed_list}, ensure_ascii=False).encode("utf-8"))
 
         elif path == "/api/sync-whatsapp":
-            # تطبيق ومزامنة السجلات في الإكسل وتطبيق الويب وتليجرام
+            # تطبيق ومزامنة السجلات في قاعدة بيانات التطبيق وتليجرام
             records = req_data.get("records", [])
             if not records and "text" in req_data:
-                app_data = excel_sync.load_app_data()
+                app_data = data_sync.load_app_data()
                 records = nlp_engine.parse_whatsapp_batch(req_data["text"], app_data.get("master", []))
 
-            result = excel_sync.sync_batch_records(records, notify_telegram=req_data.get("notify_telegram", True))
+            result = data_sync.sync_batch_records(records, notify_telegram=req_data.get("notify_telegram", True))
             self._set_headers(200)
             self.wfile.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
 

@@ -1,6 +1,4 @@
 {
-  "excel_path": "D:\\Mostafa Ibrahim\\شيت تحصيل.xlsm",
-  "excel_strict_read_only": true,
   "data_json_path": "data/data.json",
   "telegram": {
     "bot_token": "YOUR_TELEGRAM_BOT_TOKEN",
