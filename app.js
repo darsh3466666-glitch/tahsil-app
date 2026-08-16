@@ -435,17 +435,13 @@ const state = {
   sort: {},
   filters: {
     routeRep: "all",
-    routeAreas: [],
-    routeCustomers: [],
-    routeStatuses: [],
     routeSearch: "",
     masterSearch: "",
-    masterCollectors: [],
-    masterAreas: [],
-    masterTodayStatuses: [],
-    masterActivities: [],
-    masterClasses: [],
     masterBalance: "all",
+  },
+  columnFilters: {
+    route: {},
+    master: {},
   },
   manualPays: loadManualPays(),
   interactiveRoute: null,
@@ -455,86 +451,265 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* ---------- مكوّن الاختيار المتعدد الذكي (Multi-Select Component) ---------- */
-function renderMultiSelect({ id, label, icon, options, selected, showSearch = true }) {
-  const selectedArr = Array.isArray(selected) ? selected : (selected && selected !== "all" ? [selected] : []);
-  const count = selectedArr.length;
-  const isAll = count === 0;
-
-  let triggerText = `${icon ? icon + " " : ""}${label}`;
-  if (isAll) {
-    triggerText += " (الكل)";
-  } else if (count === 1) {
-    const singleOpt = options.find((o) => o.value === selectedArr[0]);
-    const valText = singleOpt ? singleOpt.label.replace(/^[📍👤🏷️🟢🔴⚪⏳✅⚠️❌💰]\s*/, "") : selectedArr[0];
-    triggerText += `: ${valText}`;
+/* ---------- Excel-Style Column Header Filters & Sorting Engine ---------- */
+function getColumnRawValue(tableKey, row, colKey) {
+  if (!row) return "";
+  if (tableKey === "route") {
+    if (colKey === "customer") return row.customer || "";
+    if (colKey === "collector") return row.collector || "";
+    if (colKey === "area") return row.area && row.area !== "—" && row.area !== "__" ? row.area : "غير محدد";
+    if (colKey === "balance") return Number(row.balance) || 0;
+    if (colKey === "last_invoice") return row.last_invoice || "__";
+    if (colKey === "last_payment") return row.last_payment || "__";
+    if (colKey === "response") return hasRealResponse(row.response) ? cleanResponse(row.response) : "__";
+    if (colKey === "paid") return Number(row.paid) || 0;
+    if (colKey === "status") return row.paid >= row.balance && row.balance > 0 ? "مسدد بالكامل" : (row.paid > 0 ? "مسدد جزئياً" : (row.status || "لم يسدد"));
+    if (colKey === "comm") return normalizeComm(row.comm);
+    return row[colKey] || "";
   }
+  if (tableKey === "master") {
+    if (colKey === "code") return row.code || "";
+    if (colKey === "name") return row.name || "";
+    if (colKey === "collector") return row.collector || "بدون محصل";
+    if (colKey === "area") return row.area && row.area !== "—" && row.area !== "__" ? row.area : "غير محدد";
+    if (colKey === "balance") return Number(row.balance) || 0;
+    if (colKey === "today_status") return row.today_status || "—";
+    if (colKey === "classification") return row.classification || "—";
+    if (colKey === "activity") return row._activityKey === "active" ? "🟢 نشط" : (row._activityKey === "idle_debt" ? "🔴 راكد (مديونية)" : "⚪ راكد (خالص)");
+    if (colKey === "last_invoice") return row.last_invoice || "__";
+    if (colKey === "last_payment") return row.last_payment || "__";
+    if (colKey === "last_visit") return row.last_visit || "__";
+    if (colKey === "agreement_days") return row.agreement_days ? `${row.agreement_days} يوم` : "—";
+    if (colKey === "due_date") return row.due_date || "—";
+    if (colKey === "notes") return hasRealResponse(row.notes) ? cleanResponse(row.notes) : "__";
+    return row[colKey] || "";
+  }
+  return row[colKey] || "";
+}
+
+function getColumnDisplayValue(tableKey, row, colKey) {
+  const v = getColumnRawValue(tableKey, row, colKey);
+  if (colKey === "balance" && typeof v === "number") return money(v);
+  if (colKey === "paid" && typeof v === "number") return v > 0 ? money(v) : "0 ج.م";
+  return String(v);
+}
+
+function excelTh(tableKey, colKey, colType, colLabel, cls) {
+  const tableFilters = (state.columnFilters && state.columnFilters[tableKey]) || {};
+  const activeColFilter = tableFilters[colKey];
+  const hasFilter = Array.isArray(activeColFilter) && activeColFilter.length > 0;
+  const filterCount = hasFilter ? activeColFilter.length : 0;
+
+  const curSort = state.sort[tableKey];
+  const isSorted = curSort && curSort.col === colKey;
+  const sortArrow = isSorted ? (curSort.dir === 1 ? "▲" : "▼") : "";
 
   return `
-    <div class="ms-container" id="${id}Container" data-ms-id="${id}">
-      <button type="button" class="ms-trigger ${count > 0 ? "has-selection" : ""}" data-action="ms-toggle" data-ms-target="${id}">
-        <span class="ms-label">${esc(triggerText)}</span>
-        ${count > 1 ? `<span class="ms-badge">${count}</span>` : ""}
-        <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="ms-dropdown" id="${id}Dropdown">
-        ${showSearch && options.length > 5 ? `
-          <input type="search" class="ms-search-input" placeholder="بحث في القائمة…" data-ms-search="${id}" />
-        ` : ""}
-        <div class="ms-actions">
-          <button type="button" class="ms-action-btn" data-ms-action="select-all" data-ms-target="${id}">تحديد الكل</button>
-          <button type="button" class="ms-action-btn" data-ms-action="clear-all" data-ms-target="${id}">إلغاء التحديد</button>
-        </div>
-        <div class="ms-options-list" id="${id}List">
-          ${options.map((opt) => {
-            const isChecked = selectedArr.includes(opt.value);
-            return `
-              <label class="ms-option ${isChecked ? "selected" : ""}" data-ms-val="${esc(opt.value)}" data-ms-search-text="${esc(opt.label)}">
-                <input type="checkbox" value="${esc(opt.value)}" ${isChecked ? "checked" : ""} data-ms-id="${id}" />
-                <span class="ms-opt-text">${esc(opt.label)}</span>
-                ${opt.count !== undefined ? `<span class="ms-opt-count">(${opt.count})</span>` : ""}
-              </label>
-            `;
-          }).join("")}
-        </div>
+    <th class="th-excel ${(cls || "")} ${hasFilter ? "has-filter" : ""} ${isSorted ? "sorted" : ""}" data-th-tbl="${tableKey}" data-th-k="${colKey}">
+      <div class="th-excel-inner">
+        <span class="th-title" onclick="toggleHeaderSort('${tableKey}', '${colKey}', '${colType}')" title="اضغط لترتيب عمود ${colLabel}">
+          ${colLabel}
+        </span>
+        ${sortArrow ? `<span class="th-sort-indicator">${sortArrow}</span>` : ""}
+        <button 
+          type="button" 
+          class="th-filter-btn ${hasFilter ? "active" : ""}" 
+          onclick="openExcelColumnFilter('${tableKey}', '${colKey}', '${colLabel}', '${colType}', this, event)"
+          title="تصفية، بحث، وترتيب عمود ${colLabel} بنمط الإكسل"
+        >
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          ${hasFilter ? `<span class="th-filter-badge">${filterCount}</span>` : ""}
+        </button>
       </div>
-    </div>
+    </th>
   `;
 }
 
-function updateMultiSelectTrigger(id, label, icon, options, selected) {
-  const container = $(id + "Container");
-  if (!container) return;
-  const trigger = container.querySelector(".ms-trigger");
-  if (!trigger) return;
-  const selectedArr = Array.isArray(selected) ? selected : [];
-  const count = selectedArr.length;
-  const isAll = count === 0;
+function toggleHeaderSort(tbl, col, type) {
+  const cur = state.sort[tbl];
+  if (cur && cur.col === col) {
+    state.sort[tbl] = cur.dir === 1 ? { col, dir: -1, type } : null;
+  } else {
+    state.sort[tbl] = { col, dir: 1, type };
+  }
+  viewFn(state.view)();
+}
 
-  let triggerText = `${icon ? icon + " " : ""}${label}`;
-  if (isAll) {
-    triggerText += " (الكل)";
-  } else if (count === 1) {
-    const singleOpt = options.find((o) => o.value === selectedArr[0]);
-    const valText = singleOpt ? singleOpt.label.replace(/^[📍👤🏷️🟢🔴⚪⏳✅⚠️❌💰]\s*/, "") : selectedArr[0];
-    triggerText += `: ${valText}`;
+function closeExcelColumnFilter() {
+  const oldBackdrop = document.getElementById("excelFilterBackdrop");
+  const oldPopup = document.getElementById("excelFilterPopup");
+  if (oldBackdrop) {
+    if (typeof oldBackdrop.remove === "function") oldBackdrop.remove();
+    else if (oldBackdrop.parentNode) oldBackdrop.parentNode.removeChild(oldBackdrop);
+  }
+  if (oldPopup) {
+    if (typeof oldPopup.remove === "function") oldPopup.remove();
+    else if (oldPopup.parentNode) oldPopup.parentNode.removeChild(oldPopup);
+  }
+}
+
+function openExcelColumnFilter(tableKey, colKey, colLabel, colType, triggerBtn, event) {
+  if (event) event.stopPropagation();
+  closeExcelColumnFilter();
+
+  let dataset = [];
+  if (tableKey === "route") {
+    dataset = state.interactiveRoute || [];
+  } else if (tableKey === "master") {
+    const stats = getMasterActivityStats((state.data && state.data.master) || []);
+    dataset = stats.enriched || [];
   }
 
-  trigger.classList.toggle("has-selection", count > 0);
-  const labelSpan = trigger.querySelector(".ms-label");
-  if (labelSpan) labelSpan.textContent = triggerText;
-
-  let badge = trigger.querySelector(".ms-badge");
-  if (count > 1) {
-    if (!badge) {
-      badge = document.createElement("span");
-      badge.className = "ms-badge";
-      trigger.insertBefore(badge, trigger.querySelector(".ms-chevron"));
+  const distinctMap = new Map();
+  dataset.forEach((row) => {
+    const rawVal = getColumnRawValue(tableKey, row, colKey);
+    const dispVal = getColumnDisplayValue(tableKey, row, colKey);
+    const strVal = String(rawVal);
+    if (!distinctMap.has(strVal)) {
+      distinctMap.set(strVal, { value: strVal, label: dispVal, count: 0 });
     }
-    badge.textContent = count;
-  } else if (badge) {
-    badge.remove();
-  }
+    distinctMap.get(strVal).count++;
+  });
+
+  const options = Array.from(distinctMap.values()).sort((a, b) => a.label.localeCompare(b.label, "ar"));
+  const tableFilters = (state.columnFilters && state.columnFilters[tableKey]) || {};
+  const currentSelected = tableFilters[colKey];
+  const isFiltered = Array.isArray(currentSelected) && currentSelected.length > 0;
+
+  // تحديد الموضع بالنسبة لزر الفلتر
+  const rect = triggerBtn.getBoundingClientRect();
+  let left = rect.left - 200;
+  if (left < 10) left = 10;
+  if (left + 280 > window.innerWidth) left = window.innerWidth - 285;
+
+  const curSort = state.sort[tableKey];
+  const isAsc = curSort && curSort.col === colKey && curSort.dir === 1;
+  const isDesc = curSort && curSort.col === colKey && curSort.dir === -1;
+
+  const backdrop = document.createElement("div");
+  backdrop.id = "excelFilterBackdrop";
+  backdrop.className = "excel-filter-modal-backdrop";
+  backdrop.onclick = closeExcelColumnFilter;
+  document.body.appendChild(backdrop);
+
+  const popup = document.createElement("div");
+  popup.id = "excelFilterPopup";
+  popup.className = "excel-filter-popup";
+  popup.style.top = `${rect.bottom + 6}px`;
+  popup.style.left = `${left}px`;
+
+  popup.innerHTML = `
+    <div class="ef-header">
+      <span class="ef-title">🔍 فلترة وترتيب: ${esc(colLabel)}</span>
+      <button type="button" class="ef-close-btn" onclick="closeExcelColumnFilter()" title="إغلاق">&times;</button>
+    </div>
+
+    <div class="ef-sort-group">
+      <button type="button" class="ef-sort-btn ${isAsc ? "active" : ""}" id="efSortAscBtn">
+        <span>▲</span> فرز تصاعدي (أ ➔ ي / الأصغر ➔ الأكبر)
+      </button>
+      <button type="button" class="ef-sort-btn ${isDesc ? "active" : ""}" id="efSortDescBtn">
+        <span>▼</span> فرز تنازلي (ي ➔ أ / الأكبر ➔ الأصغر)
+      </button>
+    </div>
+
+    <div class="ef-divider"></div>
+
+    <input type="search" class="ef-search-box" id="efSearchInput" placeholder="بحث داخل قيم ${esc(colLabel)}…" />
+
+    <div class="ef-actions-bar">
+      <button type="button" class="ef-action-link" id="efSelectAllBtn">تحديد الكل</button>
+      <button type="button" class="ef-action-link" id="efClearAllBtn">إلغاء التحديد</button>
+      <span style="opacity:0.65; font-size:0.75rem; font-weight:700;">${options.length} خيار</span>
+    </div>
+
+    <div class="ef-options-list" id="efOptionsList">
+      ${options.map((opt) => {
+        const isChecked = !isFiltered || currentSelected.includes(opt.value);
+        return `
+          <label class="ef-option-item ${isChecked ? "selected" : ""}" data-val="${esc(opt.value)}">
+            <input type="checkbox" value="${esc(opt.value)}" ${isChecked ? "checked" : ""} />
+            <span class="ef-opt-text">${esc(opt.label)}</span>
+            <span class="ef-opt-count">(${opt.count})</span>
+          </label>
+        `;
+      }).join("")}
+    </div>
+
+    <div class="ef-footer">
+      <button type="button" class="btn btn-primary" id="efApplyBtn">تطبيق الفلتر</button>
+      <button type="button" class="btn btn-ghost" id="efClearFilterBtn" style="color:var(--danger);">مسح الفلتر</button>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+
+  const searchInput = popup.querySelector("#efSearchInput");
+  if (searchInput) setTimeout(() => searchInput.focus(), 50);
+
+  searchInput.addEventListener("input", (e) => {
+    const q = normalizeArabic(e.target.value);
+    popup.querySelectorAll(".ef-option-item").forEach((item) => {
+      const txt = normalizeArabic(item.textContent);
+      item.style.display = (!q || txt.includes(q)) ? "flex" : "none";
+    });
+  });
+
+  popup.querySelector("#efSortAscBtn").onclick = () => {
+    state.sort[tableKey] = { col: colKey, dir: 1, type: colType };
+    closeExcelColumnFilter();
+    viewFn(state.view)();
+  };
+  popup.querySelector("#efSortDescBtn").onclick = () => {
+    state.sort[tableKey] = { col: colKey, dir: -1, type: colType };
+    closeExcelColumnFilter();
+    viewFn(state.view)();
+  };
+
+  popup.querySelector("#efSelectAllBtn").onclick = () => {
+    popup.querySelectorAll(".ef-option-item input[type='checkbox']").forEach((cb) => {
+      if (cb.closest(".ef-option-item").style.display !== "none") {
+        cb.checked = true;
+        cb.closest(".ef-option-item").classList.add("selected");
+      }
+    });
+  };
+  popup.querySelector("#efClearAllBtn").onclick = () => {
+    popup.querySelectorAll(".ef-option-item input[type='checkbox']").forEach((cb) => {
+      if (cb.closest(".ef-option-item").style.display !== "none") {
+        cb.checked = false;
+        cb.closest(".ef-option-item").classList.remove("selected");
+      }
+    });
+  };
+
+  popup.querySelectorAll(".ef-option-item input[type='checkbox']").forEach((cb) => {
+    cb.addEventListener("change", () => {
+      cb.closest(".ef-option-item").classList.toggle("selected", cb.checked);
+    });
+  });
+
+  popup.querySelector("#efApplyBtn").onclick = () => {
+    const checked = Array.from(popup.querySelectorAll(".ef-option-item input[type='checkbox']:checked")).map((cb) => cb.value);
+    if (!state.columnFilters) state.columnFilters = {};
+    if (!state.columnFilters[tableKey]) state.columnFilters[tableKey] = {};
+
+    if (checked.length === 0 || checked.length === options.length) {
+      delete state.columnFilters[tableKey][colKey];
+    } else {
+      state.columnFilters[tableKey][colKey] = checked;
+    }
+    closeExcelColumnFilter();
+    viewFn(state.view)();
+  };
+
+  popup.querySelector("#efClearFilterBtn").onclick = () => {
+    if (state.columnFilters && state.columnFilters[tableKey]) {
+      delete state.columnFilters[tableKey][colKey];
+    }
+    closeExcelColumnFilter();
+    viewFn(state.view)();
+  };
 }
 
 /* ---------- Sorting ---------- */
@@ -561,7 +736,7 @@ function sortArray(rows, key, get) {
   return r;
 }
 function clearSortBtn(key) {
-  return `<button class="clear-sort" data-clear-sort="${key}" title="الرجوع لترتيب الشيت الأصلي">↺ ترتيب الشيت</button>`;
+  return `<button class="clear-sort" data-clear-sort="${key}" title="إعادة ضبط كافة الفلاتر والترتيب واستعادة الشيت الأصلي">↺ إعادة ضبط الشيت والفلاتر</button>`;
 }
 
 function viewFn(name) {
@@ -581,7 +756,16 @@ function onTableClick(e) {
   }
   const clr = e.target.closest("[data-clear-sort]");
   if (clr) {
-    state.sort[clr.dataset.clearSort] = null;
+    const k = clr.dataset.clearSort;
+    state.sort[k] = null;
+    if (state.columnFilters) state.columnFilters[k] = {};
+    if (k === "route") {
+      state.filters.routeSearch = "";
+      state.filters.routeRep = "all";
+    } else if (k === "master") {
+      state.filters.masterSearch = "";
+      state.filters.masterBalance = "all";
+    }
     viewFn(state.view)();
   }
 }
@@ -885,26 +1069,16 @@ function viewRoute() {
         </div>
       </div>
 
-      <!-- تصفيات سريعة وفلاتر متكاملة متعددة الاختيار -->
+      <!-- تصفيات سريعة وفلاتر رؤوس الأعمدة بنمط الإكسل -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
         <div class="seg" id="routeRepSeg">
           <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
           ${reps.map((r) => `<button data-f="${esc(r)}" class="${fRep === r ? "active" : ""}">${esc(r)} (${allRoute.filter((x) => x.collector === r).length})</button>`).join("")}
         </div>
 
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <!-- حقل البحث الفوري السلس -->
-          <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث باسم العميل، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:180px;">
-
-          <!-- فلتر المناطق متعدد الاختيار -->
-          ${renderMultiSelect({ id: "routeAreaFilter", label: "المناطق", icon: "📍", options: areaOptions, selected: state.filters.routeAreas })}
-
-          <!-- فلتر العملاء متعدد الاختيار -->
-          ${renderMultiSelect({ id: "routeCustomerFilter", label: "العملاء", icon: "👤", options: customerOptions, selected: state.filters.routeCustomers })}
-
-          <!-- فلتر حالات التواصل متعدد الاختيار -->
-          ${renderMultiSelect({ id: "routeStatusFilter", label: "حالات التواصل", icon: "", options: statusOptions, selected: state.filters.routeStatuses, showSearch: false })}
-
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <!-- حقل البحث الفوري السلس العام -->
+          <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث شامل بالاسم، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:220px;">
           ${clearSortBtn("route")}
         </div>
       </div>
@@ -949,15 +1123,15 @@ function viewRoute() {
           <thead>
             <tr>
               <th class="row-num">م</th>
-              ${sortTh("route", "customer", "str", "العميل")}
-              ${sortTh("route", "area", "str", "المنطقة")}
-              ${sortTh("route", "balance", "num", "المبلغ المستحق")}
-              ${sortTh("route", "last_invoice", "str", "آخر فاتورة")}
-              ${sortTh("route", "last_payment", "str", "آخر سداد")}
-              ${sortTh("route", "response", "str", "الرد (رد العميل الوارد)")}
-              ${sortTh("route", "paid", "num", "المسدد")}
-              ${sortTh("route", "status", "str", "الحالة")}
-              ${sortTh("route", "comm", "str", "التواصل")}
+              ${excelTh("route", "customer", "str", "العميل")}
+              ${excelTh("route", "area", "str", "المنطقة")}
+              ${excelTh("route", "balance", "num", "المبلغ المستحق")}
+              ${excelTh("route", "last_invoice", "str", "آخر فاتورة")}
+              ${excelTh("route", "last_payment", "str", "آخر سداد")}
+              ${excelTh("route", "response", "str", "الرد (رد العميل الوارد)")}
+              ${excelTh("route", "paid", "num", "المسدد")}
+              ${excelTh("route", "status", "str", "الحالة")}
+              ${excelTh("route", "comm", "str", "التواصل")}
               <th style="width: 80px; text-align: center;">إجراءات</th>
             </tr>
           </thead>
@@ -970,27 +1144,19 @@ function viewRoute() {
   const drawRouteRows = () => {
     const fSearch = (state.filters.routeSearch || "").trim();
     const fRep = state.filters.routeRep || "all";
-    const selAreas = state.filters.routeAreas || [];
-    const selCusts = state.filters.routeCustomers || [];
-    const selStatuses = state.filters.routeStatuses || [];
+    const colFilters = (state.columnFilters && state.columnFilters.route) || {};
 
     let filtered = allRoute.filter((item) => {
       if (fRep !== "all" && item.collector !== fRep) return false;
-      if (selAreas.length > 0 && !selAreas.includes(item.area)) return false;
-      if (selCusts.length > 0 && !selCusts.includes(item.customer)) return false;
-      if (selStatuses.length > 0) {
-        const nComm = normalizeComm(item.comm);
-        const isPaid = item.paid > 0;
-        const matchesAny = selStatuses.some((st) => {
-          if (st === "responded") return nComm === "تم الرد / مستجيب";
-          if (st === "no_answer") return nComm === "لا يرد / غير متاح";
-          if (st === "not_visited") return nComm === "لم يذهب ولم يتصل" || item.notVisited;
-          if (st === "pending") return nComm === "قيد المتابعة" && !item.notVisited;
-          if (st === "paid") return isPaid;
-          return false;
-        });
-        if (!matchesAny) return false;
+
+      // تطبيق فلاتر رؤوس الأعمدة بنمط الإكسل
+      for (const [col, allowedVals] of Object.entries(colFilters)) {
+        if (Array.isArray(allowedVals) && allowedVals.length > 0) {
+          const itemVal = String(getColumnRawValue("route", item, col));
+          if (!allowedVals.includes(itemVal)) return false;
+        }
       }
+
       if (fSearch && !matchSearch(`${item.customer} ${item.area} ${item.collector} ${item.response || ""}`, fSearch)) return false;
       return true;
     });
@@ -2124,36 +2290,6 @@ function viewMasterData() {
   const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
   const masterAreas = [...new Set(master.map((m) => m.area).filter((a) => a && a !== "—" && a !== "__"))].sort((a, b) => a.localeCompare(b, "ar"));
 
-  // إعداد خيارات الفلاتر متعددة الاختيار في Master Data
-  const collectorOptions = [
-    ...reps.map((r) => ({ value: r, label: `👤 ${r}`, count: master.filter((m) => m.collector === r).length })),
-    { value: "none", label: "بدون محصل محدد", count: master.filter((m) => !m.collector).length }
-  ];
-
-  const masterAreaOptions = masterAreas.map((a) => ({
-    value: a,
-    label: `📍 ${a}`,
-    count: master.filter((m) => m.area === a).length,
-  }));
-
-  const todayStatusOptions = todayStatuses.map((st) => ({
-    value: st,
-    label: st,
-    count: master.filter((m) => m.today_status === st).length,
-  }));
-
-  const activityOptions = [
-    { value: "active", label: "🟢 نشط (< 6 شهور)", count: stats.activeCount },
-    { value: "idle_debt", label: "🔴 راكد بمديونية (> 6 شهور)", count: stats.idleDebtCount },
-    { value: "idle_zero", label: "⚪ راكد بدون رصيد (خالص)", count: stats.idleZeroCount },
-  ];
-
-  const classOptions = classifications.map((c) => ({
-    value: c,
-    label: `🏷️ ${c}`,
-    count: master.filter((m) => m.classification === c).length,
-  }));
-
   const fBalance = state.filters.masterBalance || "all";
 
   // الحسابات العامة
@@ -2188,7 +2324,7 @@ function viewMasterData() {
       </div>
     </div>
 
-    <!-- شريط الفلاتر والبحث لشيت Master Data (متعدد الاختيار) -->
+    <!-- شريط البحث والتحكم لشيت Master Data -->
     <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1;">
@@ -2196,25 +2332,10 @@ function viewMasterData() {
             class="search-input" 
             id="masterSearchInput" 
             type="search"
-            placeholder="بحث فوري وسلس بالاسم، الكود، المنطقة، الملاحظات…" 
+            placeholder="بحث شامل بالاسم، الكود، المنطقة، الملاحظات…" 
             value="${esc(state.filters.masterSearch || "")}" 
-            style="min-width: 240px; flex: 1;"
+            style="min-width: 260px; flex: 1;"
           />
-
-          <!-- المحصلين متعدد الاختيار -->
-          ${renderMultiSelect({ id: "masterCollectorFilter", label: "المحصلين", icon: "👤", options: collectorOptions, selected: state.filters.masterCollectors, showSearch: false })}
-
-          <!-- المناطق متعدد الاختيار -->
-          ${renderMultiSelect({ id: "masterAreaFilter", label: "المناطق", icon: "📍", options: masterAreaOptions, selected: state.filters.masterAreas })}
-
-          <!-- موقف اليوم متعدد الاختيار -->
-          ${renderMultiSelect({ id: "masterTodayStatusFilter", label: "موقف اليوم", icon: "🎯", options: todayStatusOptions, selected: state.filters.masterTodayStatuses, showSearch: false })}
-
-          <!-- النشاط والركود متعدد الاختيار -->
-          ${renderMultiSelect({ id: "masterActivityFilter", label: "النشاط", icon: "", options: activityOptions, selected: state.filters.masterActivities, showSearch: false })}
-
-          <!-- التصنيفات متعدد الاختيار -->
-          ${renderMultiSelect({ id: "masterClassFilter", label: "التصنيفات", icon: "🏷️", options: classOptions, selected: state.filters.masterClasses })}
 
           <select id="masterBalanceSelect" class="select">
             <option value="all" ${fBalance === "all" ? "selected" : ""}>كل الأرصدة</option>
@@ -2230,12 +2351,12 @@ function viewMasterData() {
       </div>
     </div>
 
-    <!-- جدول شيت Master Data الكامل لايف -->
+    <!-- جدول شيت Master Data الكامل لايف مع فلاتر رؤوس الأعمدة بنمط الإكسل -->
     <div class="card" style="padding: var(--space-4);">
       <div class="card-head" style="margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div>
           <span class="card-title">📄 شيت Master Data (البيانات الرئيسية المحدثة لايف)</span>
-          <span class="card-sub" style="display:block; margin-top:2px;">عرض مباشر لكافة سجلات العملاء وحساباتهم ومواعيد الزيارات والاستحقاقات</span>
+          <span class="card-sub" style="display:block; margin-top:2px;">انقر على أيقونة الفلتر 🔍 بجانب أي عنوان عمود للفرز والبحث والاختيار المتعدد مثل Excel</span>
         </div>
         <div class="table-scroll-controls">
           <span style="font-size:0.75rem; font-weight:700; opacity:0.7;">تحريك الجدول أفقياً:</span>
@@ -2258,20 +2379,20 @@ function viewMasterData() {
           <thead>
             <tr>
               <th class="row-num">م</th>
-              ${sortTh("master", "code", "str", "كود العميل")}
-              ${sortTh("master", "name", "str", "اسم العميل")}
-              ${sortTh("master", "collector", "str", "المحصل")}
-              ${sortTh("master", "area", "str", "المنطقة")}
-              ${sortTh("master", "balance", "num", "المديونية الحالية")}
-              ${sortTh("master", "today_status", "str", "موقف اليوم")}
-              ${sortTh("master", "classification", "str", "التصنيف")}
-              ${sortTh("master", "activity", "str", "نشاط العميل")}
-              ${sortTh("master", "last_invoice", "str", "آخر فاتورة")}
-              ${sortTh("master", "last_payment", "str", "آخر سداد")}
-              ${sortTh("master", "last_visit", "str", "آخر زيارة")}
-              ${sortTh("master", "agreement_days", "num", "مدة الاتفاق")}
-              ${sortTh("master", "due_date", "str", "تاريخ الاستحقاق")}
-              ${sortTh("master", "notes", "str", "الملاحظات")}
+              ${excelTh("master", "code", "str", "كود العميل")}
+              ${excelTh("master", "name", "str", "اسم العميل")}
+              ${excelTh("master", "collector", "str", "المحصل")}
+              ${excelTh("master", "area", "str", "المنطقة")}
+              ${excelTh("master", "balance", "num", "المديونية الحالية")}
+              ${excelTh("master", "today_status", "str", "موقف اليوم")}
+              ${excelTh("master", "classification", "str", "التصنيف")}
+              ${excelTh("master", "activity", "str", "نشاط العميل")}
+              ${excelTh("master", "last_invoice", "str", "آخر فاتورة")}
+              ${excelTh("master", "last_payment", "str", "آخر سداد")}
+              ${excelTh("master", "last_visit", "str", "آخر زيارة")}
+              ${excelTh("master", "agreement_days", "num", "مدة الاتفاق")}
+              ${excelTh("master", "due_date", "str", "تاريخ الاستحقاق")}
+              ${excelTh("master", "notes", "str", "الملاحظات")}
             </tr>
           </thead>
           <tbody id="masterTableBody"></tbody>
@@ -2282,23 +2403,19 @@ function viewMasterData() {
 
   const drawMaster = () => {
     const q = (state.filters.masterSearch || "").trim();
-    const selCollectors = state.filters.masterCollectors || [];
-    const selAreas = state.filters.masterAreas || [];
-    const selTodayStatuses = state.filters.masterTodayStatuses || [];
-    const selActivities = state.filters.masterActivities || [];
-    const selClasses = state.filters.masterClasses || [];
+    const colFilters = (state.columnFilters && state.columnFilters.master) || {};
     const bal = state.filters.masterBalance || "all";
 
     let filtered = enrichedMaster.filter((m) => {
-      if (q && !matchSearch(`${m.code} ${m.name} ${m.collector} ${m.area} ${m.classification} ${m.notes || ""}`, q)) return false;
-      if (selCollectors.length > 0) {
-        const matchesCol = selCollectors.some((c) => (c === "none" ? !m.collector : m.collector === c));
-        if (!matchesCol) return false;
+      // تطبيق فلاتر رؤوس الأعمدة بنمط الإكسل
+      for (const [col, allowedVals] of Object.entries(colFilters)) {
+        if (Array.isArray(allowedVals) && allowedVals.length > 0) {
+          const itemVal = String(getColumnRawValue("master", m, col));
+          if (!allowedVals.includes(itemVal)) return false;
+        }
       }
-      if (selAreas.length > 0 && !selAreas.includes(m.area)) return false;
-      if (selTodayStatuses.length > 0 && !selTodayStatuses.includes(m.today_status)) return false;
-      if (selActivities.length > 0 && !selActivities.includes(m._activityKey)) return false;
-      if (selClasses.length > 0 && !selClasses.includes(m.classification)) return false;
+
+      if (q && !matchSearch(`${m.code} ${m.name} ${m.collector} ${m.area} ${m.classification} ${m.notes || ""}`, q)) return false;
       if (bal === "has_debt" && m.balance <= 0) return false;
       if (bal === "zero_debt" && m.balance > 0) return false;
       return true;
@@ -2407,31 +2524,6 @@ function viewMasterData() {
       };
     }
   }
-
-  // ربط القوائم متعددة الاختيار في Master Data
-  const masterFilters = [
-    { id: "masterCollectorFilter", label: "المحصلين", icon: "👤", options: collectorOptions, key: "masterCollectors" },
-    { id: "masterAreaFilter", label: "المناطق", icon: "📍", options: masterAreaOptions, key: "masterAreas" },
-    { id: "masterTodayStatusFilter", label: "موقف اليوم", icon: "🎯", options: todayStatusOptions, key: "masterTodayStatuses" },
-    { id: "masterActivityFilter", label: "النشاط", icon: "", options: activityOptions, key: "masterActivities" },
-    { id: "masterClassFilter", label: "التصنيفات", icon: "🏷️", options: classOptions, key: "masterClasses" },
-  ];
-
-  masterFilters.forEach(({ id, label, icon, options, key }) => {
-    const container = $(id + "Container");
-    if (container) {
-      container.addEventListener("change", (e) => {
-        if (e.target.type === "checkbox") {
-          const opt = e.target.closest(".ms-option");
-          if (opt) opt.classList.toggle("selected", e.target.checked);
-        }
-        const checkedVals = Array.from(container.querySelectorAll("input[type='checkbox']:checked")).map((cb) => cb.value);
-        state.filters[key] = checkedVals;
-        updateMultiSelectTrigger(id, label, icon, options, checkedVals);
-        drawMaster();
-      });
-    }
-  });
 
   const searchInp = $("masterSearchInput");
   if (searchInp) {

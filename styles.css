@@ -392,51 +392,252 @@ table.route-table { table-layout: fixed; min-width: 920px; }
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
-/* ============ Multi-Select Dropdowns (اختيار متعدد أنيق وسريع) ============ */
-.ms-container {
+/* ============ Excel Column AutoFilter Headers & Popups ============ */
+.th-excel {
+  padding: 8px 10px !important;
+  user-select: none;
+  vertical-align: middle;
   position: relative;
-  display: inline-block;
 }
-.ms-trigger {
+.th-excel-inner {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  background: var(--surface);
-  color: var(--foreground);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 0.86rem;
-  font-weight: 700;
+  gap: 5px;
+  width: 100%;
+  justify-content: space-between;
+}
+.th-title {
   cursor: pointer;
-  transition: all 0.18s ease;
+  font-weight: 900;
+  font-size: 0.92rem;
+  color: inherit;
+  transition: color 0.15s;
   white-space: nowrap;
-  user-select: none;
-  min-height: 35px;
 }
-.ms-trigger:hover, .ms-trigger.active {
-  border-color: var(--primary);
-  background: var(--surface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
-}
-.ms-trigger.has-selection {
-  border-color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+.th-title:hover {
   color: var(--primary);
 }
-.ms-badge {
+.th-sort-indicator {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--primary);
+  margin-inline-start: 2px;
+}
+.th-filter-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
-  border-radius: 999px;
+  gap: 2px;
+  background: var(--surface);
+  border: 1.2px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 5px;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: all 0.15s ease;
+  margin-inline-start: 4px;
+  min-width: 22px;
+  height: 22px;
+}
+.th-filter-btn:hover {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.th-filter-btn.active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.th-filter-badge {
+  font-size: 0.65rem;
+  font-weight: 900;
   line-height: 1;
+  background: #fff;
+  color: var(--primary);
+  padding: 1px 4px;
+  border-radius: 999px;
+  margin-inline-start: 2px;
+}
+
+/* النافذة المنبثقة لفلتر العمود بنمط الإكسل */
+.excel-filter-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(0, 0, 0, 0.05);
+}
+.excel-filter-popup {
+  position: fixed;
+  z-index: 99999;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 35px -4px rgba(0, 0, 0, 0.28), 0 6px 14px rgba(0, 0, 0, 0.12);
+  width: 270px;
+  max-width: 92vw;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  animation: msFadeIn 0.15s ease-out;
+  font-family: inherit;
+}
+.ef-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.ef-title {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--foreground);
+}
+.ef-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.ef-close-btn:hover {
+  color: var(--danger);
+}
+.ef-sort-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ef-sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: start;
+  transition: all 0.12s;
+}
+.ef-sort-btn:hover {
+  background: var(--muted);
+  border-color: var(--border);
+}
+.ef-sort-btn.active {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.ef-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+.ef-search-box {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+  outline: none;
+}
+.ef-search-box:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.ef-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  padding: 0 2px;
+}
+.ef-action-link {
+  color: var(--primary);
+  background: none;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.ef-action-link:hover {
+  text-decoration: underline;
+}
+.ef-options-list {
+  max-height: 170px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ef-option-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--foreground);
+  user-select: none;
+  background: var(--surface);
+  transition: background 0.1s;
+}
+.ef-option-item:hover {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+.ef-option-item.selected {
+  font-weight: 800;
+  color: var(--primary);
+}
+.ef-option-item input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+.ef-opt-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ef-opt-count {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  font-weight: 700;
+}
+.ef-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+.ef-footer .btn {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
 }
 .ms-chevron {
   width: 13px;
