@@ -469,7 +469,7 @@ function getColumnRawValue(tableKey, row, colKey) {
     if (colKey === "last_invoice") return row.last_invoice || "__";
     if (colKey === "last_payment") return row.last_payment || "__";
     if (colKey === "response") return hasRealResponse(row.response) ? cleanResponse(row.response) : "__";
-    if (colKey === "paid") return Number(row.paid) || 0;
+    if (colKey === "paid") return row.paid > 0 ? "مسدد" : "لم يسدد";
     if (colKey === "status") return row.paid >= row.balance && row.balance > 0 ? "مسدد بالكامل" : (row.paid > 0 ? "مسدد جزئياً" : (row.status || "لم يسدد"));
     if (colKey === "comm") return normalizeComm(row.comm);
     return row[colKey] || "";
@@ -1051,6 +1051,32 @@ function viewDashboard() {
     </div>`;
 }
 
+function setRouteKpiFilter(filterType) {
+  if (!state.columnFilters) state.columnFilters = {};
+  if (!state.columnFilters.route) state.columnFilters.route = {};
+
+  if (!filterType || filterType === "all") {
+    delete state.columnFilters.route.comm;
+    delete state.columnFilters.route.paid;
+  } else if (filterType === "paid") {
+    delete state.columnFilters.route.comm;
+    state.columnFilters.route.paid = ["مسدد"];
+  } else if (filterType === "responded") {
+    delete state.columnFilters.route.paid;
+    state.columnFilters.route.comm = ["تم الرد / مستجيب"];
+  } else if (filterType === "no_answer") {
+    delete state.columnFilters.route.paid;
+    state.columnFilters.route.comm = ["لا يرد / غير متاح"];
+  } else if (filterType === "not_visited") {
+    delete state.columnFilters.route.paid;
+    state.columnFilters.route.comm = ["لم يذهب ولم يتصل"];
+  } else if (filterType === "pending") {
+    delete state.columnFilters.route.paid;
+    state.columnFilters.route.comm = ["قيد المتابعة"];
+  }
+  viewRoute();
+}
+
 /* ---------- 2. ROUTE (خط سير اليوم التفاعلي + سداد يدوي + إحصائيات الإكسل) ---------- */
 function viewRoute() {
   const d = state.data;
@@ -1091,6 +1117,16 @@ function viewRoute() {
   // حساب المؤشرات المطابقة لشيت الإكسل
   const stats = calculateRouteStats(fRep === "all" ? allRoute : allRoute.filter((x) => x.collector === fRep));
 
+  // معرفة الكرت النشط حالياً
+  const curRoutePaid = (state.columnFilters && state.columnFilters.route && state.columnFilters.route.paid) || [];
+  const curRouteComm = (state.columnFilters && state.columnFilters.route && state.columnFilters.route.comm) || [];
+  let activeRouteKpi = "all";
+  if (curRoutePaid.includes("مسدد")) activeRouteKpi = "paid";
+  else if (curRouteComm.includes("تم الرد / مستجيب")) activeRouteKpi = "responded";
+  else if (curRouteComm.includes("لا يرد / غير متاح")) activeRouteKpi = "no_answer";
+  else if (curRouteComm.includes("لم يذهب ولم يتصل")) activeRouteKpi = "not_visited";
+  else if (curRouteComm.includes("قيد المتابعة")) activeRouteKpi = "pending";
+
   $("view-route").innerHTML = `
     <!-- شريط أدوات خط السير: فلاتر، إضافة عميل، نسخ للواتساب -->
     <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4);">
@@ -1127,33 +1163,33 @@ function viewRoute() {
       </div>
     </div>
 
-    <!-- إحصائيات سريعة علوية -->
+    <!-- إحصائيات سريعة علوية تفاعلية بالكامل عند الضغط عليها للفلترة الفورية -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
-      <div class="kpi-card c-danger">
+      <div class="kpi-card c-danger clickable ${activeRouteKpi === "all" ? "active-card" : ""}" onclick="setRouteKpiFilter('all')" title="عرض كل عملاء خط السير">
         <div class="kpi-label">اجمالي المطلوب</div>
         <div class="kpi-value">${money(stats.totalDue)}</div>
         <div class="kpi-sub">${stats.totalCount} عميل مكلف بهم</div>
       </div>
-      <div class="kpi-card c-success">
+      <div class="kpi-card c-success clickable ${activeRouteKpi === "paid" ? "active-card" : ""}" onclick="setRouteKpiFilter('paid')" title="عرض العملاء الذين سددوا اليوم">
         <div class="kpi-label">المحصل اليوم</div>
         <div class="kpi-value">${money(stats.collected)}</div>
-        <div class="kpi-sub">نسبة التحصيل: ${stats.collectionRate.toFixed(1)}%</div>
+        <div class="kpi-sub">${allRoute.filter((x) => x.paid > 0).length} مسدد (${stats.collectionRate.toFixed(1)}%)</div>
       </div>
-      <div class="kpi-card" style="border-inline-start: 4px solid var(--success);">
+      <div class="kpi-card clickable ${activeRouteKpi === "responded" ? "active-card" : ""}" style="border-inline-start: 4px solid var(--success);" onclick="setRouteKpiFilter('responded')" title="عرض العملاء المستجيبين">
         <div class="kpi-label" style="color:var(--success);">✅ تم الرد / مستجيب</div>
         <div class="kpi-value" style="color:var(--success);">${stats.responsiveCount}</div>
         <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.responsiveCount / stats.totalCount) * 100) : 0}% من العملاء</div>
       </div>
-      <div class="kpi-card" style="border-inline-start: 4px solid var(--warning);">
+      <div class="kpi-card clickable ${activeRouteKpi === "no_answer" ? "active-card" : ""}" style="border-inline-start: 4px solid var(--warning);" onclick="setRouteKpiFilter('no_answer')" title="عرض العملاء غير المتاحين">
         <div class="kpi-label" style="color:var(--warning);">⚠️ لا يرد / غير متاح</div>
         <div class="kpi-value" style="color:var(--warning);">${stats.unresponsiveCount}</div>
         <div class="kpi-sub">اتصال دون رد / المحل مغلق</div>
       </div>
-      <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
+      <div class="kpi-card clickable ${activeRouteKpi === "not_visited" ? "active-card" : ""}" style="border-inline-start: 4px solid var(--danger);" onclick="setRouteKpiFilter('not_visited')" title="عرض العملاء الذين لم يتم زيارتهم">
         <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
         <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
       </div>
-      <div class="kpi-card c-accent">
+      <div class="kpi-card c-accent clickable ${activeRouteKpi === "pending" ? "active-card" : ""}" onclick="setRouteKpiFilter('pending')" title="عرض العملاء قيد المتابعة">
         <div class="kpi-label">⏳ قيد المتابعة</div>
         <div class="kpi-value">${stats.pendingCount}</div>
         <div class="kpi-sub">بانتظار المتابعة اليوم</div>
@@ -2313,7 +2349,18 @@ function getMasterActivityStats(master) {
 }
 
 function setMasterActivityFilter(val) {
-  state.filters.masterActivities = (val && val !== "all") ? [val] : [];
+  if (!state.columnFilters) state.columnFilters = {};
+  if (!state.columnFilters.master) state.columnFilters.master = {};
+
+  if (!val || val === "all") {
+    delete state.columnFilters.master.activity;
+  } else if (val === "active") {
+    state.columnFilters.master.activity = ["🟢 نشط"];
+  } else if (val === "idle_debt") {
+    state.columnFilters.master.activity = ["🔴 راكد (مديونية)"];
+  } else if (val === "idle_zero") {
+    state.columnFilters.master.activity = ["⚪ راكد (خالص)"];
+  }
   viewMasterData();
 }
 
@@ -2328,6 +2375,10 @@ function viewMasterData() {
   const stats = getMasterActivityStats(master);
   const enrichedMaster = stats.enriched;
 
+  // معرفة كرت النشاط المحدد حالياً
+  const curMasterActivity = (state.columnFilters && state.columnFilters.master && state.columnFilters.master.activity) || [];
+  const activeActivity = curMasterActivity.includes("🟢 نشط") ? "active" : (curMasterActivity.includes("🔴 راكد (مديونية)") ? "idle_debt" : (curMasterActivity.includes("⚪ راكد (خالص)") ? "idle_zero" : "all"));
+
   // الخيارات الفريدة لموقف اليوم والتصنيفات والمناطق
   const todayStatuses = ["🟢 ساري", "🎯 هدف اليوم", "✅ خالص"];
   const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
@@ -2340,27 +2391,27 @@ function viewMasterData() {
   const totalBal = master.reduce((s, m) => s + (Number(m.balance) || 0), 0);
 
   $("view-master").innerHTML = `
-    <!-- إحصائيات Master Data والنشاط والركود (قاعدة الـ 6 شهور لتاريخ آخر فاتورة) -->
+    <!-- إحصائيات Master Data والنشاط والركود (تفاعلية بالكامل عند الضغط عليها للفلترة الفورية) -->
     <div class="kpi-grid" style="margin-bottom: var(--space-4);">
-      <div class="kpi-card c-info" style="cursor: pointer;" onclick="setMasterActivityFilter('all')" title="عرض كل عملاء الشيت">
+      <div class="kpi-card c-info clickable ${activeActivity === "all" ? "active-card" : ""}" onclick="setMasterActivityFilter('all')" title="عرض كل عملاء الشيت (${totalCount} عميل)">
         <div class="kpi-label">إجمالي عملاء الشيت</div>
         <div class="kpi-value">${totalCount} عميل</div>
         <div class="kpi-sub">${money(totalBal)} (كامل الشيت)</div>
       </div>
 
-      <div class="kpi-card c-success" style="cursor: pointer;" onclick="setMasterActivityFilter('active')" title="عرض العملاء النشطين (أخذوا فواتير خلال آخر 6 شهور)">
+      <div class="kpi-card c-success clickable ${activeActivity === "active" ? "active-card" : ""}" onclick="setMasterActivityFilter('active')" title="عرض العملاء النشطين (أخذوا فواتير خلال آخر 6 شهور)">
         <div class="kpi-label">🟢 عملاء نشطون (آخر فاتورة < 6 شهور)</div>
         <div class="kpi-value">${stats.activeCount} عميل</div>
         <div class="kpi-sub">${money(stats.activeBal)} — حركة فواتير حديثة</div>
       </div>
 
-      <div class="kpi-card c-danger" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_debt')" title="عرض العملاء الراكدين ولديهم مديونية (توقفوا عن الفواتير > 6 شهور)">
+      <div class="kpi-card c-danger clickable ${activeActivity === "idle_debt" ? "active-card" : ""}" onclick="setMasterActivityFilter('idle_debt')" title="عرض العملاء الراكدين ولديهم مديونية (توقفوا عن الفواتير > 6 شهور)">
         <div class="kpi-label">🔴 راكد وعليه مديونية (فواتير > 6 شهور)</div>
         <div class="kpi-value">${stats.idleDebtCount} عميل</div>
         <div class="kpi-sub">${money(stats.idleDebtBal)} — مديونية راكدة</div>
       </div>
 
-      <div class="kpi-card c-accent" style="cursor: pointer;" onclick="setMasterActivityFilter('idle_zero')" title="عرض العملاء الراكدين الخالصين (توقفوا عن الفواتير > 6 شهور ورصيدهم 0)">
+      <div class="kpi-card c-accent clickable ${activeActivity === "idle_zero" ? "active-card" : ""}" onclick="setMasterActivityFilter('idle_zero')" title="عرض العملاء الراكدين الخالصين (توقفوا عن الفواتير > 6 شهور ورصيدهم 0)">
         <div class="kpi-label">⚪ راكد بدون رصيد (خالص > 6 شهور)</div>
         <div class="kpi-value">${stats.idleZeroCount} عميل</div>
         <div class="kpi-sub">0 ج.م — مسدد بالكامل</div>
@@ -2668,6 +2719,7 @@ window.setCollectorTab = setCollectorTab;
 window.copyCollectorSummaryReport = copyCollectorSummaryReport;
 window.switchView = switchView;
 window.setMasterActivityFilter = setMasterActivityFilter;
+window.setRouteKpiFilter = setRouteKpiFilter;
 
 /* ---------- Global Bootstrap ---------- */
 document.addEventListener("DOMContentLoaded", () => {

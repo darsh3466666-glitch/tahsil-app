@@ -164,6 +164,26 @@ input, select { font-family: inherit; font-size: .95rem; }
 .kpi-value { font-size: 1.85rem; font-weight: 800; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
 .kpi-sub { font-size: .82rem; font-weight: 600; opacity: .65; margin-top: 2px; }
 
+/* كروت تفاعلية قابلة للنقر للفلترة الفورية للجدول */
+.kpi-card.clickable {
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.kpi-card.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary);
+}
+.kpi-card.clickable:active {
+  transform: translateY(-1px);
+}
+.kpi-card.active-card {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--primary) 40%, transparent), 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface)) !important;
+}
+
 /* ============ Cards / Sections ============ */
 .card {
   background: var(--surface); border: 1px solid var(--border);
