@@ -435,10 +435,13 @@ const state = {
   sort: {},
   filters: {
     routeRep: "all",
+    routeArea: "all",
+    routeCustomer: "all",
     routeStatus: "all",
     routeSearch: "",
     masterSearch: "",
     masterCollector: "all",
+    masterArea: "all",
     masterTodayStatus: "all",
     masterActivity: "all",
     masterClass: "all",
@@ -749,8 +752,14 @@ function viewRoute() {
   const master = d.master || [];
   const reps = ["مصطفى", "محمد شعبان"];
 
+  // استخراج قوائم المناطق والعملاء الفريدة لخط السير
+  const areas = [...new Set(allRoute.map((x) => x.area).filter((a) => a && a !== "—" && a !== "__"))].sort((a, b) => a.localeCompare(b, "ar"));
+  const customers = [...new Set(allRoute.map((x) => x.customer).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
+
   // تطبيق الفلاتر
   const fRep = state.filters.routeRep || "all";
+  const fArea = state.filters.routeArea || "all";
+  const fCustomer = state.filters.routeCustomer || "all";
   const fStatus = state.filters.routeStatus || "all";
 
   // حساب المؤشرات المطابقة لشيت الإكسل
@@ -777,7 +786,7 @@ function viewRoute() {
         </div>
       </div>
 
-      <!-- تصفيات سريعة -->
+      <!-- تصفيات سريعة وفلاتر متكاملة للمنطقة والعميل والحالة -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
         <div class="seg" id="routeRepSeg">
           <button data-f="all" class="${fRep === "all" ? "active" : ""}">كل المحصلين (${allRoute.length})</button>
@@ -785,8 +794,23 @@ function viewRoute() {
         </div>
 
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث سلس وفوري باسم العميل، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:240px;">
-          <select id="routeStatusFilter" class="select" style="padding:6px 10px;">
+          <!-- حقل البحث الفوري السلس -->
+          <input class="search-input" id="routeTableSearch" type="search" placeholder="بحث باسم العميل، المنطقة، الرد…" value="${esc(state.filters.routeSearch || "")}" style="padding:6px 12px; min-width:180px;">
+
+          <!-- فلتر المنطقة -->
+          <select id="routeAreaFilter" class="select" style="padding:6px 10px; font-weight:700;">
+            <option value="all" ${fArea === "all" ? "selected" : ""}>كل المناطق (${areas.length})</option>
+            ${areas.map((a) => `<option value="${esc(a)}" ${fArea === a ? "selected" : ""}>📍 ${esc(a)} (${allRoute.filter((x) => x.area === a).length})</option>`).join("")}
+          </select>
+
+          <!-- فلتر العميل -->
+          <select id="routeCustomerFilter" class="select" style="padding:6px 10px; font-weight:700; max-width:180px;">
+            <option value="all" ${fCustomer === "all" ? "selected" : ""}>كل العملاء (${customers.length})</option>
+            ${customers.map((c) => `<option value="${esc(c)}" ${fCustomer === c ? "selected" : ""}>👤 ${esc(c)}</option>`).join("")}
+          </select>
+
+          <!-- فلتر حالة التواصل -->
+          <select id="routeStatusFilter" class="select" style="padding:6px 10px; font-weight:700;">
             <option value="all" ${fStatus === "all" ? "selected" : ""}>كل حالات التواصل</option>
             <option value="responded" ${fStatus === "responded" ? "selected" : ""}>✅ تم الرد / مستجيب (${allRoute.filter((x) => normalizeComm(x.comm) === "تم الرد / مستجيب").length})</option>
             <option value="no_answer" ${fStatus === "no_answer" ? "selected" : ""}>⚠️ لا يرد / غير متاح (${allRoute.filter((x) => normalizeComm(x.comm) === "لا يرد / غير متاح").length})</option>
@@ -794,6 +818,7 @@ function viewRoute() {
             <option value="pending" ${fStatus === "pending" ? "selected" : ""}>⏳ قيد المتابعة (${allRoute.filter((x) => normalizeComm(x.comm) === "قيد المتابعة" && !x.notVisited).length})</option>
             <option value="paid" ${fStatus === "paid" ? "selected" : ""}>💰 تم السداد اليوم (${allRoute.filter((x) => x.paid > 0).length})</option>
           </select>
+
           ${clearSortBtn("route")}
         </div>
       </div>
@@ -860,9 +885,13 @@ function viewRoute() {
     const fSearch = (state.filters.routeSearch || "").trim();
     const fStatus = state.filters.routeStatus || "all";
     const fRep = state.filters.routeRep || "all";
+    const fArea = state.filters.routeArea || "all";
+    const fCustomer = state.filters.routeCustomer || "all";
 
     let filtered = allRoute.filter((item) => {
       if (fRep !== "all" && item.collector !== fRep) return false;
+      if (fArea !== "all" && item.area !== fArea) return false;
+      if (fCustomer !== "all" && item.customer !== fCustomer) return false;
       const nComm = normalizeComm(item.comm);
       if (fStatus === "responded" && nComm !== "تم الرد / مستجيب") return false;
       if (fStatus === "no_answer" && nComm !== "لا يرد / غير متاح") return false;
@@ -1004,6 +1033,26 @@ function bindRouteEvents(drawRouteRows) {
   if (statusSelect) {
     statusSelect.addEventListener("change", (e) => {
       state.filters.routeStatus = e.target.value;
+      if (drawRouteRows) drawRouteRows();
+      else viewRoute();
+    });
+  }
+
+  // فلتر المنطقة
+  const areaSelect = $("routeAreaFilter");
+  if (areaSelect) {
+    areaSelect.addEventListener("change", (e) => {
+      state.filters.routeArea = e.target.value;
+      if (drawRouteRows) drawRouteRows();
+      else viewRoute();
+    });
+  }
+
+  // فلتر العميل
+  const custSelect = $("routeCustomerFilter");
+  if (custSelect) {
+    custSelect.addEventListener("change", (e) => {
+      state.filters.routeCustomer = e.target.value;
       if (drawRouteRows) drawRouteRows();
       else viewRoute();
     });
@@ -1981,13 +2030,15 @@ function viewMasterData() {
   const stats = getMasterActivityStats(master);
   const enrichedMaster = stats.enriched;
 
-  // الخيارات الفريدة لموقف اليوم والتصنيفات
+  // الخيارات الفريدة لموقف اليوم والتصنيفات والمناطق
   const todayStatuses = ["🟢 ساري", "🎯 هدف اليوم", "✅ خالص"];
   const classifications = [...new Set(master.map((m) => m.classification).filter(Boolean))];
+  const masterAreas = [...new Set(master.map((m) => m.area).filter((a) => a && a !== "—" && a !== "__"))].sort((a, b) => a.localeCompare(b, "ar"));
 
   // تطبيق الفلاتر
   const fSearch = (state.filters.masterSearch || "").trim().toLowerCase();
   const fCollector = state.filters.masterCollector || "all";
+  const fArea = state.filters.masterArea || "all";
   const fTodayStatus = state.filters.masterTodayStatus || "all";
   const fActivity = state.filters.masterActivity || "all";
   const fClass = state.filters.masterClass || "all";
@@ -2085,6 +2136,12 @@ function viewMasterData() {
             <option value="none" ${fCollector === "none" ? "selected" : ""}>بدون محصل محدد</option>
           </select>
 
+          <!-- فلتر المنطقة في ماستر داتا -->
+          <select id="masterAreaSelect" class="select">
+            <option value="all" ${fArea === "all" ? "selected" : ""}>كل المناطق (${masterAreas.length})</option>
+            ${masterAreas.map((a) => `<option value="${esc(a)}" ${fArea === a ? "selected" : ""}>📍 ${esc(a)} (${master.filter((m) => m.area === a).length})</option>`).join("")}
+          </select>
+
           <select id="masterClassSelect" class="select">
             <option value="all" ${fClass === "all" ? "selected" : ""}>كل التصنيفات</option>
             ${classifications.map((c) => `<option value="${esc(c)}" ${fClass === c ? "selected" : ""}>${esc(c)}</option>`).join("")}
@@ -2159,6 +2216,7 @@ function viewMasterData() {
     const st = state.filters.masterTodayStatus || "all";
     const act = state.filters.masterActivity || "all";
     const col = state.filters.masterCollector || "all";
+    const area = state.filters.masterArea || "all";
     const cls = state.filters.masterClass || "all";
     const bal = state.filters.masterBalance || "all";
 
@@ -2167,6 +2225,7 @@ function viewMasterData() {
       if (st !== "all" && m.today_status !== st) return false;
       if (act !== "all" && m._activityKey !== act) return false;
       if (col !== "all" && (col === "none" ? m.collector : m.collector !== col)) return false;
+      if (area !== "all" && m.area !== area) return false;
       if (cls !== "all" && m.classification !== cls) return false;
       if (bal === "has_debt" && m.balance <= 0) return false;
       if (bal === "zero_debt" && m.balance > 0) return false;
@@ -2303,6 +2362,13 @@ function viewMasterData() {
   if (colSel) {
     colSel.addEventListener("change", () => {
       state.filters.masterCollector = colSel.value;
+      drawMaster();
+    });
+  }
+  const areaSel = $("masterAreaSelect");
+  if (areaSel) {
+    areaSel.addEventListener("change", () => {
+      state.filters.masterArea = areaSel.value;
       drawMaster();
     });
   }
