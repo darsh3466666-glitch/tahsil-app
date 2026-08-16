@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-16 15:06:48",
+  "generated_at": "2026-08-16 15:08:57",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -4351,12 +4351,12 @@
    "balance": 540.0,
    "last_payment": "2026-05-31",
    "last_invoice": "2026-05-25",
-   "last_visit": "2026-08-13",
-   "agreement_days": "0",
-   "due_date": "2026-08-13",
+   "last_visit": "2026-08-16",
+   "agreement_days": "90",
+   "due_date": "2026-11-14",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
    "notes": "مكالمة من ا احمد ",
    "agreements": "",
@@ -10933,17 +10933,6 @@
    "notes": "قالي  10 ايام",
    "last_payment": "2026-08-05",
    "last_visit": "2026-04-07"
-  },
-  {
-   "customer": "راضي منصور",
-   "balance": 540.0,
-   "collector": "مصطفى",
-   "area": "الهداهده",
-   "due": "2026-08-13",
-   "classification": "فاتورة بفاتورة",
-   "notes": "مكالمة من ا احمد ",
-   "last_payment": "2026-05-31",
-   "last_visit": "2026-08-13"
   }
  ],
  "route_sheets": {
@@ -11124,12 +11113,6 @@
      "balance": 231300.0,
      "last_invoice": "2026-08-13",
      "last_payment": "2026-06-02"
-    },
-    {
-     "customer": "راضي منصور",
-     "balance": 540.0,
-     "last_invoice": "2026-05-25",
-     "last_payment": "2026-05-31"
     },
     {
      "customer": "عمرو صلاح الكومي (ياسر عبد الصمد)",
