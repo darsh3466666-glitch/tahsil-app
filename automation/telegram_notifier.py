@@ -136,63 +136,40 @@ def send_telegram_message(text: str, chat_id: str = None, bot_token: str = None,
 
 
 def build_morning_report_text(reminders: list[dict], report_date: datetime.date = None) -> str:
-    """بناء وتنسيق نص التقرير الصباحي الشامل"""
+    """بناء قائمة نقطية سريعة ومدمجة لمتابعات اليوم (سطر واحد لكل عميل)"""
     if report_date is None:
         report_date = datetime.date.today()
 
-    # أسماء الأيام بالعربية
-    days_ar = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
-    day_name = days_ar[report_date.weekday()]
-    date_str = report_date.strftime("%d/%m/%Y")
+    date_str = report_date.strftime("%d/%m")
 
     if not reminders:
-        return (
-            f"☀️ *تقرير المتابعات والتحصيلات الصباحي*\n"
-            f"📅 التاريخ: {day_name} {date_str} (الساعة 10:00 ص)\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"✅ *ممتاز!* لا توجد مواعيد سداد متأخرة أو متابعات مستحقة اليوم.\n"
-            f"🎯 خط سير اليوم جاهز في التطبيق."
-        )
+        return f"⏰ *متابعات اليوم ({date_str}):* لا توجد مواعيد مستحقة اليوم ✅"
 
     # تقسيم العملاء حسب المحصل
     grouped = {}
     total_balance = 0.0
     for r in reminders:
-        rep = r.get("collector") or "بدون محصل محدد"
+        rep = r.get("collector") or "عام"
         if rep not in grouped:
             grouped[rep] = []
         grouped[rep].append(r)
         total_balance += float(r.get("balance") or 0.0)
 
-    lines = [
-        f"📋 *تقرير المتابعات والتحصيلات الصباحي*",
-        f"📅 اليوم: *{day_name}* {date_str} | ⏰ *10:00 صباحاً*",
-        f"━━━━━━━━━━━━━━━━━━━━━\n",
-    ]
+    lines = [f"⏰ *متابعات اليوم ({date_str}):*\n"]
 
     for rep, items in grouped.items():
-        rep_total = sum(float(x.get("balance") or 0) for x in items)
-        lines.append(f"👤 *المحصل: {rep}* ({len(items)} عميل | {format_money(rep_total)})")
-        lines.append("─────────────────────")
-
-        for idx, item in enumerate(items, 1):
+        lines.append(f"👤 *{rep}:*")
+        for item in items:
             cust_name = item.get("customer_name") or "عميل"
-            area = item.get("area") or "—"
+            area = item.get("area")
+            area_str = f" ({area})" if area and area != "—" and area != "__" else ""
             bal = format_money(item.get("balance") or 0)
-            notes = item.get("notes") or "وعد بالمتابعة اليوم"
-
-            lines.append(f"{idx}. *{cust_name}*")
-            lines.append(f"   📍 المنطقة: {area} | 💰 المديونية: {bal}")
-            lines.append(f"   📝 الاتفاق السابق: _{notes}_")
-            lines.append("")
-
+            notes = item.get("notes") or "متابعة"
+            lines.append(f"• *{cust_name}*{area_str} | {bal} | {notes}")
         lines.append("")
 
-    lines.append("━━━━━━━━━━━━━━━━━━━━━")
-    lines.append(f"📊 *الإجمالي العام المستحق اليوم:* {format_money(total_balance)} ({len(reminders)} عميل)")
-    lines.append("🎯 *بالتوفيق لرجال التحصيل اليوم! برجاء إرسال الردود أولاً بأول.*")
-
-    return "\n".join(lines)
+    lines.append(f"📊 *الإجمالي:* {format_money(total_balance)} ({len(reminders)} عميل)")
+    return "\n".join(lines).strip()
 
 
 def send_morning_collection_report(target_date_str: str = None) -> bool:
@@ -210,30 +187,23 @@ def send_morning_collection_report(target_date_str: str = None) -> bool:
         # تعليم التنبيهات المرسلة
         reminder_ids = [r["id"] for r in reminders if "id" in r]
         db_manager.mark_reminders_as_notified(reminder_ids)
-        print(f"[Telegram Success] تم إرسال تقرير الصباح بنجاح لعدد {len(reminders)} عميل.")
+        print(f"[Telegram Success] تم إرسال تقرير الصباح لعدد {len(reminders)} عميل.")
     elif success:
-        print("[Telegram Success] تم إرسال تقرير الصباح (لا توجد متابعات لليوم).")
+        print("[Telegram Success] تم إرسال تقرير الصباح.")
     return success
 
 
 def send_instant_payment_alert(customer_name: str, amount: float, collector: str = "", notes: str = "") -> bool:
     """
-    إرسال إشعار فوري لحظة تحصيل أي دفعة
+    إشعار فوري مختصر وسريع عند تسجيل أي سداد
     """
     cfg = load_config()
     if not cfg.get("telegram", {}).get("enable_instant_payment_alerts", True):
         return False
 
-    now_time = datetime.datetime.now().strftime("%I:%M %p")
-    text = (
-        f"💸 *تم تسجيل سداد تحصيل جديد ✓*\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 *العميل:* {customer_name}\n"
-        f"💰 *المبلغ المحصل:* {format_money(amount)}\n"
-        f"📍 *المحصل:* {collector or 'عام'}\n"
-        f"⏰ *الوقت:* {now_time}\n"
-        f"{f'📝 *بيان:* {notes}' if notes else ''}"
-    )
+    rep_str = f" ({collector})" if collector else ""
+    notes_str = f" | {notes}" if notes else ""
+    text = f"💸 *سداد جديد:* *{customer_name}*{rep_str} | {format_money(amount)}{notes_str} ✓"
     return send_telegram_message(text)
 
 
