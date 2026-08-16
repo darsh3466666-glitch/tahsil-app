@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-16 10:14:26",
+  "generated_at": "2026-08-16 10:16:35",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10711,6 +10711,14 @@
    "last_response": "الخميس 6/8/2026"
   },
   {
+   "customer": "شعبان محمد - نجع اللهيب",
+   "target_debt": 4450.0,
+   "area": "نجع اللهيب",
+   "last_payment": "2026-06-29",
+   "last_invoice": "2026-07-16",
+   "last_response": "شهر بلاغ استاذ احمد"
+  },
+  {
    "customer": "محمد احمد (الوسطى)",
    "target_debt": 19065.0,
    "area": "مرعب",
@@ -10727,6 +10735,22 @@
    "last_response": "اخر النهار 18/7/2026"
   },
   {
+   "customer": "مرسي (مدشه)",
+   "target_debt": 550.0,
+   "area": "مدشة ",
+   "last_payment": "2026-08-05",
+   "last_invoice": "2026-08-12",
+   "last_response": "قالي  10 ايام"
+  },
+  {
+   "customer": "حماده عبد الخالق قيصر",
+   "target_debt": 4790.6600000000035,
+   "area": "قيصر",
+   "last_payment": "2026-08-08",
+   "last_invoice": "2026-08-08",
+   "last_response": "بكرا 5/7/2026"
+  },
+  {
    "customer": "حجاج حامد (قصر شانة)",
    "target_debt": 8475.0,
    "area": "قصر شانة",
@@ -10735,20 +10759,12 @@
    "last_response": "0"
   },
   {
-   "customer": "د. عبد المجيد المرزوقي",
-   "target_debt": 2380.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2025-04-16",
-   "last_invoice": "2025-04-13",
-   "last_response": "زيارة كل جمعة مع ربيع قرني"
-  },
-  {
    "customer": "ربيع قرني(طريق اسيوط)",
-   "target_debt": 22650.0,
+   "target_debt": 7650.0,
    "area": "طريق اسيوط",
-   "last_payment": "2026-06-27",
+   "last_payment": "2026-08-15",
    "last_invoice": "2026-05-13",
-   "last_response": "الجمعة 14/8"
+   "last_response": "الاثنين 17/8"
   },
   {
    "customer": "محمود اسماعيل",
@@ -10767,44 +10783,12 @@
    "last_response": "بكرا 9/8/2026"
   },
   {
-   "customer": "شعبان فتحي(الشيخ علي)",
-   "target_debt": 3915.0,
-   "area": "الشيخ علي",
-   "last_payment": "2026-08-02",
-   "last_invoice": "2026-08-13",
-   "last_response": "0"
-  },
-  {
    "customer": "عمرو حسن عابد",
    "target_debt": 2400.0,
    "area": "الشركه",
    "last_payment": "2026-07-09",
    "last_invoice": "2026-07-09",
-   "last_response": "السبت 15/8"
-  },
-  {
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "target_debt": 12890.0,
-   "area": "السحابه",
-   "last_payment": "2026-07-26",
-   "last_invoice": "2026-08-09",
-   "last_response": "السبت 15/8"
-  },
-  {
-   "customer": "حامد ابراهيم (الدوار)",
-   "target_debt": 18345.0,
-   "area": "الدوار",
-   "last_payment": "2026-07-13",
-   "last_invoice": "2026-07-13",
-   "last_response": "هيصفي "
-  },
-  {
-   "customer": "مصطفى محمد حسن (الحطي)",
-   "target_debt": 13700.0,
-   "area": "الحطي",
-   "last_payment": "2025-10-05",
-   "last_invoice": "2026-07-20",
-   "last_response": "بلاغ استاذ احمد "
+   "last_response": "بكرا 16/8"
   },
   {
    "customer": "جمعه محمد حسن (الحطي)",
@@ -10813,38 +10797,6 @@
    "last_payment": "2026-05-25",
    "last_invoice": "2026-07-25",
    "last_response": "مستني يبيع"
-  },
-  {
-   "customer": "عويس سيف(ابو شويقي)",
-   "target_debt": 14200.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-07-08",
-   "last_invoice": "2026-07-08",
-   "last_response": "اخد شهر عشان فاتورة وفاتورة"
-  },
-  {
-   "customer": "عدلي عبدالهادي (ابو شويقي)",
-   "target_debt": 239265.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-08-10",
-   "last_invoice": "2026-08-13",
-   "last_response": "الاثنين 10/8"
-  },
-  {
-   "customer": "مفرح سيد فهيم",
-   "target_debt": 165400.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-04-08",
-   "last_invoice": "2025-12-16",
-   "last_response": "اتفاق ومناقشة مع حاج منير"
-  },
-  {
-   "customer": "عيد احمد عبد الفتاح(ابو السعود)",
-   "target_debt": 616150.0,
-   "area": "ابو السعود",
-   "last_payment": "2026-08-13",
-   "last_invoice": "2026-08-08",
-   "last_response": "0"
   }
  ],
  "daily_targets": [
