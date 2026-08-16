@@ -327,8 +327,6 @@ function initInteractiveRouteIfNeeded() {
     const rl = ratingMap.get(t.customer);
     const mm = masterMap.get(t.customer);
     const rep = t.collector || (mm ? mm.collector : "") || "مصطفى";
-    const rawResp = rl ? rl.last_response : (t.notes || (mm ? mm.notes : ""));
-    const lastResp = cleanResponse(rawResp);
     const bal = Number(t.balance) || (mm ? Number(mm.balance) : 0) || 0;
 
     routeList.push({
@@ -338,8 +336,8 @@ function initInteractiveRouteIfNeeded() {
       balance: bal,
       paid: 0,
       status: "لم يسدد",
-      comm: inferCommFromResponse(lastResp, 0, "قيد المتابعة"),
-      response: lastResp,
+      comm: "قيد المتابعة",
+      response: "",
       notVisited: false,
       last_invoice: mm ? (mm.last_invoice || "") : "",
       last_payment: t.last_payment || (mm ? mm.last_payment : "") || "",
@@ -360,8 +358,6 @@ function initInteractiveRouteIfNeeded() {
       const rl = ratingMap.get(c.customer);
       const mm = masterMap.get(c.customer);
       const bal = Number(c.balance) || (mm ? Number(mm.balance) : 0) || 0;
-      const rawResp = rl ? rl.last_response : (mm ? mm.notes : "");
-      const lastResp = cleanResponse(rawResp);
       routeList.push({
         customer: c.customer,
         collector: repName,
@@ -369,8 +365,8 @@ function initInteractiveRouteIfNeeded() {
         balance: bal,
         paid: 0,
         status: "لم يسدد",
-        comm: inferCommFromResponse(lastResp, 0, "قيد المتابعة"),
-        response: lastResp,
+        comm: "قيد المتابعة",
+        response: "",
         notVisited: false,
         last_invoice: mm ? (mm.last_invoice || "") : "",
         last_payment: c.last_payment || (mm ? mm.last_payment : "") || "",
@@ -1172,6 +1168,9 @@ function viewRoute() {
           </button>
           <button type="button" class="btn btn-ghost" onclick="openWhatsAppShareModal('${fRep}')" style="padding:6px 12px; font-size:0.82rem; font-weight:700;" title="نسخ رسالة خط السير لإرسالها للمحصلين">
             📋 ملخص الواتساب
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="resetTodayRouteProgress()" style="padding:6px 12px; font-size:0.82rem; font-weight:700; color:var(--danger);" title="تصفير كل ردود وسدادات اليومية للبدء من الصفر للتجربة">
+            ↺ تصفير اليومية للتجربة
           </button>
           <button type="button" id="resetRouteBtn" class="clear-sort" title="استعادة خط السير من الشيت الأصلي">↺ استعادة المقترح</button>
         </div>
@@ -2898,6 +2897,22 @@ function initTheme() {
   applyTheme(saved || (prefersDark ? "dark" : "light"));
 }
 
+function resetTodayRouteProgress() {
+  initInteractiveRouteIfNeeded();
+  if (!state.interactiveRoute) return;
+  state.interactiveRoute.forEach((c) => {
+    c.response = "";
+    c.comm = "قيد المتابعة";
+    c.paid = 0;
+    c.status = "لم يسدد";
+    c.notVisited = false;
+    c.updatedAt = "";
+  });
+  saveInteractiveRoute();
+  toast("تم التصفير ✓", "تم تصفير ردود وسدادات اليومية للبدء من الصفر للتجربة", "pay");
+  viewRoute();
+}
+
 // تصدير الدوال التفاعلية عالمياً
 window.openResponseModal = openResponseModal;
 window.closeResponseModal = closeResponseModal;
@@ -2907,6 +2922,7 @@ window.openWhatsAppShareModal = openWhatsAppShareModal;
 window.closeWhatsAppShareModal = closeWhatsAppShareModal;
 window.openWhatsAppParserModal = openWhatsAppParserModal;
 window.closeWhatsAppParserModal = closeWhatsAppParserModal;
+window.resetTodayRouteProgress = resetTodayRouteProgress;
 window.setCollectorTab = setCollectorTab;
 window.copyCollectorSummaryReport = copyCollectorSummaryReport;
 window.switchView = switchView;
