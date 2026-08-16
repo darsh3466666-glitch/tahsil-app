@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-16 10:16:35",
+  "generated_at": "2026-08-16 10:19:44",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10735,14 +10735,6 @@
    "last_response": "اخر النهار 18/7/2026"
   },
   {
-   "customer": "مرسي (مدشه)",
-   "target_debt": 550.0,
-   "area": "مدشة ",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-08-12",
-   "last_response": "قالي  10 ايام"
-  },
-  {
    "customer": "حماده عبد الخالق قيصر",
    "target_debt": 4790.6600000000035,
    "area": "قيصر",
@@ -10757,14 +10749,6 @@
    "last_payment": "",
    "last_invoice": "2026-08-08",
    "last_response": "0"
-  },
-  {
-   "customer": "ربيع قرني(طريق اسيوط)",
-   "target_debt": 7650.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2026-08-15",
-   "last_invoice": "2026-05-13",
-   "last_response": "الاثنين 17/8"
   },
   {
    "customer": "محمود اسماعيل",
@@ -10797,6 +10781,14 @@
    "last_payment": "2026-05-25",
    "last_invoice": "2026-07-25",
    "last_response": "مستني يبيع"
+  },
+  {
+   "customer": "عويس سيف(ابو شويقي)",
+   "target_debt": 14200.0,
+   "area": "ابو شويقي",
+   "last_payment": "2026-07-08",
+   "last_invoice": "2026-07-08",
+   "last_response": "اخد شهر عشان فاتورة وفاتورة"
   }
  ],
  "daily_targets": [
