@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-16 15:05:40",
+  "generated_at": "2026-08-16 15:06:48",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -5531,12 +5531,12 @@
    "balance": 500.0,
    "last_payment": "2026-07-25",
    "last_invoice": "2026-07-21",
-   "last_visit": "2026-07-21",
-   "agreement_days": "0",
-   "due_date": "2026-07-21",
+   "last_visit": "2026-08-16",
+   "agreement_days": "30",
+   "due_date": "2026-09-15",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
    "notes": "هيحول بكرا 12/7/2026",
    "agreements": "",
@@ -10944,17 +10944,6 @@
    "notes": "مكالمة من ا احمد ",
    "last_payment": "2026-05-31",
    "last_visit": "2026-08-13"
-  },
-  {
-   "customer": "المعلم/ عبد الفتاح ربيع",
-   "balance": 500.0,
-   "collector": "مصطفى",
-   "area": "",
-   "due": "2026-07-21",
-   "classification": "فاتورة بفاتورة",
-   "notes": "هيحول بكرا 12/7/2026",
-   "last_payment": "2026-07-25",
-   "last_visit": "2026-07-21"
   }
  ],
  "route_sheets": {
@@ -11110,12 +11099,6 @@
      "customer": "حماده ابو خضره سيلا",
      "balance": 918290.0,
      "last_invoice": "2026-07-23",
-     "last_payment": "2026-07-25"
-    },
-    {
-     "customer": "المعلم/ عبد الفتاح ربيع",
-     "balance": 500.0,
-     "last_invoice": "2026-07-21",
      "last_payment": "2026-07-25"
     },
     {
