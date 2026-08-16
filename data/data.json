@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-16 10:08:30",
+  "generated_at": "2026-08-16 10:10:09",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -3791,12 +3791,12 @@
    "balance": 2380.0,
    "last_payment": "2025-04-16",
    "last_invoice": "2025-04-13",
-   "last_visit": "2026-08-11",
-   "agreement_days": "4",
-   "due_date": "2026-08-15",
+   "last_visit": "2026-08-16",
+   "agreement_days": "2",
+   "due_date": "2026-08-18",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "مشكوك في تحصيله ",
    "notes": "زيارة كل جمعة مع ربيع قرني",
    "agreements": "",
@@ -4355,7 +4355,7 @@
    "agreement_days": "0",
    "due_date": "2026-08-13",
    "status": "نشط",
-   "collector": "محمد شعبان",
+   "collector": "مصطفى",
    "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "مكالمة من ا احمد ",
@@ -5911,12 +5911,12 @@
    "balance": 50138.8571390002,
    "last_payment": "2026-08-15",
    "last_invoice": "2026-08-12",
-   "last_visit": "2026-08-08",
+   "last_visit": "2026-08-16",
    "agreement_days": "7",
-   "due_date": "2026-08-15",
+   "due_date": "2026-08-23",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء كاش ",
    "notes": "بكرا",
    "agreements": "",
@@ -9776,24 +9776,6 @@
    "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
-   "prev_due": "2026-08-13",
-   "appt_status": "0",
-   "new_due": "2026-08-13",
-   "customer": "راضي منصور",
-   "target_debt": 540.0,
-   "area": "الهداهده",
-   "last_payment": "2026-05-31",
-   "last_invoice": "2026-05-25",
-   "last_response": "مكالمة من ا احمد ",
-   "total_withdrawn": 180495.0,
-   "total_paid": 140825.0,
-   "collected": 0.0,
-   "remaining": 540.0,
-   "collection_rate": "0",
-   "turnover": "334.25",
-   "rating": "خطر 🔴 (متوقف/راكد)"
-  },
-  {
    "prev_due": "2026-06-23",
    "appt_status": "7",
    "new_due": "2026-06-30",
@@ -9866,24 +9848,6 @@
    "rating": "خطر 🔴 (متوقف/راكد)"
   },
   {
-   "prev_due": "2026-08-11",
-   "appt_status": "4",
-   "new_due": "2026-08-15",
-   "customer": "د. عبد المجيد المرزوقي",
-   "target_debt": 2380.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2025-04-16",
-   "last_invoice": "2025-04-13",
-   "last_response": "زيارة كل جمعة مع ربيع قرني",
-   "total_withdrawn": 1957255.0,
-   "total_paid": 1941775.0,
-   "collected": 0.0,
-   "remaining": 2380.0,
-   "collection_rate": "0",
-   "turnover": "822.3760504201681",
-   "rating": "خطر 🔴 (متوقف/راكد)"
-  },
-  {
    "prev_due": "2026-08-04",
    "appt_status": "2",
    "new_due": "2026-08-06",
@@ -9918,24 +9882,6 @@
    "collection_rate": "0",
    "turnover": "2.0469907407407408",
    "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-08-08",
-   "appt_status": "7",
-   "new_due": "2026-08-15",
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "target_debt": 50138.8571390002,
-   "area": "كوم ابو راضي",
-   "last_payment": "2026-08-15",
-   "last_invoice": "2026-08-12",
-   "last_response": "بكرا",
-   "total_withdrawn": 5374650.0,
-   "total_paid": 4407845.0,
-   "collected": 0.0,
-   "remaining": 50138.8571390002,
-   "collection_rate": "0",
-   "turnover": "107.1953033372865",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
    "prev_due": "2026-08-10",
@@ -10149,7 +10095,7 @@
    "balance": 50138.8571390002,
    "expected": 100000.0,
    "collected": 100000.0,
-   "due": "2026-08-15",
+   "due": "2026-08-23",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10512,7 +10458,7 @@
    "balance": 2380.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-15",
+   "due": "2026-08-18",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10621,7 +10567,7 @@
    "B": "عمرو حسن عابد",
    "C": "2400",
    "I": "الباقي",
-   "J": "1575105.6600000001",
+   "J": "1572185.6600000001",
    "M": "لم يتم التواصل"
   },
   {
@@ -10731,36 +10677,26 @@
   },
   {
    "A": "21",
-   "B": "راضي منصور",
-   "C": "540"
-  },
-  {
-   "A": "22",
    "B": "عطيه محمد غريب (العياط)",
    "C": "5945"
   },
   {
-   "A": "23",
+   "A": "22",
    "B": "مفرح سيد فهيم",
    "C": "165400"
   },
   {
-   "A": "24",
+   "A": "23",
    "B": "محمود اسماعيل",
    "C": "60000"
   },
   {
-   "A": "25",
+   "A": "24",
    "B": "عمر زين (حنس)",
    "C": "151155"
   },
   {
-   "A": "26",
-   "B": "د. عبد المجيد المرزوقي",
-   "C": "2380"
-  },
-  {
-   "A": "27",
+   "A": "25",
    "B": "محمد عبد العزيز حسين (نصار)",
    "C": "640"
   }
@@ -11056,17 +10992,6 @@
    "last_visit": "2026-06-08"
   },
   {
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "balance": 50138.8571390002,
-   "collector": "مصطفى",
-   "area": "كوم ابو راضي",
-   "due": "2026-08-15",
-   "classification": "عملاء كاش ",
-   "notes": "بكرا",
-   "last_payment": "2026-08-15",
-   "last_visit": "2026-08-08"
-  },
-  {
    "customer": "محمد احمد (الوسطى)",
    "balance": 19065.0,
    "collector": "محمد شعبان",
@@ -11210,17 +11135,6 @@
    "last_visit": "2026-08-15"
   },
   {
-   "customer": "د. عبد المجيد المرزوقي",
-   "balance": 2380.0,
-   "collector": "محمد شعبان",
-   "area": "طريق اسيوط",
-   "due": "2026-08-15",
-   "classification": "مشكوك في تحصيله ",
-   "notes": "زيارة كل جمعة مع ربيع قرني",
-   "last_payment": "2025-04-16",
-   "last_visit": "2026-08-11"
-  },
-  {
    "customer": "اسامه يحيى (العياط)",
    "balance": 1470.0,
    "collector": "محمد شعبان",
@@ -11267,7 +11181,7 @@
   {
    "customer": "راضي منصور",
    "balance": 540.0,
-   "collector": "محمد شعبان",
+   "collector": "مصطفى",
    "area": "الهداهده",
    "due": "2026-08-13",
    "classification": "فاتورة بفاتورة",
@@ -11359,12 +11273,6 @@
      "last_payment": "2026-07-05"
     },
     {
-     "customer": "د. عبد المجيد المرزوقي",
-     "balance": 2380.0,
-     "last_invoice": "2025-04-13",
-     "last_payment": "2025-04-16"
-    },
-    {
      "customer": "عمر زين (حنس)",
      "balance": 151155.0,
      "last_invoice": "2025-04-20",
@@ -11387,12 +11295,6 @@
      "balance": 5945.0,
      "last_invoice": "2026-01-19",
      "last_payment": "2026-06-02"
-    },
-    {
-     "customer": "راضي منصور",
-     "balance": 540.0,
-     "last_invoice": "2026-05-25",
-     "last_payment": "2026-05-31"
     },
     {
      "customer": "محمد فتحي حسن(مرعب)",
@@ -11465,12 +11367,6 @@
      "last_payment": "2026-05-25"
     },
     {
-     "customer": "بادية فارم (كوم ابو راضي)",
-     "balance": 50138.8571390002,
-     "last_invoice": "2026-08-12",
-     "last_payment": "2026-08-15"
-    },
-    {
      "customer": "احمد سعد (السحابه)",
      "balance": 119445.0,
      "last_invoice": "2026-07-29",
@@ -11531,6 +11427,12 @@
      "balance": 12965.0,
      "last_invoice": "2026-07-22",
      "last_payment": "2026-08-05"
+    },
+    {
+     "customer": "راضي منصور",
+     "balance": 540.0,
+     "last_invoice": "2026-05-25",
+     "last_payment": "2026-05-31"
     },
     {
      "customer": "عمرو صلاح الكومي (ياسر عبد الصمد)",
