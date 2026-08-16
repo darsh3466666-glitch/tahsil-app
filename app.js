@@ -986,7 +986,7 @@ function switchView(name, force) {
   const titles = { dashboard: "لوحة التحكم", route: "خط سير اليوم", collectors: "تقييم المحصلين", cashflow: "التدفق النقدي", cycle: "عملاء بالدورة", master: "Master Data" };
   $("pageTitle").textContent = titles[name] || "لوحة التحكم";
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== "view-" + name));
-  if (force || !state.data) return;
+  if (!state.data) return;
   const fns = { dashboard: viewDashboard, route: viewRoute, collectors: viewCollectors, cashflow: viewCashflow, cycle: viewCycle, master: viewMasterData };
   if (fns[name]) fns[name]();
 }
@@ -2131,6 +2131,7 @@ function viewCollectors() {
     // عرض المقارنة الشاملة (All Collectors Side-by-Side Comparison)
     const scorecards = repMetrics.map((data) => {
       const { rep, stats, totalCollected, collectionPct, coveragePct, responsePct, evalScore } = data;
+      const pctColor = collectionPct >= 70 ? "var(--success)" : collectionPct >= 40 ? "var(--warning)" : "var(--danger)";
 
       return `
         <div class="comp-scorecard highlight">
@@ -3098,7 +3099,16 @@ function resetTodayRouteProgress() {
   viewRoute();
 }
 
-// تصدير الدوال التفاعلية عالمياً
+// تصدير الدوال والكائنات عالمياً
+window.state = state;
+window.render = render;
+window.fetchData = fetchData;
+window.viewDashboard = viewDashboard;
+window.viewRoute = viewRoute;
+window.viewCollectors = viewCollectors;
+window.viewMasterData = viewMasterData;
+window.viewCashflow = viewCashflow;
+window.viewCycle = viewCycle;
 window.openResponseModal = openResponseModal;
 window.closeResponseModal = closeResponseModal;
 window.setClientPayment = setClientPayment;
