@@ -2598,6 +2598,11 @@ function openResponseModal(customerName) {
   $("respModalCustomer").textContent = `العميل: ${customerName} ${item ? `— منطقة: ${item.area}` : ""}`;
   $("respModalInput").value = currentResp;
   $("respModalComm").value = currentComm;
+
+  document.querySelectorAll("#respPresetChips .chip-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.preset === currentResp);
+  });
+
   $("responseModal").hidden = false;
   $("respModalInput").focus();
 }
@@ -2711,9 +2716,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("#respPresetChips .chip-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
+      document.querySelectorAll("#respPresetChips .chip-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       const preset = btn.dataset.preset;
+      const comm = btn.dataset.comm;
       const input = $("respModalInput");
       input.value = preset;
+      if (comm && $("respModalComm")) {
+        $("respModalComm").value = comm;
+      }
       input.focus();
     });
   });
