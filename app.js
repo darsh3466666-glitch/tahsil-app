@@ -1621,62 +1621,148 @@ function bindCollectorClientEvents() {
   if (colSearch) {
     colSearch.addEventListener("input", (e) => {
       state.filters.collectorSearch = e.target.value;
-      const q = (e.target.value || "").trim();
-      const currentTab = state.filters.collectorTab || "all";
-      const all = state.interactiveRoute || [];
-      const clients = currentTab === "all" ? all : all.filter((x) => x.collector === currentTab);
-      let filteredClients = clients.filter((c) => {
-        if (q && !matchSearch(`${c.customer} ${c.area} ${c.response || ""}`, q)) return false;
-        return true;
-      });
-      let sortedClients = sortArray(filteredClients, "collector_clients", (x, col) => {
-        if (col === "paid") return Number(x.paid) || 0;
-        if (col === "balance") return Number(x.balance) || 0;
-        if (col === "comm") return normalizeComm(x.comm);
-        return x[col] || "";
-      });
-      tbody.innerHTML = sortedClients.length ? sortedClients.map((c, idx) => {
-        const normComm = normalizeComm(c.comm);
-        const isFullPaid = c.paid >= c.balance && c.balance > 0;
-        const isPartial = c.paid > 0 && !isFullPaid;
-        const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
-        const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
-        const commClass = commClassOf(normComm);
-        const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
-        return `
-          <tr class="${rowClass}" data-customer="${esc(c.customer)}">
-            <td class="row-num">${idx + 1}</td>
-            <td><b style="font-size:0.92rem; color:var(--foreground);">${esc(c.customer)}</b></td>
-            <td>📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}</td>
-            <td class="tbl-amount neg">${money(c.balance)}</td>
-            <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">${esc(c.last_invoice || "__")}</td>
-            <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">${esc(c.last_payment || "__")}</td>
-            <td style="min-width: 200px;">
-              <div class="resp-cell-content">
-                <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">${formatNoteDisplay(c.response)}</div>
-                <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> تعديل
-                </button>
-              </div>
-            </td>
-            <td style="min-width: 120px;">
-              <div style="display: inline-flex; align-items: center; gap: 4px;">
-                <input type="number" class="paid-inline-input ${c.paid > 0 ? "has-paid" : ""}" value="${c.paid ? c.paid : ""}" placeholder="0" min="0" step="any" data-action="edit-paid" data-customer="${esc(c.customer)}" title="عدّل المبلغ واضغط Enter للحفظ وتحديث الكروت فورياً" />
-                <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
-              </div>
-            </td>
-            <td><span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span></td>
-            <td style="min-width: 165px;">
-              <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
-                <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
-                <option value="تم الرد / مستجيب" ${normComm === "تم الرد / مستجيب" ? "selected" : ""}>✅ تم الرد / مستجيب</option>
-                <option value="لا يرد / غير متاح" ${normComm === "لا يرد / غير متاح" ? "selected" : ""}>⚠️ لا يرد / غير متاح</option>
-                <option value="لم يذهب ولم يتصل" ${normComm === "لم يذهب ولم يتصل" ? "selected" : ""}>❌ لم يذهب ولم يتصل</option>
-              </select>
-            </td>
-          </tr>`;
-      }).join("") : `<tr><td colspan="10" class="empty-state">لا توجد نتائج مطابقة لبحث المحصل</td></tr>`;
+      viewCollectors();
     });
+  }
+}
+
+/* ========================================================
+   COLLECTOR EVALUATION & RESPONSE INTELLIGENCE ENGINE
+   ======================================================== */
+
+function classifyResponseIntelligence(respText) {
+  const cleaned = cleanResponse(respText);
+  if (!cleaned || cleaned === "0") {
+    return {
+      category: "no_response",
+      label: "🔴 بدون رد / معلق",
+      badgeCls: "resp-intel-none",
+      dateDesc: "",
+      dueDate: null,
+      desc: "لم يتم تسجيل رد من العميل بعد"
+    };
+  }
+
+  const norm = normalizeArabic(cleaned);
+
+  // 1. وعود سداد بمواعيد محددة
+  const dateInfo = parseEgyptianDateInJs(cleaned);
+  const hasSpecificDate = dateInfo && dateInfo.date;
+  const hasPromiseWord = /(?:^|\s)(بكرا|بكره|الخميس|الجمعة|السبت|الاحد|الاثنين|الثلاثاء|الاربعاء|اخر النهار|اسبوع|الاسبوع|يوم|تاريخ|\d{1,2}[\/\-]\d{1,2})(?:\s|$)/.test(norm);
+
+  if (hasSpecificDate || hasPromiseWord || /\b(هيسدد|هيدفع|وعد|سدد|تم السداد|خالص|حول)\b/.test(norm)) {
+    return {
+      category: "promise",
+      label: "🟢 وعد سداد محدد",
+      badgeCls: "resp-intel-promise",
+      dateDesc: (dateInfo && dateInfo.desc) || "موعد محدد",
+      dueDate: dateInfo ? dateInfo.date : null,
+      desc: `وعد بالسداد: ${cleaned}`
+    };
+  }
+
+  // 2. مطالبات وبلاغات ومشاكل إدارية
+  if (/(?:^|\s)(بلاغ|مطالب[ةه]|مطالبه|شكوى|محامي|استاذ احمد|خلاف|مشكل[ةه]|مشكله|قضي[ةه]|قضيه|مرفوض|خصم|محكمة)(?:\s|$)/.test(norm) || cleaned.includes("مطالبة") || cleaned.includes("بلاغ")) {
+    return {
+      category: "escalation",
+      label: "⚠️ مطالبة / مراجعة",
+      badgeCls: "resp-intel-escalate",
+      dateDesc: "يحتاج قرار إداري",
+      dueDate: null,
+      desc: `متابعة إدارية: ${cleaned}`
+    };
+  }
+
+  // 3. مهلة تجارية / انتظار بيع أو طلبيات
+  if (/(?:^|\s)(مستني|يبيع|طلبية|طلب|علف|فاتورة وفاتورة|شهر|بعد العيد|المحصول|دورة)(?:\s|$)/.test(norm)) {
+    return {
+      category: "commercial_wait",
+      label: "⏳ انتظار بيع / مهلة",
+      badgeCls: "resp-intel-wait",
+      dateDesc: "مهلة تجارية",
+      dueDate: null,
+      desc: `انتظار ظروف تجارية: ${cleaned}`
+    };
+  }
+
+  // افتراضي: رد عام
+  return {
+    category: "general_reply",
+    label: "💬 رد وارد",
+    badgeCls: "resp-intel-promise",
+    dateDesc: "",
+      dueDate: null,
+    desc: cleaned
+  };
+}
+
+function calculateCustomerAging(lastInvoiceStr, lastPaymentStr) {
+  const parseDateStr = (str) => {
+    if (!str || str === "00/01/1900" || str === "—" || str === "__") return null;
+    if (str.includes("/")) {
+      const parts = str.split("/");
+      if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m, d);
+      }
+    } else if (str.includes("-")) {
+      const parts = str.split("-");
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m, d);
+      }
+    }
+    return null;
+  };
+
+  const now = new Date(2026, 7, 16);
+  const invDate = parseDateStr(lastInvoiceStr);
+  const payDate = parseDateStr(lastPaymentStr);
+
+  let invDays = null;
+  let isIdleDebt = false;
+  let invBadge = `<span class="aging-badge" style="opacity:0.6;">لا توجد فواتير</span>`;
+
+  if (invDate) {
+    invDays = Math.max(0, Math.floor((now - invDate) / (1000 * 60 * 60 * 24)));
+    if (invDays >= 180) {
+      isIdleDebt = true;
+      invBadge = `<span class="aging-badge idle-risk" title="أكثر من 6 شهور بدون فواتير (${invDays} يوم)">🔴 راكد (${Math.floor(invDays / 30)} شهر)</span>`;
+    } else {
+      invBadge = `<span class="aging-badge active-ok" title="فاتورة حديثة (${invDays} يوم)">🟢 نشط</span>`;
+    }
+  }
+
+  let payDays = null;
+  let payBadge = `<span style="font-size:0.75rem; opacity:0.6;">لم يسدد مسبقاً</span>`;
+  if (payDate) {
+    payDays = Math.max(0, Math.floor((now - payDate) / (1000 * 60 * 60 * 24)));
+    payBadge = `<span style="font-size:0.75rem; font-weight:700; color:var(--foreground);">منذ ${payDays} يوم</span>`;
+  }
+
+  return {
+    invDays,
+    isIdleDebt,
+    invBadge,
+    payDays,
+    payBadge
+  };
+}
+
+function calculateCollectorScore(coveragePct, responsePct, collectionPct) {
+  const score = Math.round((coveragePct * 0.35) + (responsePct * 0.35) + (collectionPct * 0.30));
+  if (score >= 90) {
+    return { score, grade: "A+", label: "⭐⭐⭐⭐⭐ ممتاز (A+)", cls: "score-a-plus", desc: "أداء قياسي في التغطية وسرعة المتابعة والتحصيل" };
+  } else if (score >= 75) {
+    return { score, grade: "A", label: "⭐⭐⭐⭐ جيد جداً (A)", cls: "score-a", desc: "إنجاز وتغطية ميدانية مرتفعة مع متابعة جيدة" };
+  } else if (score >= 55) {
+    return { score, grade: "B", label: "⭐⭐⭐ مقبول (B)", cls: "score-b", desc: "أداء متوسط يحتاج حسم ومتابعة لاسترداد المديونيات" };
+  } else {
+    return { score, grade: "C", label: "⚠️ يحتاج متابعة (C)", cls: "score-c", desc: "تأخر في التواصل الميداني أو قلة الردود المحصلة" };
   }
 }
 
@@ -1688,11 +1774,12 @@ function viewCollectors() {
   initInteractiveRouteIfNeeded();
   const allRoute = state.interactiveRoute || [];
   const master = d.master || [];
+  const masterMap = new Map(master.map((m) => [m.name, m]));
   const reps = ["مصطفى", "محمد شعبان"];
 
   const currentTab = state.filters.collectorTab || "all";
 
-  // حساب بيانات التقييم الشاملة لكل محصل
+  // حساب بيانات التقييم الشاملة لكل محصل بالمعادلات الذكية
   const repMetrics = reps.map((rep) => {
     const clients = allRoute.filter((c) => c.collector === rep);
     const stats = calculateRouteStats(clients);
@@ -1701,8 +1788,51 @@ function viewCollectors() {
     const totalCollected = stats.collected;
     const collectionPct = stats.totalDue > 0 ? Math.round((totalCollected / stats.totalDue) * 100) : 0;
     const coveragePct = stats.totalCount > 0 ? Math.round((stats.contactedCount / stats.totalCount) * 100) : 0;
+    const responsePct = stats.totalCount > 0 ? Math.round((stats.responsiveCount / stats.totalCount) * 100) : 0;
+
+    // التصنيف الذكي لردود عملاء المحصل
+    const enrichedClients = clients.map((c) => {
+      const mm = masterMap.get(c.customer);
+      const lastInv = c.last_invoice || (mm ? mm.last_invoice : "") || "";
+      const lastPay = c.last_payment || (mm ? mm.last_payment : "") || "";
+      const aging = calculateCustomerAging(lastInv, lastPay);
+      const respIntel = classifyResponseIntelligence(c.response);
+      return {
+        ...c,
+        code: mm ? mm.code : "",
+        aging,
+        respIntel,
+      };
+    });
+
+    const promiseCount = enrichedClients.filter((x) => x.respIntel.category === "promise").length;
+    const waitCount = enrichedClients.filter((x) => x.respIntel.category === "commercial_wait").length;
+    const escalateCount = enrichedClients.filter((x) => x.respIntel.category === "escalation").length;
+    const noRespCount = enrichedClients.filter((x) => x.respIntel.category === "no_response").length;
+
+    const evalScore = calculateCollectorScore(coveragePct, responsePct, collectionPct);
 
     return {
+      rep,
+      clients: enrichedClients,
+      stats,
+      repPays,
+      totalCollected,
+      collectionPct,
+      coveragePct,
+      responsePct,
+      promiseCount,
+      waitCount,
+      escalateCount,
+      noRespCount,
+      evalScore,
+    };
+  });
+
+  // إذا تم اختيار محصل معين (عرض مخصص وتفصيلي مطابق لشيت متابعة المحصل)
+  if (currentTab !== "all") {
+    const data = repMetrics.find((x) => x.rep === currentTab) || repMetrics[0];
+    const {
       rep,
       clients,
       stats,
@@ -1710,14 +1840,13 @@ function viewCollectors() {
       totalCollected,
       collectionPct,
       coveragePct,
-    };
-  });
-
-  // إذا تم اختيار محصل معين (عرض مخصص وتفصيلي)
-  if (currentTab !== "all") {
-    const data = repMetrics.find((x) => x.rep === currentTab) || repMetrics[0];
-    const { rep, clients, stats, repPays, totalCollected, collectionPct, coveragePct } = data;
-    const pctColor = collectionPct >= 70 ? "var(--success)" : collectionPct >= 40 ? "var(--warning)" : "var(--danger)";
+      responsePct,
+      promiseCount,
+      waitCount,
+      escalateCount,
+      noRespCount,
+      evalScore,
+    } = data;
 
     $("view-collectors").innerHTML = `
       <!-- شريط التنقل العلوي بين المحصلين والمقارنة الشاملة -->
@@ -1728,83 +1857,118 @@ function viewCollectors() {
         </div>
 
         <div style="display:flex; gap:8px; align-items:center;">
-          <button type="button" class="btn btn-primary" onclick="copyCollectorSummaryReport('${esc(rep)}')" style="font-size:0.8rem; padding:7px 14px;">
-            📋 تقرير الإنجاز اليومي
+          <button type="button" class="btn btn-secondary" onclick="copyCollectorSummaryReport('${esc(rep)}')" style="font-size:0.82rem; padding:7px 14px; font-weight:800;" title="نسخ تقرير التقييم والمتابعات للواتساب">
+            📋 تقرير الإنجاز للمحصل
           </button>
         </div>
       </div>
 
-      <!-- بطاقة المحصل الرئيسية ومؤشرات الإنجاز التنفيذية -->
-      <div class="card" style="margin-bottom: var(--space-4);">
-        <div class="collector-hero-header">
-          <div class="col-avatar">${esc(rep.substring(0, 1))}</div>
-          <div style="flex:1;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <h2 style="font-size:1.35rem; font-weight:900;">${esc(rep)}</h2>
-              <span class="chip chip-blue">محصل ميداني نشط</span>
+      <!-- بطاقة التقييم المتقدمة للمحصل (Scorecard & Performance Index) -->
+      <div class="collector-eval-hero">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="col-avatar" style="width:52px; height:52px; font-size:1.4rem;">${esc(rep.substring(0, 1))}</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <h2 style="font-size:1.4rem; font-weight:900; color:var(--foreground);">${esc(rep)}</h2>
+                <span class="chip chip-blue">متابعة الميدان</span>
+              </div>
+              <div style="font-size:0.82rem; opacity:0.75; margin-top:3px;">
+                تقييم الأداء الميداني بناءً على شيت متابعة المحصل — ${todayStr()}
+              </div>
             </div>
-            <div style="font-size:0.8rem; opacity:0.7; margin-top:2px;">تقييم نشاط ومتابعة العملاء الميدانية لليوم — ${todayStr()}</div>
+          </div>
+
+          <!-- صندوق الدرجة والوسام التقييمي -->
+          <div class="eval-score-box">
+            <div class="eval-score-circle ${evalScore.cls}">
+              ${evalScore.grade}
+            </div>
+            <div>
+              <div style="font-size:0.76rem; font-weight:800; opacity:0.75;">درجة الأداء الإجمالية</div>
+              <div style="font-size:1.2rem; font-weight:900; color:var(--foreground);">${evalScore.score}% — ${evalScore.label}</div>
+              <div style="font-size:0.74rem; opacity:0.8; margin-top:2px;">${evalScore.desc}</div>
+            </div>
           </div>
         </div>
 
-        <!-- مؤشرات الإنجاز الرئيسية للمحصل المتوافقة مع الحالات الجديدة -->
-        <div class="kpi-grid" style="margin: var(--space-4) 0 var(--space-3) 0;">
+        <!-- مؤشرات الإنجاز الثلاثية (Triple Progress Metrics) -->
+        <div class="eval-bars-container">
+          <div class="eval-bar-item">
+            <div class="eval-bar-head">
+              <span>🚶‍♂️ التغطية والمجهود الميداني</span>
+              <b style="color:var(--primary);">${coveragePct}%</b>
+            </div>
+            <div class="eval-bar-track">
+              <div class="eval-bar-fill" style="width:${Math.min(100, coveragePct)}%; background:var(--primary);"></div>
+            </div>
+            <span style="font-size:0.72rem; opacity:0.7;">${stats.contactedCount} من أصل ${stats.totalCount} عميل تم التواصل معهم</span>
+          </div>
+
+          <div class="eval-bar-item">
+            <div class="eval-bar-head">
+              <span>✅ معدل الاستجابة الإيجابية</span>
+              <b style="color:var(--success);">${responsePct}%</b>
+            </div>
+            <div class="eval-bar-track">
+              <div class="eval-bar-fill" style="width:${Math.min(100, responsePct)}%; background:var(--success);"></div>
+            </div>
+            <span style="font-size:0.72rem; opacity:0.7;">${stats.responsiveCount} عميل قدموا وعوداً أو ردوداً واضحة</span>
+          </div>
+
+          <div class="eval-bar-item">
+            <div class="eval-bar-head">
+              <span>💰 معدل التحصيل المالي</span>
+              <b style="color:${collectionPct >= 50 ? "var(--success)" : "var(--warning)"};">${collectionPct}%</b>
+            </div>
+            <div class="eval-bar-track">
+              <div class="eval-bar-fill" style="width:${Math.min(100, collectionPct)}%; background:${collectionPct >= 50 ? "var(--success)" : "var(--warning)"};"></div>
+            </div>
+            <span style="font-size:0.72rem; opacity:0.7;">تحصيل ${money(totalCollected)} من إجمالي ${money(stats.totalDue)}</span>
+          </div>
+        </div>
+
+        <!-- كروت مؤشرات تفاعل ومواقف الردود -->
+        <div class="kpi-grid" style="margin: var(--space-4) 0 0 0;">
           <div class="kpi-card c-danger">
-            <div class="kpi-label">المطلوب الميداني اليوم</div>
+            <div class="kpi-label">المديونية المستهدفة</div>
             <div class="kpi-value">${money(stats.totalDue)}</div>
-            <div class="kpi-sub">${stats.totalCount} عميل مكلف بهم</div>
+            <div class="kpi-sub">${stats.totalCount} عميل في قائمة المحصل</div>
           </div>
           <div class="kpi-card c-success">
-            <div class="kpi-label">المُحصّل الفعلي اليوم</div>
+            <div class="kpi-label">المحصل الفعلي اليوم</div>
             <div class="kpi-value">${money(totalCollected)}</div>
-            <div class="kpi-sub">نسبة التحصيل: ${collectionPct}%</div>
+            <div class="kpi-sub">المتبقي: ${money(stats.remaining)}</div>
           </div>
-          <div class="kpi-card" style="border-inline-start: 4px solid var(--success);">
-            <div class="kpi-label" style="color:var(--success);">✅ تم الرد / مستجيب</div>
-            <div class="kpi-value" style="color:var(--success);">${stats.responsiveCount}</div>
-            <div class="kpi-sub">${stats.totalCount > 0 ? Math.round((stats.responsiveCount / stats.totalCount) * 100) : 0}% من إجمالي العملاء</div>
+          <div class="kpi-card" style="border-inline-start: 4px solid #10b981;">
+            <div class="kpi-label" style="color:#10b981;">🟢 وعود سداد محددة</div>
+            <div class="kpi-value" style="color:#10b981;">${promiseCount}</div>
+            <div class="kpi-sub">تم جدولة تنبيهاتهم للمواعيد</div>
           </div>
-          <div class="kpi-card" style="border-inline-start: 4px solid var(--warning);">
-            <div class="kpi-label" style="color:var(--warning);">⚠️ لا يرد / غير متاح</div>
-            <div class="kpi-value" style="color:var(--warning);">${stats.unresponsiveCount}</div>
-            <div class="kpi-sub">اتصال دون رد / المحل مغلق</div>
+          <div class="kpi-card" style="border-inline-start: 4px solid #f59e0b;">
+            <div class="kpi-label" style="color:#f59e0b;">⏳ انتظار بيع ومهل</div>
+            <div class="kpi-value" style="color:#f59e0b;">${waitCount}</div>
+            <div class="kpi-sub">انتظار بيع / دورة / طلبيات</div>
           </div>
-          <div class="kpi-card" style="border-inline-start: 4px solid var(--danger);">
-            <div class="kpi-label" style="color:var(--danger);">❌ لم يذهب ولم يتصل</div>
-            <div class="kpi-value" style="color:var(--danger);">${stats.notVisitedCount}</div>
+          <div class="kpi-card" style="border-inline-start: 4px solid #ef4444;">
+            <div class="kpi-label" style="color:#ef4444;">⚠️ مطالبات ومشاكل</div>
+            <div class="kpi-value" style="color:#ef4444;">${escalateCount}</div>
+            <div class="kpi-sub">تحتاج مراجعة إدارية وقرار</div>
           </div>
           <div class="kpi-card c-accent">
-            <div class="kpi-label">⏳ قيد المتابعة</div>
-            <div class="kpi-value">${stats.pendingCount}</div>
-            <div class="kpi-sub">بانتظار المتابعة اليوم</div>
-          </div>
-        </div>
-
-        <!-- شريط التقدم الفعلي للتحصيل والتغطية -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-3);">
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800; margin-bottom:5px;">
-              <span>نسبة تحقيق التحصيل المالي</span>
-              <b style="color:${pctColor};">${collectionPct}%</b>
-            </div>
-            <div class="prog-track" style="height:10px;"><div class="prog-fill" style="width:${Math.min(100, collectionPct)}%; background:${pctColor};"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800; margin-bottom:5px;">
-              <span>نسبة التغطية والمجهود الميداني</span>
-              <b>${coveragePct}%</b>
-            </div>
-            <div class="prog-track" style="height:10px;"><div class="prog-fill" style="width:${Math.min(100, coveragePct)}%; background:var(--secondary);"></div></div>
+            <div class="kpi-label">🔴 بدون رد / معلق</div>
+            <div class="kpi-value">${noRespCount}</div>
+            <div class="kpi-sub">بانتظار تحديث المحصل</div>
           </div>
         </div>
       </div>
 
-      <!-- كشف نشاط المحصل وتفاعل العملاء الميداني اليوم مع أسهم الترتيب والتفاعل المباشر -->
+      <!-- كشف شيت متابعة المحصل التفاعلي المباشر -->
       <div class="card" style="padding: var(--space-4); margin-top: var(--space-4);">
         <div class="card-head" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <div>
-            <span class="card-title">📋 تفاصيل نشاط المحصل وتفاعل العملاء الميداني اليوم (${clients.length} عميل)</span>
-            <span class="card-sub" style="display:block; margin-top:2px;">يمكنك تعديل المبالغ وحالات التواصل والردود مباشرة وتتحدث كافة الكروت والنسب فورياً</span>
+            <span class="card-title">📋 شيت متابعة المحصل — تفاصيل العملاء (${clients.length} عميل)</span>
+            <span class="card-sub" style="display:block; margin-top:2px;">مطابق لشيت متابعة المحصل مع التحليل الذكي للردود وتاريخ الفواتير</span>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <input class="search-input" id="collectorSearchInput" type="search" placeholder="بحث باسم العميل، المنطقة، الرد…" value="${esc(state.filters.collectorSearch || "")}" style="padding: 6px 12px; min-width: 230px;">
@@ -1813,19 +1977,18 @@ function viewCollectors() {
         </div>
 
         <div class="table-wrap">
-          <table class="interactive-table">
+          <table class="interactive-table" style="font-size:0.92rem;">
             <thead>
               <tr>
                 <th class="row-num">م</th>
-                ${sortTh("collector_clients", "customer", "str", "العميل")}
-                ${sortTh("collector_clients", "area", "str", "المنطقة")}
-                ${sortTh("collector_clients", "balance", "num", "المطلوب")}
-                ${sortTh("collector_clients", "last_invoice", "str", "آخر فاتورة")}
-                ${sortTh("collector_clients", "last_payment", "str", "آخر سداد")}
-                ${sortTh("collector_clients", "response", "str", "رد العميل الوارد")}
+                ${sortTh("collector_clients", "customer", "str", "اسم العميل")}
+                ${sortTh("collector_clients", "balance", "num", "المديونية المستهدفة")}
+                ${sortTh("collector_clients", "area", "str", "خط السير (المنطقة)")}
+                ${sortTh("collector_clients", "last_payment", "str", "تاريخ آخر سداد")}
+                ${sortTh("collector_clients", "last_invoice", "str", "تاريخ آخر فاتورة")}
+                ${sortTh("collector_clients", "response", "str", "آخر رد من العميل")}
                 ${sortTh("collector_clients", "paid", "num", "المسدد اليوم")}
-                ${sortTh("collector_clients", "status", "str", "الحالة")}
-                ${sortTh("collector_clients", "comm", "str", "حالة التواصل والزيارة")}
+                ${sortTh("collector_clients", "comm", "str", "حالة التواصل")}
               </tr>
             </thead>
             <tbody id="collectorClientTableBody">
@@ -1848,27 +2011,52 @@ function viewCollectors() {
                   const isNotVisited = c.notVisited || normComm === "لم يذهب ولم يتصل";
                   const rowClass = isFullPaid ? "row-status-green" : isNotVisited ? "row-status-red" : (normComm === "تم الرد / مستجيب" ? "row-status-green" : (normComm === "لا يرد / غير متاح" || isPartial ? "row-status-amber" : ""));
                   const commClass = commClassOf(normComm);
-                  const statusChip = isFullPaid ? "chip-green" : isPartial ? "chip-amber" : "chip-gray";
 
                   return `
                     <tr class="${rowClass}" data-customer="${esc(c.customer)}">
                       <td class="row-num">${idx + 1}</td>
-                      <td>
-                        <b style="font-size:0.92rem; color:var(--foreground);">${esc(c.customer)}</b>
+                      <!-- اسم العميل وتصنيف النشاط -->
+                      <td style="min-width: 170px;">
+                        <div style="font-weight: 800; font-size: 0.96rem; color: var(--foreground);">${esc(c.customer)}</div>
+                        <div style="margin-top: 3px;">
+                          ${c.aging.invBadge}
+                        </div>
                       </td>
-                      <td>📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}</td>
-                      <td class="tbl-amount neg">${money(c.balance)}</td>
-                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
-                        ${esc(c.last_invoice || "__")}
+
+                      <!-- المديونية المستهدفة -->
+                      <td class="tbl-amount neg" style="font-size: 1rem; font-weight: 800;">
+                        ${money(c.balance)}
                       </td>
-                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.85rem;">
-                        ${esc(c.last_payment || "__")}
+
+                      <!-- خط السير (المنطقة) -->
+                      <td style="font-weight: 700; font-size: 0.94rem;">
+                        📍 ${esc(c.area && c.area !== "—" ? c.area : "__")}
                       </td>
-                      <!-- رد العميل -->
-                      <td style="min-width: 200px;">
+
+                      <!-- تاريخ آخر سداد -->
+                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.88rem;">
+                        <div><b>${esc(c.last_payment || "__")}</b></div>
+                        <div>${c.aging.payBadge}</div>
+                      </td>
+
+                      <!-- تاريخ آخر فاتورة -->
+                      <td style="font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 0.88rem;">
+                        <div><b>${esc(c.last_invoice || "__")}</b></div>
+                      </td>
+
+                      <!-- آخر رد من العميل مع التصنيف الذكي -->
+                      <td style="min-width: 240px;">
                         <div class="resp-cell-content">
-                          <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
-                            ${formatNoteDisplay(c.response)}
+                          <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+                              <span class="resp-intel-badge ${c.respIntel.badgeCls}">
+                                ${c.respIntel.label}
+                              </span>
+                              ${c.respIntel.dateDesc ? `<span style="font-size:0.7rem; font-weight:700; opacity:0.8;">(${c.respIntel.dateDesc})</span>` : ""}
+                            </div>
+                            <div class="resp-text-preview" title="${hasRealResponse(c.response) ? esc(cleanResponse(c.response)) : "__"}">
+                              ${formatNoteDisplay(c.response)}
+                            </div>
                           </div>
                           <button type="button" class="resp-edit-btn" data-action="edit-resp" data-customer="${esc(c.customer)}" title="تعديل رد العميل">
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1876,8 +2064,9 @@ function viewCollectors() {
                           </button>
                         </div>
                       </td>
-                      <!-- المسدد اليوم (تعديل مباشر) -->
-                      <td style="min-width: 120px;">
+
+                      <!-- المسدد اليوم -->
+                      <td style="min-width: 125px;">
                         <div style="display: inline-flex; align-items: center; gap: 4px;">
                           <input 
                             type="number" 
@@ -1888,16 +2077,13 @@ function viewCollectors() {
                             step="any"
                             data-action="edit-paid" 
                             data-customer="${esc(c.customer)}"
-                            title="عدّل المبلغ واضغط Enter للحفظ وتحديث الكروت فورياً"
+                            title="عدّل المبلغ واضغط Enter لتحديث النسب والمؤشرات فوراً"
                           />
                           <span style="font-size:0.75rem; opacity:0.7; font-weight:700;">ج.م</span>
                         </div>
                       </td>
-                      <!-- الحالة -->
-                      <td>
-                        <span class="chip ${statusChip}">${esc(c.status || "لم يسدد")}</span>
-                      </td>
-                      <!-- حالة التواصل والزيارة -->
+
+                      <!-- موقف التواصل -->
                       <td style="min-width: 165px;">
                         <select class="comm-select ${commClass}" data-action="change-comm" data-customer="${esc(c.customer)}" title="تحديث موقف التواصل الميداني">
                           <option value="قيد المتابعة" ${normComm === "قيد المتابعة" ? "selected" : ""}>⏳ قيد المتابعة</option>
@@ -1907,7 +2093,7 @@ function viewCollectors() {
                         </select>
                       </td>
                     </tr>`;
-                }).join("") : `<tr><td colspan="10" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
+                }).join("") : `<tr><td colspan="9" class="empty-state">لا يوجد عملاء مخصصون للمحصل في خط السير اليوم</td></tr>`;
               })()}
             </tbody>
           </table>
@@ -1944,8 +2130,7 @@ function viewCollectors() {
   } else {
     // عرض المقارنة الشاملة (All Collectors Side-by-Side Comparison)
     const scorecards = repMetrics.map((data) => {
-      const { rep, stats, repPays, totalCollected, collectionPct, coveragePct } = data;
-      const pctColor = collectionPct >= 70 ? "var(--success)" : collectionPct >= 40 ? "var(--warning)" : "var(--danger)";
+      const { rep, stats, totalCollected, collectionPct, coveragePct, responsePct, evalScore } = data;
 
       return `
         <div class="comp-scorecard highlight">
