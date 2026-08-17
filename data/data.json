@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-17 12:47:28",
+  "generated_at": "2026-08-17 13:07:08",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -4338,7 +4338,7 @@
    "collector": "محمد شعبان",
    "today_status": "🎯 هدف اليوم",
    "classification": "اتفاقات",
-   "notes": "بكرا 9/8/2026",
+   "notes": "هيدفع انهردة",
    "agreements": "21 يوم",
    "cycle_start": "",
    "total_withdrawn": 1037700.0,
@@ -9648,7 +9648,7 @@
    "area": "أطفيح",
    "last_payment": "2026-06-17",
    "last_invoice": "2026-07-15",
-   "last_response": "بكرا 9/8/2026",
+   "last_response": "هيدفع انهردة",
    "total_withdrawn": 1037700.0,
    "total_paid": 854390.0,
    "collected": 0.0,
@@ -10578,7 +10578,7 @@
    "area": "البيضاء",
    "last_payment": "2026-08-01",
    "last_invoice": "2026-08-02",
-   "last_response": ""
+   "last_response": "مطالبة لتخفيف الحساب"
   },
   {
    "customer": "ربيع قرني(طريق اسيوط)",
@@ -10586,7 +10586,7 @@
    "area": "طريق اسيوط",
    "last_payment": "2026-08-15",
    "last_invoice": "2026-05-13",
-   "last_response": ""
+   "last_response": "الاثنين 17/8"
   },
   {
    "customer": "د. عبد المجيد المرزوقي",
@@ -10594,7 +10594,7 @@
    "area": "طريق اسيوط",
    "last_payment": "2025-04-16",
    "last_invoice": "2025-04-13",
-   "last_response": ""
+   "last_response": "زيارة كل جمعة مع ربيع قرني"
   },
   {
    "customer": "مشهور ابراهيم معوض (الشركة)",
@@ -10602,7 +10602,7 @@
    "area": "الشركه",
    "last_payment": "2026-07-14",
    "last_invoice": "2026-07-14",
-   "last_response": ""
+   "last_response": "10 ايام بلاغ محمد شعبان"
   },
   {
    "customer": "مرسي (مدشه)",
@@ -10610,7 +10610,7 @@
    "area": "مدشة ",
    "last_payment": "2026-08-05",
    "last_invoice": "2026-08-12",
-   "last_response": ""
+   "last_response": "قالي  10 ايام"
   },
   {
    "customer": "محمود سامي ابراهيم سيد(السحابه)",
@@ -10618,7 +10618,7 @@
    "area": "السحابه",
    "last_payment": "2026-07-26",
    "last_invoice": "2026-08-09",
-   "last_response": ""
+   "last_response": "السبت 15/8"
   },
   {
    "customer": "حجاج حامد (قصر شانة)",
@@ -10626,7 +10626,7 @@
    "area": "قصر شانة",
    "last_payment": "",
    "last_invoice": "2026-08-08",
-   "last_response": ""
+   "last_response": " بكرا17/08/2026"
   },
   {
    "customer": "محمد احمد (الوسطى)",
@@ -10634,7 +10634,7 @@
    "area": "مرعب",
    "last_payment": "2026-07-28",
    "last_invoice": "2026-08-08",
-   "last_response": ""
+   "last_response": "مطالبة "
   },
   {
    "customer": "الحاج / ابراهيم ابو سريع",
@@ -10642,7 +10642,7 @@
    "area": "أطفيح",
    "last_payment": "2026-06-17",
    "last_invoice": "2026-07-15",
-   "last_response": ""
+   "last_response": "هيدفع انهردة"
   },
   {
    "customer": "عمرو حسن عابد",
@@ -10650,7 +10650,7 @@
    "area": "الشركه",
    "last_payment": "2026-07-09",
    "last_invoice": "2026-07-09",
-   "last_response": ""
+   "last_response": "بكرا 16/8"
   },
   {
    "customer": "محمد فتحي حسن(مرعب)",
@@ -10658,7 +10658,7 @@
    "area": "مرعب",
    "last_payment": "2026-06-27",
    "last_invoice": "2026-06-27",
-   "last_response": ""
+   "last_response": "اخر النهار 18/7/2026"
   },
   {
    "customer": "مفرح سيد فهيم",
@@ -10666,7 +10666,7 @@
    "area": "ابو شويقي",
    "last_payment": "2026-04-08",
    "last_invoice": "2025-12-16",
-   "last_response": ""
+   "last_response": "اتفاق ومناقشة مع حاج منير"
   },
   {
    "customer": "محمود اسماعيل",
@@ -10674,7 +10674,7 @@
    "area": "طريق اسيوط",
    "last_payment": "2025-08-27",
    "last_invoice": "2025-08-25",
-   "last_response": ""
+   "last_response": "اسبوع  15/6/2026"
   },
   {
    "customer": "محمد عبد العزيز حسين (نصار)",
@@ -10682,7 +10682,7 @@
    "area": "نصار",
    "last_payment": "2026-07-05",
    "last_invoice": "2024-03-28",
-   "last_response": ""
+   "last_response": "الخميس 6/8/2026"
   },
   {
    "customer": "احمد سعد (السحابه)",
@@ -10690,7 +10690,7 @@
    "area": "السحابه",
    "last_payment": "2026-07-19",
    "last_invoice": "2026-07-29",
-   "last_response": ""
+   "last_response": "الاسبوع الجي "
   }
  ],
  "daily_targets": [
@@ -10789,7 +10789,7 @@
    "area": "أطفيح",
    "due": "2026-08-05",
    "classification": "اتفاقات",
-   "notes": "بكرا 9/8/2026",
+   "notes": "هيدفع انهردة",
    "last_payment": "2026-06-17",
    "last_visit": "2026-08-04"
   },
