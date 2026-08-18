@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-18 17:43:08",
+  "generated_at": "2026-08-18 18:19:22",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -1571,14 +1571,14 @@
    "balance": 12890.0,
    "last_payment": "2026-07-26",
    "last_invoice": "2026-08-09",
-   "last_visit": "2026-08-10",
-   "agreement_days": "5",
-   "due_date": "2026-08-15",
+   "last_visit": "2026-08-18",
+   "agreement_days": "2",
+   "due_date": "2026-08-20",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
-   "notes": "السبت 15/8",
+   "notes": "محمود سامي الخميس 20/8",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 25410.0,
@@ -7511,14 +7511,14 @@
    "balance": 85100.0,
    "last_payment": "2026-08-01",
    "last_invoice": "2026-08-02",
-   "last_visit": "2026-08-10",
-   "agreement_days": "7",
-   "due_date": "2026-08-17",
+   "last_visit": "2026-08-18",
+   "agreement_days": "4",
+   "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
-   "notes": "مطالبة لتخفيف الحساب 17/8/2026",
+   "notes": "اخوه هيجي السبت 22/8",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 548730.0,
@@ -9248,15 +9248,15 @@
   {
    "code": "1464",
    "name": "حجاج حامد (قصر شانة)",
-   "balance": 8475.0,
+   "balance": 0.0,
    "last_payment": "",
    "last_invoice": "2026-08-08",
    "last_visit": "2026-08-09",
    "agreement_days": "7",
    "due_date": "2026-08-16",
-   "status": "نشط",
+   "status": "عميل خالص",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "✅ خالص",
    "classification": "عملاء كاش",
    "notes": "",
    "agreements": "",
@@ -9634,42 +9634,6 @@
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
-   "prev_due": "2026-08-10",
-   "appt_status": "5",
-   "new_due": "2026-08-15",
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "target_debt": 12890.0,
-   "area": "السحابه",
-   "last_payment": "2026-07-26",
-   "last_invoice": "2026-08-09",
-   "last_response": "السبت 15/8",
-   "total_withdrawn": 25410.0,
-   "total_paid": 18500.0,
-   "collected": 0.0,
-   "remaining": 12890.0,
-   "collection_rate": "0",
-   "turnover": "1.9712955779674166",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-08-09",
-   "appt_status": "7",
-   "new_due": "2026-08-16",
-   "customer": "حجاج حامد (قصر شانة)",
-   "target_debt": 8475.0,
-   "area": "قصر شانة",
-   "last_payment": "",
-   "last_invoice": "2026-08-08",
-   "last_response": "0",
-   "total_withdrawn": 0.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 8475.0,
-   "collection_rate": "0",
-   "turnover": "0",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
    "prev_due": "2026-06-23",
    "appt_status": "7",
    "new_due": "2026-06-30",
@@ -9686,24 +9650,6 @@
    "collection_rate": "0",
    "turnover": "70.523809523809518",
    "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-10",
-   "appt_status": "7",
-   "new_due": "2026-08-17",
-   "customer": "احمد شعبان (البيضاء)",
-   "target_debt": 85100.0,
-   "area": "البيضاء",
-   "last_payment": "2026-08-01",
-   "last_invoice": "2026-08-02",
-   "last_response": "مطالبة لتخفيف الحساب 17/8/2026",
-   "total_withdrawn": 548730.0,
-   "total_paid": 232580.0,
-   "collected": 0.0,
-   "remaining": 85100.0,
-   "collection_rate": "0",
-   "turnover": "6.4480611045828438",
-   "rating": "جيد 🟡 (منتظم)"
   },
   {
    "prev_due": "2026-04-26",
@@ -9758,6 +9704,150 @@
    "collection_rate": "0",
    "turnover": "13.5",
    "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
+   "prev_due": "2026-07-18",
+   "appt_status": "0",
+   "new_due": "2026-07-18",
+   "customer": "محمد فتحي حسن(مرعب)",
+   "target_debt": 1400.0,
+   "area": "مرعب",
+   "last_payment": "2026-06-27",
+   "last_invoice": "2026-06-27",
+   "last_response": "اخر النهار 18/7/2026",
+   "total_withdrawn": 0.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 1400.0,
+   "collection_rate": "0",
+   "turnover": "0",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-08-15",
+   "appt_status": "2",
+   "new_due": "2026-08-17",
+   "customer": "ربيع قرني(طريق اسيوط)",
+   "target_debt": 7650.0,
+   "area": "طريق اسيوط",
+   "last_payment": "2026-08-15",
+   "last_invoice": "2026-05-13",
+   "last_response": "مطالبة يوم الاثنين 17/8/2026",
+   "total_withdrawn": 93250.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 7650.0,
+   "collection_rate": "0",
+   "turnover": "12.18954248366013",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-06-23",
+   "appt_status": "7",
+   "new_due": "2026-06-30",
+   "customer": "عطيه محمد غريب (العياط)",
+   "target_debt": 5945.0,
+   "area": "العياط",
+   "last_payment": "2026-06-02",
+   "last_invoice": "2026-01-19",
+   "last_response": "مطالبة   ",
+   "total_withdrawn": 135345.0,
+   "total_paid": 96500.0,
+   "collected": 0.0,
+   "remaining": 5945.0,
+   "collection_rate": "0",
+   "turnover": "22.76619007569386",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-08-11",
+   "appt_status": "2",
+   "new_due": "2026-08-13",
+   "customer": "مفرح سيد فهيم",
+   "target_debt": 165400.0,
+   "area": "ابو شويقي",
+   "last_payment": "2026-04-08",
+   "last_invoice": "2025-12-16",
+   "last_response": "اتفاق ومناقشة مع حاج منير",
+   "total_withdrawn": 970335.0,
+   "total_paid": 762000.0,
+   "collected": 0.0,
+   "remaining": 165400.0,
+   "collection_rate": "0",
+   "turnover": "5.8665961305925034",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-06-08",
+   "appt_status": "7",
+   "new_due": "2026-06-15",
+   "customer": "محمود اسماعيل",
+   "target_debt": 60000.0,
+   "area": "طريق اسيوط",
+   "last_payment": "2025-08-27",
+   "last_invoice": "2025-08-25",
+   "last_response": "اسبوع  15/6/2026",
+   "total_withdrawn": 193025.0,
+   "total_paid": 323040.0,
+   "collected": 0.0,
+   "remaining": 60000.0,
+   "collection_rate": "0",
+   "turnover": "3.2170833333333335",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2025-07-20",
+   "appt_status": "0",
+   "new_due": "2025-07-20",
+   "customer": "عمر زين (حنس)",
+   "target_debt": 151155.0,
+   "area": "حنس- مصر الجديدة",
+   "last_payment": "2025-05-29",
+   "last_invoice": "2025-04-20",
+   "last_response": "مطالبة واتصال حتى السداد ",
+   "total_withdrawn": 981270.0,
+   "total_paid": 830115.0,
+   "collected": 0.0,
+   "remaining": 151155.0,
+   "collection_rate": "0",
+   "turnover": "6.4918130395951179",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-08-04",
+   "appt_status": "2",
+   "new_due": "2026-08-06",
+   "customer": "محمد عبد العزيز حسين (نصار)",
+   "target_debt": 640.0,
+   "area": "نصار",
+   "last_payment": "2026-07-05",
+   "last_invoice": "2024-03-28",
+   "last_response": "الخميس 6/8/2026",
+   "total_withdrawn": 25050.0,
+   "total_paid": 20500.0,
+   "collected": 0.0,
+   "remaining": 640.0,
+   "collection_rate": "0",
+   "turnover": "39.140625",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-08-10",
+   "appt_status": "7",
+   "new_due": "2026-08-17",
+   "customer": "احمد سعد (السحابه)",
+   "target_debt": 118595.0,
+   "area": "السحابه",
+   "last_payment": "2026-08-17",
+   "last_invoice": "2026-07-29",
+   "last_response": "الاسبوع الجي ",
+   "total_withdrawn": 402630.0,
+   "total_paid": 393800.0,
+   "collected": 0.0,
+   "remaining": 118595.0,
+   "collection_rate": "0",
+   "turnover": "3.3949997891985326",
+   "rating": "سيء ⚫ (بطيء جداً)"
   }
  ],
  "cash_flow": [
@@ -10305,7 +10395,7 @@
    "balance": 12890.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-15",
+   "due": "2026-08-20",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10393,7 +10483,7 @@
    "balance": 85100.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-17",
+   "due": "2026-08-22",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10412,7 +10502,7 @@
   },
   {
    "customer": "حجاج حامد (قصر شانة)",
-   "balance": 8475.0,
+   "balance": 0.0,
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-16",
@@ -10436,7 +10526,7 @@
    "B": "مشهور ابراهيم معوض (الشركة)",
    "C": "8785",
    "I": "الباقي",
-   "J": "1386530",
+   "J": "1280065",
    "M": "لم يتم التواصل"
   },
   {
@@ -10516,71 +10606,56 @@
   },
   {
    "A": "15",
-   "B": "محمود سامي ابراهيم سيد(السحابه)",
-   "C": "12890"
-  },
-  {
-   "A": "16",
-   "B": "حجاج حامد (قصر شانة)",
-   "C": "8475"
-  },
-  {
-   "A": "17",
    "B": "اسامه يحيى (العياط)",
    "C": "1470"
   },
   {
-   "A": "18",
-   "B": "احمد شعبان (البيضاء)",
-   "C": "85100"
-  },
-  {
-   "A": "19",
+   "A": "16",
    "B": "سعيد جوده (السحابه)",
    "C": "5425"
   },
   {
-   "A": "20",
+   "A": "17",
    "B": "الحاج / ابراهيم ابو سريع",
    "C": "107130"
   },
   {
-   "A": "21",
+   "A": "18",
    "B": "عمرو حسن عابد",
    "C": "2400"
   },
   {
-   "A": "22",
+   "A": "19",
    "B": "محمد فتحي حسن(مرعب)",
    "C": "1400"
   },
   {
-   "A": "23",
+   "A": "20",
    "B": "ربيع قرني(طريق اسيوط)",
    "C": "7650"
   },
   {
-   "A": "24",
+   "A": "21",
    "B": "عطيه محمد غريب (العياط)",
    "C": "5945"
   },
   {
-   "A": "25",
+   "A": "22",
    "B": "مفرح سيد فهيم",
    "C": "165400"
   },
   {
-   "A": "26",
+   "A": "23",
    "B": "محمود اسماعيل",
    "C": "60000"
   },
   {
-   "A": "27",
+   "A": "24",
    "B": "عمر زين (حنس)",
    "C": "151155"
   },
   {
-   "A": "28",
+   "A": "25",
    "B": "محمد عبد العزيز حسين (نصار)",
    "C": "640"
   }
@@ -10808,17 +10883,6 @@
    "last_visit": "2026-08-12"
   },
   {
-   "customer": "احمد شعبان (البيضاء)",
-   "balance": 85100.0,
-   "collector": "محمد شعبان",
-   "area": "البيضاء",
-   "due": "2026-08-17",
-   "classification": "فاتورة بفاتورة",
-   "notes": "مطالبة لتخفيف الحساب 17/8/2026",
-   "last_payment": "2026-08-01",
-   "last_visit": "2026-08-10"
-  },
-  {
    "customer": "احمد سلامه (حلوان)",
    "balance": 81020.0,
    "collector": "محمد شعبان",
@@ -10852,17 +10916,6 @@
    "last_visit": "2026-08-09"
   },
   {
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "balance": 12890.0,
-   "collector": "محمد شعبان",
-   "area": "السحابه",
-   "due": "2026-08-15",
-   "classification": "فاتورة بفاتورة",
-   "notes": "السبت 15/8",
-   "last_payment": "2026-07-26",
-   "last_visit": "2026-08-10"
-  },
-  {
    "customer": "ابراهيم سويلم - العياط",
    "balance": 10000.0,
    "collector": "مصطفى",
@@ -10883,17 +10936,6 @@
    "notes": "10 ايام بلاغ محمد شعبان",
    "last_payment": "2026-07-14",
    "last_visit": "2026-08-08"
-  },
-  {
-   "customer": "حجاج حامد (قصر شانة)",
-   "balance": 8475.0,
-   "collector": "محمد شعبان",
-   "area": "قصر شانة",
-   "due": "2026-08-16",
-   "classification": "عملاء كاش",
-   "notes": "",
-   "last_payment": "",
-   "last_visit": "2026-08-09"
   },
   {
    "customer": "ربيع قرني(طريق اسيوط)",
@@ -11143,28 +11185,10 @@
      "last_payment": "2026-07-20"
     },
     {
-     "customer": "احمد شعبان (البيضاء)",
-     "balance": 85100.0,
-     "last_invoice": "2026-08-02",
-     "last_payment": "2026-08-01"
-    },
-    {
      "customer": "اسامه يحيى (العياط)",
      "balance": 1470.0,
      "last_invoice": "2026-08-04",
      "last_payment": "2026-06-02"
-    },
-    {
-     "customer": "حجاج حامد (قصر شانة)",
-     "balance": 8475.0,
-     "last_invoice": "2026-08-08",
-     "last_payment": ""
-    },
-    {
-     "customer": "محمود سامي ابراهيم سيد(السحابه)",
-     "balance": 12890.0,
-     "last_invoice": "2026-08-09",
-     "last_payment": "2026-07-26"
     },
     {
      "customer": "مرسي (مدشه)",
