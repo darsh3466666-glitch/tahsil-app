@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-19 18:19:17",
+  "generated_at": "2026-08-19 18:29:31",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9275,15 +9275,15 @@
    "agreement_days": "90",
    "due_date": "2026-11-14",
    "status": "نشط",
-   "collector": "",
+   "collector": "مصطفى",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
    "notes": "تصفية خلال 7 شهور وسداد 2 مليون خلال  3 شهور ",
    "agreements": "",
-   "cycle_start": "",
+   "cycle_start": "2026-08-16",
    "total_withdrawn": 0.0,
    "total_paid": 0.0,
-   "area": ""
+   "area": "بجوار ريست الفيوم"
   }
  ],
  "payments": [
@@ -9905,6 +9905,17 @@
    "notes": ""
   },
   {
+   "customer": "مزرعة بيور",
+   "balance": 499999.0999999996,
+   "expected": 250000.0,
+   "collected": 0.0,
+   "due": "2026-08-22",
+   "pay_ratio": "0",
+   "pay_status": "لم يسدد",
+   "remaining": 250000.0,
+   "notes": ""
+  },
+  {
    "customer": "مزرعه الخيرات",
    "balance": 522799.76999999955,
    "expected": 0.0,
@@ -9938,17 +9949,6 @@
    "notes": ""
   },
   {
-   "customer": "فايد علي رمضان (الشخ علي)",
-   "balance": 1250.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-16",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "عيد احمد عبد الفتاح(ابو السعود)",
    "balance": 521845.0,
    "expected": 0.0,
@@ -9971,88 +9971,11 @@
    "notes": ""
   },
   {
-   "customer": "جمعه محمد عزوز(العياط)",
-   "balance": 97265.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-14",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "محمد عدلي (الوسطى)",
-   "balance": 535.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-28",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "سيد محمود سيد (السحابه)",
-   "balance": 100.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-06",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "سيد الهواري - كوم أبو راضي",
-   "balance": 14180.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-16",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "عدلي عبدالهادي (ابو شويقي)",
    "balance": 139265.0,
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-09-15",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "بدوي حجازي البطل (الشوبك )",
-   "balance": 29999.00900000008,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-15",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "عبد الغفورعلي عبد الباقي(كوم ابو راضي)",
-   "balance": 650.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-23",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "ممدوح عبد القادر محمد (قيصر)",
-   "balance": 3855.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-05",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10103,50 +10026,6 @@
    "notes": ""
   },
   {
-   "customer": "محمد احمد (الوسطى)",
-   "balance": 17865.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-28",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "حماده عبد الخالق قيصر",
-   "balance": 1290.6600000000035,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-01",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "جمال عبدالشفيق قيصر",
-   "balance": 2180.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-21",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "نور حميده (البراني)",
-   "balance": 55205.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-30",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "د.هاني محمود يوسف (طاميه)",
    "balance": 1181976.0,
    "expected": 0.0,
@@ -10188,28 +10067,6 @@
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "عمرو صلاح الكومي (ياسر عبد الصمد)",
-   "balance": 102000.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-14",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "مزرعة بيور",
-   "balance": 499999.0999999996,
-   "expected": 250000.0,
-   "collected": 0.0,
-   "due": "2026-08-22",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 250000.0,
    "notes": ""
   },
   {
@@ -10323,28 +10180,6 @@
    "notes": ""
   },
   {
-   "customer": "رمضان طه ابو شويقى",
-   "balance": 21120.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-10",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "ايمن شحات (مصطفى الصعيدي)",
-   "balance": 8110.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-26",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "عمرو حسن عابد",
    "balance": 2400.0,
    "expected": 0.0,
@@ -10356,41 +10191,8 @@
    "notes": ""
   },
   {
-   "customer": "مشهور ابراهيم معوض (الشركة)",
-   "balance": 8785.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-18",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "عويس سيف(ابو شويقي)",
-   "balance": 14200.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-23",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "محمد حفني (اهناسيا) المسيد",
-   "balance": 886.0500000000029,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-04",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "balance": 12890.0,
+   "customer": "رجب الدريني سيلا",
+   "balance": 67135.0,
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-20",
@@ -10400,74 +10202,41 @@
    "notes": ""
   },
   {
-   "customer": "حامد ابراهيم (الدوار)",
-   "balance": 18345.0,
+   "customer": "سمحي ابو زيد عبد الرحمن (الهداهده)",
+   "balance": 8455.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-09-04",
+   "due": "2026-08-23",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
    "notes": ""
   },
   {
-   "customer": "د. عبد المجيد المرزوقي",
-   "balance": 2380.0,
+   "customer": "حمدان احمد ابو هوله - دوار",
+   "balance": 9470.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-18",
+   "due": "2026-08-25",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
    "notes": ""
   },
   {
-   "customer": "جمعه محمد (مصطفى الصعيدي)",
-   "balance": 24765.0,
+   "customer": "جمعه محمد عبد الحميد (سرسنا)",
+   "balance": 15200.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-26",
+   "due": "2026-08-19",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
    "notes": ""
   },
   {
-   "customer": "جمعه محمد حسن (الحطي)",
-   "balance": 108000.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-15",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "احمد فرحات عبد الحميد (منشأة دمو)",
-   "balance": 2988220.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-09-08",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "حسن مصطفى (منشأة الامراء)",
-   "balance": 63755.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-26",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "مصطفى محمد حسن (الحطي)",
-   "balance": 13700.0,
+   "customer": "عثمان ربيع _قيصر",
+   "balance": 186655.0,
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-21",
@@ -10477,86 +10246,20 @@
    "notes": ""
   },
   {
-   "customer": "احمد شعبان (البيضاء)",
-   "balance": 85100.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-22",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "شعبان محمد - نجع اللهيب",
-   "balance": 4450.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-30",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "رجب الدريني سيلا",
-   "balance": 67135.0,
-   "expected": 67135.0,
-   "collected": 0.0,
-   "due": "",
-   "pay_ratio": "",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "سمحي ابو زيد عبد الرحمن (الهداهده)",
-   "balance": 8455.0,
-   "expected": 8455.0,
-   "collected": 0.0,
-   "due": "",
-   "pay_ratio": "",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "حمدان احمد ابو هوله - دوار",
-   "balance": 9470.0,
-   "expected": 9470.0,
-   "collected": 0.0,
-   "due": "",
-   "pay_ratio": "",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "جمعه محمد عبد الحميد (سرسنا)",
-   "balance": 15200.0,
-   "expected": 15200.0,
-   "collected": 0.0,
-   "due": "",
-   "pay_ratio": "",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "عثمان ربيع _قيصر",
-   "balance": 186655.0,
-   "expected": 186655.0,
-   "collected": 0.0,
-   "due": "",
-   "pay_ratio": "",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "ناصر سيد جبالي (مهدي بيه)",
    "balance": 8205.0,
-   "expected": 8205.0,
+   "expected": 0.0,
+   "collected": 0.0,
+   "due": "2026-08-20",
+   "pay_ratio": "0",
+   "pay_status": "",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "عاطف راغب (الهداهده)",
+   "balance": 0.0,
+   "expected": 0.0,
    "collected": 0.0,
    "due": "",
    "pay_ratio": "",
@@ -12104,9 +11807,9 @@
    "customer": "امير رياض(احمد فرحات) ريست الفيوم",
    "balance": 145200.0,
    "due_date": "2026-11-14",
-   "cycle_start": "",
-   "cycle_end": "",
-   "days_left": null
+   "cycle_start": "2026-08-16",
+   "cycle_end": "2027-02-16",
+   "days_left": 181.0
   }
  ]
 }
