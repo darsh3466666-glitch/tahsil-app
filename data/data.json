@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-20 10:02:45",
+  "generated_at": "2026-08-20 12:17:29",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9957,6 +9957,17 @@
    "notes": ""
   },
   {
+   "customer": "مزرعه الخيرات",
+   "balance": 522799.76999999955,
+   "expected": 100000.0,
+   "collected": 150000.0,
+   "due": "2026-08-28",
+   "pay_ratio": "1.5",
+   "pay_status": "مكتمل",
+   "remaining": -50000.0,
+   "notes": ""
+  },
+  {
    "customer": "مزرعة بيور",
    "balance": 499999.0999999996,
    "expected": 250000.0,
@@ -9968,25 +9979,14 @@
    "notes": ""
   },
   {
-   "customer": "مزرعه الخيرات",
-   "balance": 522799.76999999955,
-   "expected": 200000.0,
-   "collected": 0.0,
-   "due": "2026-08-28",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 200000.0,
-   "notes": ""
-  },
-  {
    "customer": "محمد يونس عبد اللطيف(قلمشاه)",
    "balance": 630793.3000000007,
-   "expected": 150000.0,
+   "expected": 100000.0,
    "collected": 0.0,
    "due": "2026-09-09",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
-   "remaining": 150000.0,
+   "remaining": 100000.0,
    "notes": ""
   },
   {
@@ -10503,14 +10503,6 @@
    "last_response": "الباقي خلال اسبوع"
   },
   {
-   "customer": "ناصر سيد جبالي (مهدي بيه)",
-   "target_debt": 8205.0,
-   "area": "مهدي بيه",
-   "last_payment": "2026-07-23",
-   "last_invoice": "2026-07-20",
-   "last_response": "عنده عجلين هيبعهم ويصفي متابعة مع م علي "
-  },
-  {
    "customer": "محمد فتحي حسن(مرعب)",
    "target_debt": 1400.0,
    "area": "مرعب",
@@ -10620,14 +10612,6 @@
    "area": "السحابه",
    "last_payment": "2026-08-05",
    "last_invoice": "2026-06-24",
-   "last_response": "بلاغ استاذ احمد "
-  },
-  {
-   "customer": "مصطفى محمد حسن (الحطي)",
-   "target_debt": 13700.0,
-   "area": "الحطي",
-   "last_payment": "2025-10-05",
-   "last_invoice": "2026-07-20",
    "last_response": "بلاغ استاذ احمد "
   },
   {
