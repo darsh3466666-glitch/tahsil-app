@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-20 15:07:19",
+  "generated_at": "2026-08-20 15:51:28",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -2500,7 +2500,7 @@
    "classification": "عملاء بالدورة",
    "notes": "تحصيل بعد 15 يوم",
    "agreements": "دفعات",
-   "cycle_start": "2026-02-14",
+   "cycle_start": "2026-06-25",
    "total_withdrawn": 327525.0,
    "total_paid": 268000.0,
    "area": "ابو شويقي"
@@ -2678,9 +2678,9 @@
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "موعده 1/9/2026",
+   "notes": "موعده 1/9/2026   عليه 12880 قديم ",
    "agreements": "",
-   "cycle_start": "2025-11-05",
+   "cycle_start": "2026-06-06",
    "total_withdrawn": 102085.0,
    "total_paid": 52290.0,
    "area": "قيصر"
@@ -6900,7 +6900,7 @@
    "classification": "عملاء بالدورة",
    "notes": "دورة جديدة",
    "agreements": "",
-   "cycle_start": "2026-02-07",
+   "cycle_start": "2026-08-12",
    "total_withdrawn": 24245.0,
    "total_paid": 4380.0,
    "area": "قيصر"
@@ -11472,18 +11472,18 @@
    "customer": "رمضان طه ابو شويقى",
    "balance": 21120.0,
    "due_date": "2026-09-10",
-   "cycle_start": "2026-02-14",
-   "cycle_end": "2026-08-14",
-   "days_left": -6.0
+   "cycle_start": "2026-06-25",
+   "cycle_end": "2026-12-25",
+   "days_left": 127.0
   },
   {
    "seq": "28",
    "customer": "حسين احمدحسين (قيصر)",
    "balance": 40915.0,
    "due_date": "2026-08-31",
-   "cycle_start": "2025-11-05",
-   "cycle_end": "2026-05-05",
-   "days_left": -107.0
+   "cycle_start": "2026-06-06",
+   "cycle_end": "2026-12-06",
+   "days_left": 108.0
   },
   {
    "seq": "29",
@@ -11760,9 +11760,9 @@
    "customer": "عماد صلاح عبدالمعبود (قيصر)",
    "balance": 7035.0,
    "due_date": "2027-01-31",
-   "cycle_start": "2026-02-07",
-   "cycle_end": "2026-08-07",
-   "days_left": -13.0
+   "cycle_start": "2026-08-12",
+   "cycle_end": "2027-02-12",
+   "days_left": 176.0
   },
   {
    "seq": "60",
