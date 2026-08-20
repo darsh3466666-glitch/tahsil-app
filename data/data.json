@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-20 19:15:51",
+  "generated_at": "2026-08-20 19:19:01",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10106,6 +10106,83 @@
    "notes": ""
   },
   {
+   "customer": "رجب الدريني سيلا",
+   "balance": 76970.0,
+   "expected": 20000.0,
+   "collected": 20000.0,
+   "due": "2026-08-20",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "حماده ابو خضره سيلا",
+   "balance": 818290.0,
+   "expected": 100000.0,
+   "collected": 100000.0,
+   "due": "2026-06-30",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "د.هاني محمود يوسف (طاميه)",
+   "balance": 981976.0,
+   "expected": 200000.0,
+   "collected": 200000.0,
+   "due": "2026-08-22",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "محمود دبور",
+   "balance": 40.0,
+   "expected": 37500.0,
+   "collected": 37500.0,
+   "due": "2026-06-08",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "قرنى احمد محمد حسين (كمال علوى)",
+   "balance": 19215.0,
+   "expected": 8000.0,
+   "collected": 8000.0,
+   "due": "2026-08-31",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
+   "balance": 2260.0,
+   "expected": 1000.0,
+   "collected": 1000.0,
+   "due": "2026-06-01",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "علي محمد (نصار)",
+   "balance": 1800.0,
+   "expected": 11200.0,
+   "collected": 11200.0,
+   "due": "2026-08-22",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
    "customer": "مزرعة بيور",
    "balance": 499999.0999999996,
    "expected": 250000.0,
@@ -10147,17 +10224,6 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 100000.0,
-   "notes": ""
-  },
-  {
-   "customer": "د.هاني محمود يوسف (طاميه)",
-   "balance": 981976.0,
-   "expected": 200000.0,
-   "collected": 0.0,
-   "due": "2026-08-22",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 200000.0,
    "notes": ""
   },
   {
@@ -10359,17 +10425,6 @@
    "notes": ""
   },
   {
-   "customer": "رجب الدريني سيلا",
-   "balance": 76970.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-20",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "سمحي ابو زيد عبد الرحمن (الهداهده)",
    "balance": 12955.0,
    "expected": 0.0,
@@ -10430,17 +10485,6 @@
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-19",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "حماده ابو خضره سيلا",
-   "balance": 818290.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-06-30",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
