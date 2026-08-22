@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-22 19:30:08",
+  "generated_at": "2026-08-22 19:34:18",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10135,8 +10135,8 @@
   {
    "customer": "محمود دبور",
    "balance": -1260.0,
-   "expected": 37500.0,
-   "collected": 37500.0,
+   "expected": 73800.0,
+   "collected": 73800.0,
    "due": "2026-06-08",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
@@ -10226,6 +10226,61 @@
    "expected": 33300.0,
    "collected": 33300.0,
    "due": "2026-09-16",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "مشهور ابراهيم معوض (الشركة)",
+   "balance": 6785.0,
+   "expected": 2000.0,
+   "collected": 2000.0,
+   "due": "2026-09-06",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "بدوي حجازي البطل (الشوبك )",
+   "balance": 29999.00900000008,
+   "expected": 33200.0,
+   "collected": 33200.0,
+   "due": "2026-09-15",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "خالد عبد الوهاب (البيضاء)",
+   "balance": 53950.0,
+   "expected": 17000.0,
+   "collected": 17000.0,
+   "due": "2027-01-03",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "الحاج / محمد عوده (الفشن)",
+   "balance": 880.0,
+   "expected": 33500.0,
+   "collected": 33500.0,
+   "due": "2026-08-22",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "كرومه (هجمين العزازية)",
+   "balance": 300.0,
+   "expected": 17000.0,
+   "collected": 17000.0,
+   "due": "2026-08-04",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10479,17 +10534,6 @@
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-20",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "عاطف راغب (الهداهده)",
-   "balance": 21785.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-29",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
