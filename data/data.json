@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-22 11:46:44",
+  "generated_at": "2026-08-22 12:41:54",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -8231,9 +8231,9 @@
    "balance": 450.0,
    "last_payment": "2026-08-13",
    "last_invoice": "2026-06-21",
-   "last_visit": "2026-08-20",
-   "agreement_days": "30",
-   "due_date": "2026-09-19",
+   "last_visit": "2026-08-22",
+   "agreement_days": "8",
+   "due_date": "2026-08-30",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
@@ -12219,7 +12219,7 @@
    "seq": "75",
    "customer": "فايز دياب(مهدي بيه)",
    "balance": 450.0,
-   "due_date": "2026-09-19",
+   "due_date": "2026-08-30",
    "cycle_start": "2026-06-21",
    "cycle_end": "2026-12-21",
    "days_left": 121.0
