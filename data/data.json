@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-20 19:20:50",
+  "generated_at": "2026-08-22 11:35:40",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -758,7 +758,7 @@
    "collector": "محمد شعبان",
    "today_status": "🎯 هدف اليوم",
    "classification": "عملاء بالدورة",
-   "notes": "اخد اخر 2 طن وهيصفي  ",
+   "notes": "عليه 47 الف قديم اسأل  عنهم ",
    "agreements": "",
    "cycle_start": "2025-09-06",
    "total_withdrawn": 598370.0,
@@ -1031,9 +1031,9 @@
    "balance": 499999.0999999996,
    "last_payment": "2026-08-16",
    "last_invoice": "2026-08-09",
-   "last_visit": "2026-08-15",
+   "last_visit": "2026-08-22",
    "agreement_days": "7",
-   "due_date": "2026-08-22",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -2011,9 +2011,9 @@
    "balance": 969696.0,
    "last_payment": "2026-08-11",
    "last_invoice": "2026-08-12",
-   "last_visit": "2026-08-16",
+   "last_visit": "2026-08-22",
    "agreement_days": "7",
-   "due_date": "2026-08-23",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -2131,14 +2131,14 @@
    "balance": 12955.0,
    "last_payment": "2026-07-04",
    "last_invoice": "2026-08-20",
-   "last_visit": "2026-08-04",
-   "agreement_days": "19",
-   "due_date": "2026-08-23",
+   "last_visit": "2026-08-22",
+   "agreement_days": "10",
+   "due_date": "2026-09-01",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "يوم 23 اغسطس",
+   "notes": "بلاغ ا احمد",
    "agreements": "",
    "cycle_start": "2025-12-30",
    "total_withdrawn": 99770.0,
@@ -2760,7 +2760,7 @@
    "classification": "عملاء بالدورة",
    "notes": "بلاغ م شعبان ",
    "agreements": "دفعات",
-   "cycle_start": "2026-02-18",
+   "cycle_start": "2026-07-22",
    "total_withdrawn": 88490.0,
    "total_paid": 150500.0,
    "area": "الهداهده"
@@ -3831,9 +3831,9 @@
    "balance": 179900.0,
    "last_payment": "2026-08-01",
    "last_invoice": "2026-08-16",
-   "last_visit": "2026-08-16",
+   "last_visit": "2026-08-22",
    "agreement_days": "7",
-   "due_date": "2026-08-23",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -3856,7 +3856,7 @@
    "due_date": "2026-08-21",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "صابر مصطفى معوش فلوس دلوقتي",
    "agreements": "",
@@ -4131,9 +4131,9 @@
    "balance": 981976.0,
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-16",
-   "last_visit": "2026-08-15",
+   "last_visit": "2026-08-22",
    "agreement_days": "7",
-   "due_date": "2026-08-22",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -5911,9 +5911,9 @@
    "balance": 148238.8571390002,
    "last_payment": "2026-08-15",
    "last_invoice": "2026-08-20",
-   "last_visit": "2026-08-16",
+   "last_visit": "2026-08-22",
    "agreement_days": "7",
-   "due_date": "2026-08-23",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -6018,7 +6018,7 @@
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "جاب 40 باقي 15 الف بكرا 26/7",
+   "notes": "",
    "agreements": "",
    "cycle_start": "2026-04-11",
    "total_withdrawn": 407220.0,
@@ -6936,7 +6936,7 @@
    "due_date": "2026-08-21",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "بلاغ استاذ احمد ",
    "agreements": "",
@@ -7516,7 +7516,7 @@
    "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "اخوه هيجي السبت 22/8",
    "agreements": "",
@@ -7716,7 +7716,7 @@
    "due_date": "2026-08-21",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "عملاء بالدورة",
    "notes": "لسة لما يبيع  مفيش معاد بيع",
    "agreements": "",
@@ -8111,15 +8111,15 @@
    "balance": 19215.0,
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-20",
-   "last_visit": "2026-08-11",
+   "last_visit": "2026-08-22",
    "agreement_days": "20",
-   "due_date": "2026-08-31",
+   "due_date": "2026-09-11",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
-   "classification": "فاتورة بفاتورة",
+   "classification": "دورة جزئية",
    "notes": "باخد علف واسدد القديم",
-   "agreements": "",
+   "agreements": "دفعات",
    "cycle_start": "2026-01-15",
    "total_withdrawn": 46400.0,
    "total_paid": 14000.0,
@@ -8651,12 +8651,12 @@
    "balance": 2260.0,
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-20",
-   "last_visit": "2026-06-01",
-   "agreement_days": "0",
-   "due_date": "2026-06-01",
+   "last_visit": "2026-08-22",
+   "agreement_days": "10",
+   "due_date": "2026-09-01",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
    "notes": "",
    "agreements": "",
@@ -8676,7 +8676,7 @@
    "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "خد 25 يوم عشان فاتورة وفاتورة",
    "agreements": "",
@@ -8736,7 +8736,7 @@
    "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "فاتورة بفاتورة",
    "notes": "السبت 22/8",
    "agreements": "",
@@ -8956,7 +8956,7 @@
    "due_date": "2026-08-22",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🟢 ساري",
+   "today_status": "🎯 هدف اليوم",
    "classification": "عملاء كاش",
    "notes": "",
    "agreements": "",
@@ -9484,40 +9484,112 @@
  ],
  "route_line": [
   {
-   "prev_due": "2026-08-20",
-   "appt_status": "0",
-   "new_due": "2026-08-20",
-   "customer": "محمد علي ذيدان (البيضاء)",
-   "target_debt": 330515.0,
+   "prev_due": "2026-08-18",
+   "appt_status": "4",
+   "new_due": "2026-08-22",
+   "customer": "احمد شعبان (البيضاء)",
+   "target_debt": 85100.0,
    "area": "البيضاء",
-   "last_payment": "2026-06-06",
-   "last_invoice": "2026-07-04",
-   "last_response": "الباقي مع الطلبية الجديدة",
-   "total_withdrawn": 2443015.0,
-   "total_paid": 1844995.0,
+   "last_payment": "2026-08-01",
+   "last_invoice": "2026-08-02",
+   "last_response": "اخوه هيجي السبت 22/8",
+   "total_withdrawn": 548730.0,
+   "total_paid": 232580.0,
    "collected": 0.0,
-   "remaining": 330515.0,
+   "remaining": 85100.0,
    "collection_rate": "0",
-   "turnover": "7.3915404747137048",
+   "turnover": "6.4480611045828438",
    "rating": "جيد 🟡 (منتظم)"
   },
   {
-   "prev_due": "2026-08-05",
-   "appt_status": "15",
-   "new_due": "2026-08-20",
-   "customer": "علي حجازي",
-   "target_debt": 690.0,
-   "area": "مدشة ",
-   "last_payment": "2026-05-18",
-   "last_invoice": "2026-04-05",
-   "last_response": "0",
-   "total_withdrawn": 114605.0,
-   "total_paid": 119465.0,
+   "prev_due": "2026-08-02",
+   "appt_status": "20",
+   "new_due": "2026-08-22",
+   "customer": "جمال سيد عبدالفتاح(قمن العروس)",
+   "target_debt": 13650.0,
+   "area": "قمن العروس",
+   "last_payment": "2026-06-17",
+   "last_invoice": "2026-06-28",
+   "last_response": "خد 25 يوم عشان فاتورة وفاتورة",
+   "total_withdrawn": 0.0,
+   "total_paid": 0.0,
    "collected": 0.0,
-   "remaining": 690.0,
+   "remaining": 13650.0,
    "collection_rate": "0",
-   "turnover": "166.09420289855072",
+   "turnover": "0",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-08-20",
+   "appt_status": "2",
+   "new_due": "2026-08-22",
+   "customer": "علي محمد (نصار)",
+   "target_debt": 1800.0,
+   "area": "نصار",
+   "last_payment": "2026-08-20",
+   "last_invoice": "2026-08-20",
+   "last_response": "السبت 22/8",
+   "total_withdrawn": 0.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 1800.0,
+   "collection_rate": "0",
+   "turnover": "0",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-07-23",
+   "appt_status": "30",
+   "new_due": "2026-08-22",
+   "customer": "الحاج / محمد عوده (الفشن)",
+   "target_debt": 460.0,
+   "area": "الفشن",
+   "last_payment": "2026-07-22",
+   "last_invoice": "2026-07-22",
+   "last_response": "0",
+   "total_withdrawn": 0.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 460.0,
+   "collection_rate": "0",
+   "turnover": "0",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-08-13",
+   "appt_status": "10",
+   "new_due": "2026-08-23",
+   "customer": "عبد الغفورعلي عبد الباقي(كوم ابو راضي)",
+   "target_debt": 650.0,
+   "area": "كوم ابو راضي",
+   "last_payment": "2026-08-15",
+   "last_invoice": "2026-06-06",
+   "last_response": "هيجي واحده",
+   "total_withdrawn": 98000.0,
+   "total_paid": 72000.0,
+   "collected": 0.0,
+   "remaining": 650.0,
+   "collection_rate": "0",
+   "turnover": "150.76923076923077",
    "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-08-16",
+   "appt_status": "7",
+   "new_due": "2026-08-23",
+   "customer": "عويس سيف(ابو شويقي)",
+   "target_debt": 14200.0,
+   "area": "ابو شويقي",
+   "last_payment": "2026-07-08",
+   "last_invoice": "2026-07-08",
+   "last_response": "اخد شهر عشان فاتورة وفاتورة",
+   "total_withdrawn": 0.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 14200.0,
+   "collection_rate": "0",
+   "turnover": "0",
+   "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
    "prev_due": "2026-08-05",
@@ -9528,7 +9600,7 @@
    "area": "سيلا",
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-20",
-   "last_response": "اخد اخر 2 طن وهيصفي  ",
+   "last_response": "عليه 47 الف قديم اسأل  عنهم ",
    "total_withdrawn": 598370.0,
    "total_paid": 472800.0,
    "collected": 0.0,
@@ -9536,150 +9608,6 @@
    "collection_rate": "0",
    "turnover": "7.7740678186306349",
    "rating": "جيد 🟡 (منتظم)"
-  },
-  {
-   "prev_due": "2026-08-18",
-   "appt_status": "2",
-   "new_due": "2026-08-20",
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "target_debt": 12890.0,
-   "area": "السحابه",
-   "last_payment": "2026-07-26",
-   "last_invoice": "2026-08-09",
-   "last_response": "محمود سامي الخميس 20/8",
-   "total_withdrawn": 25410.0,
-   "total_paid": 18500.0,
-   "collected": 0.0,
-   "remaining": 12890.0,
-   "collection_rate": "0",
-   "turnover": "1.9712955779674166",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-08-05",
-   "appt_status": "15",
-   "new_due": "2026-08-20",
-   "customer": "فرج محمد مسلم (السحابه)",
-   "target_debt": 950.0,
-   "area": "السحابه",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-06-24",
-   "last_response": "بلاغ استاذ احمد ",
-   "total_withdrawn": 20145.0,
-   "total_paid": 16590.0,
-   "collected": 0.0,
-   "remaining": 950.0,
-   "collection_rate": "0",
-   "turnover": "21.205263157894738",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-20",
-   "appt_status": "0",
-   "new_due": "2026-08-20",
-   "customer": "رفيق مصطفى عبد المعبود (قيصر)",
-   "target_debt": 5575.0,
-   "area": "قيصر",
-   "last_payment": "2026-08-06",
-   "last_invoice": "2026-06-25",
-   "last_response": "مطالبة",
-   "total_withdrawn": 151070.0,
-   "total_paid": 66500.0,
-   "collected": 0.0,
-   "remaining": 5575.0,
-   "collection_rate": "0",
-   "turnover": "27.097757847533632",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-20",
-   "appt_status": "0",
-   "new_due": "2026-08-20",
-   "customer": "حسام عدلي عبود(قيصر)",
-   "target_debt": 80275.0,
-   "area": "قيصر",
-   "last_payment": "2026-02-15",
-   "last_invoice": "2026-08-16",
-   "last_response": "0",
-   "total_withdrawn": 8760.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 80275.0,
-   "collection_rate": "0",
-   "turnover": "0.10912488321395204",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-07-22",
-   "appt_status": "30",
-   "new_due": "2026-08-21",
-   "customer": "صابر مصطفى محمد",
-   "target_debt": 1845.0,
-   "area": "قيصر",
-   "last_payment": "2026-07-16",
-   "last_invoice": "2026-07-16",
-   "last_response": "صابر مصطفى معوش فلوس دلوقتي",
-   "total_withdrawn": 35245.0,
-   "total_paid": 32400.0,
-   "collected": 0.0,
-   "remaining": 1845.0,
-   "collection_rate": "0",
-   "turnover": "19.102981029810298",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-15",
-   "appt_status": "6",
-   "new_due": "2026-08-21",
-   "customer": "مصطفى محمد حسن (الحطي)",
-   "target_debt": 13700.0,
-   "area": "الحطي",
-   "last_payment": "2025-10-05",
-   "last_invoice": "2026-07-20",
-   "last_response": "بلاغ استاذ احمد ",
-   "total_withdrawn": 17950.0,
-   "total_paid": 13000.0,
-   "collected": 0.0,
-   "remaining": 13700.0,
-   "collection_rate": "0",
-   "turnover": "1.3102189781021898",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-07-22",
-   "appt_status": "30",
-   "new_due": "2026-08-21",
-   "customer": "عثمان ربيع _قيصر",
-   "target_debt": 186655.0,
-   "area": "قيصر",
-   "last_payment": "2026-08-12",
-   "last_invoice": "2026-08-12",
-   "last_response": "لسة لما يبيع  مفيش معاد بيع",
-   "total_withdrawn": 198770.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 186655.0,
-   "collection_rate": "0",
-   "turnover": "1.0649058423294313",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-06-01",
-   "appt_status": "0",
-   "new_due": "2026-06-01",
-   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "target_debt": 2260.0,
-   "area": "الشيخ علي",
-   "last_payment": "2026-08-20",
-   "last_invoice": "2026-08-20",
-   "last_response": "0",
-   "total_withdrawn": 0.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 2260.0,
-   "collection_rate": "0",
-   "turnover": "0",
-   "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
    "prev_due": "2026-08-09",
@@ -9718,6 +9646,24 @@
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
+   "prev_due": "2026-08-20",
+   "appt_status": "0",
+   "new_due": "2026-08-20",
+   "customer": "حسام عدلي عبود(قيصر)",
+   "target_debt": 80275.0,
+   "area": "قيصر",
+   "last_payment": "2026-02-15",
+   "last_invoice": "2026-08-16",
+   "last_response": "0",
+   "total_withdrawn": 8760.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 80275.0,
+   "collection_rate": "0",
+   "turnover": "0.10912488321395204",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
    "prev_due": "2026-08-01",
    "appt_status": "3",
    "new_due": "2026-08-04",
@@ -9734,6 +9680,24 @@
    "collection_rate": "0",
    "turnover": "24.2006294742039",
    "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
+   "prev_due": "2026-07-22",
+   "appt_status": "30",
+   "new_due": "2026-08-21",
+   "customer": "عثمان ربيع _قيصر",
+   "target_debt": 186655.0,
+   "area": "قيصر",
+   "last_payment": "2026-08-12",
+   "last_invoice": "2026-08-12",
+   "last_response": "لسة لما يبيع  مفيش معاد بيع",
+   "total_withdrawn": 198770.0,
+   "total_paid": 0.0,
+   "collected": 0.0,
+   "remaining": 186655.0,
+   "collection_rate": "0",
+   "turnover": "1.0649058423294313",
+   "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
    "prev_due": "2026-04-07",
@@ -9772,6 +9736,24 @@
    "rating": "جيد 🟡 (منتظم)"
   },
   {
+   "prev_due": "2026-08-18",
+   "appt_status": "2",
+   "new_due": "2026-08-20",
+   "customer": "محمود سامي ابراهيم سيد(السحابه)",
+   "target_debt": 12890.0,
+   "area": "السحابه",
+   "last_payment": "2026-07-26",
+   "last_invoice": "2026-08-09",
+   "last_response": "محمود سامي الخميس 20/8",
+   "total_withdrawn": 25410.0,
+   "total_paid": 18500.0,
+   "collected": 0.0,
+   "remaining": 12890.0,
+   "collection_rate": "0",
+   "turnover": "1.9712955779674166",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
    "prev_due": "2026-06-23",
    "appt_status": "7",
    "new_due": "2026-06-30",
@@ -9787,6 +9769,42 @@
    "remaining": 1470.0,
    "collection_rate": "0",
    "turnover": "70.523809523809518",
+   "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
+   "prev_due": "2026-08-15",
+   "appt_status": "6",
+   "new_due": "2026-08-21",
+   "customer": "مصطفى محمد حسن (الحطي)",
+   "target_debt": 13700.0,
+   "area": "الحطي",
+   "last_payment": "2025-10-05",
+   "last_invoice": "2026-07-20",
+   "last_response": "بلاغ استاذ احمد ",
+   "total_withdrawn": 17950.0,
+   "total_paid": 13000.0,
+   "collected": 0.0,
+   "remaining": 13700.0,
+   "collection_rate": "0",
+   "turnover": "1.3102189781021898",
+   "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-07-22",
+   "appt_status": "30",
+   "new_due": "2026-08-21",
+   "customer": "صابر مصطفى محمد",
+   "target_debt": 1845.0,
+   "area": "قيصر",
+   "last_payment": "2026-07-16",
+   "last_invoice": "2026-07-16",
+   "last_response": "صابر مصطفى معوش فلوس دلوقتي",
+   "total_withdrawn": 35245.0,
+   "total_paid": 32400.0,
+   "collected": 0.0,
+   "remaining": 1845.0,
+   "collection_rate": "0",
+   "turnover": "19.102981029810298",
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
@@ -9844,6 +9862,24 @@
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
+   "prev_due": "2026-08-20",
+   "appt_status": "0",
+   "new_due": "2026-08-20",
+   "customer": "محمد علي ذيدان (البيضاء)",
+   "target_debt": 330515.0,
+   "area": "البيضاء",
+   "last_payment": "2026-06-06",
+   "last_invoice": "2026-07-04",
+   "last_response": "الباقي مع الطلبية الجديدة",
+   "total_withdrawn": 2443015.0,
+   "total_paid": 1844995.0,
+   "collected": 0.0,
+   "remaining": 330515.0,
+   "collection_rate": "0",
+   "turnover": "7.3915404747137048",
+   "rating": "جيد 🟡 (منتظم)"
+  },
+  {
    "prev_due": "2026-07-18",
    "appt_status": "0",
    "new_due": "2026-07-18",
@@ -9860,6 +9896,42 @@
    "collection_rate": "0",
    "turnover": "0",
    "rating": "سيء ⚫ (بطيء جداً)"
+  },
+  {
+   "prev_due": "2026-08-20",
+   "appt_status": "0",
+   "new_due": "2026-08-20",
+   "customer": "رفيق مصطفى عبد المعبود (قيصر)",
+   "target_debt": 5575.0,
+   "area": "قيصر",
+   "last_payment": "2026-08-06",
+   "last_invoice": "2026-06-25",
+   "last_response": "مطالبة",
+   "total_withdrawn": 151070.0,
+   "total_paid": 66500.0,
+   "collected": 0.0,
+   "remaining": 5575.0,
+   "collection_rate": "0",
+   "turnover": "27.097757847533632",
+   "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
+   "prev_due": "2026-08-05",
+   "appt_status": "15",
+   "new_due": "2026-08-20",
+   "customer": "فرج محمد مسلم (السحابه)",
+   "target_debt": 950.0,
+   "area": "السحابه",
+   "last_payment": "2026-08-05",
+   "last_invoice": "2026-06-24",
+   "last_response": "بلاغ استاذ احمد ",
+   "total_withdrawn": 20145.0,
+   "total_paid": 16590.0,
+   "collected": 0.0,
+   "remaining": 950.0,
+   "collection_rate": "0",
+   "turnover": "21.205263157894738",
+   "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
    "prev_due": "2026-08-12",
@@ -9913,6 +9985,24 @@
    "remaining": 2670.0,
    "collection_rate": "0",
    "turnover": "34.925093632958799",
+   "rating": "خطر 🔴 (متوقف/راكد)"
+  },
+  {
+   "prev_due": "2026-08-05",
+   "appt_status": "15",
+   "new_due": "2026-08-20",
+   "customer": "علي حجازي",
+   "target_debt": 690.0,
+   "area": "مدشة ",
+   "last_payment": "2026-05-18",
+   "last_invoice": "2026-04-05",
+   "last_response": "0",
+   "total_withdrawn": 114605.0,
+   "total_paid": 119465.0,
+   "collected": 0.0,
+   "remaining": 690.0,
+   "collection_rate": "0",
+   "turnover": "166.09420289855072",
    "rating": "خطر 🔴 (متوقف/راكد)"
   },
   {
@@ -10022,42 +10112,6 @@
    "collection_rate": "0",
    "turnover": "39.140625",
    "rating": "خطر 🔴 (متوقف/راكد)"
-  },
-  {
-   "prev_due": "2026-08-20",
-   "appt_status": "0",
-   "new_due": "2026-08-20",
-   "customer": "مصطفي هاشم  _ طامية",
-   "target_debt": 4905.0,
-   "area": "طاميه",
-   "last_payment": "2026-03-11",
-   "last_invoice": "2025-12-06",
-   "last_response": "دورة",
-   "total_withdrawn": 8000.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 4905.0,
-   "collection_rate": "0",
-   "turnover": "1.6309887869520896",
-   "rating": "خطر 🔴 (متوقف/راكد)"
-  },
-  {
-   "prev_due": "2026-08-08",
-   "appt_status": "12",
-   "new_due": "2026-08-20",
-   "customer": "ناصر سيد جبالي (مهدي بيه)",
-   "target_debt": 8205.0,
-   "area": "مهدي بيه",
-   "last_payment": "2026-07-23",
-   "last_invoice": "2026-07-20",
-   "last_response": "عنده عجلين هيبعهم ويصفي متابعة مع م علي ",
-   "total_withdrawn": 0.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 8205.0,
-   "collection_rate": "0",
-   "turnover": "0",
-   "rating": "سيء ⚫ (بطيء جداً)"
   }
  ],
  "cash_flow": [
@@ -10132,7 +10186,7 @@
    "balance": 981976.0,
    "expected": 200000.0,
    "collected": 200000.0,
-   "due": "2026-08-22",
+   "due": "2026-08-29",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10154,7 +10208,7 @@
    "balance": 19215.0,
    "expected": 8000.0,
    "collected": 8000.0,
-   "due": "2026-08-31",
+   "due": "2026-09-11",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10165,7 +10219,7 @@
    "balance": 2260.0,
    "expected": 1000.0,
    "collected": 1000.0,
-   "due": "2026-06-01",
+   "due": "2026-09-01",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10187,7 +10241,7 @@
    "balance": 499999.0999999996,
    "expected": 250000.0,
    "collected": 0.0,
-   "due": "2026-08-22",
+   "due": "2026-08-29",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 250000.0,
@@ -10209,7 +10263,7 @@
    "balance": 179900.0,
    "expected": 60000.0,
    "collected": 0.0,
-   "due": "2026-08-23",
+   "due": "2026-08-29",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 60000.0,
@@ -10220,7 +10274,7 @@
    "balance": 148238.8571390002,
    "expected": 100000.0,
    "collected": 0.0,
-   "due": "2026-08-23",
+   "due": "2026-08-29",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 100000.0,
@@ -10231,7 +10285,7 @@
    "balance": 969696.0,
    "expected": 150000.0,
    "collected": 0.0,
-   "due": "2026-08-23",
+   "due": "2026-08-29",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 150000.0,
@@ -10429,7 +10483,7 @@
    "balance": 12955.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-23",
+   "due": "2026-09-01",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10494,172 +10548,197 @@
  "follow_up": [
   {
    "A": "1",
-   "B": "محمد علي ذيدان (البيضاء)",
-   "C": "330515",
+   "B": "احمد شعبان (البيضاء)",
+   "C": "85100",
    "I": "المحصل ",
    "J": "0",
    "M": "تليفون "
   },
   {
    "A": "2",
-   "B": "علي حجازي",
-   "C": "690",
+   "B": "جمال سيد عبدالفتاح(قمن العروس)",
+   "C": "13650",
    "I": "الباقي",
-   "J": "1866930",
+   "J": "1980530",
    "M": "لم يتم التواصل"
   },
   {
    "A": "3",
-   "B": "رجب الدريني سيلا",
-   "C": "76970",
+   "B": "علي محمد (نصار)",
+   "C": "1800",
    "I": "نسبة التحصيل ",
    "J": "0",
    "M": "رد "
   },
   {
    "A": "4",
-   "B": "محمود سامي ابراهيم سيد(السحابه)",
-   "C": "12890",
+   "B": "الحاج / محمد عوده (الفشن)",
+   "C": "460",
    "I": "تم التواصل",
    "J": "0",
    "M": "لا يوجد رد"
   },
   {
    "A": "5",
-   "B": "فرج محمد مسلم (السحابه)",
-   "C": "950",
+   "B": "عبد الغفورعلي عبد الباقي(كوم ابو راضي)",
+   "C": "650",
    "I": "عميل مستجيب ",
    "J": "0",
    "M": "غير متواجد"
   },
   {
    "A": "6",
-   "B": "رفيق مصطفى عبد المعبود (قيصر)",
-   "C": "5575",
+   "B": "عويس سيف(ابو شويقي)",
+   "C": "14200",
    "I": "عميل غير مستجيب",
    "J": "0"
   },
   {
    "A": "7",
-   "B": "حسام عدلي عبود(قيصر)",
-   "C": "80275",
+   "B": "رجب الدريني سيلا",
+   "C": "76970",
    "I": "نسبة الاستجابة",
    "J": "0"
   },
   {
    "A": "8",
-   "B": "صابر مصطفى محمد",
-   "C": "1845",
+   "B": "عاطف راغب (الهداهده)",
+   "C": "21785",
    "I": "لم  يتم التواصل ",
    "J": "0"
   },
   {
    "A": "9",
-   "B": "مصطفى محمد حسن (الحطي)",
-   "C": "13700"
-  },
-  {
-   "A": "10",
-   "B": "عثمان ربيع _قيصر",
-   "C": "186655"
-  },
-  {
-   "A": "11",
-   "B": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "C": "2260"
-  },
-  {
-   "A": "12",
-   "B": "عاطف راغب (الهداهده)",
-   "C": "21785"
-  },
-  {
-   "A": "13",
    "B": "عيد احمد عبد الفتاح(ابو السعود)",
    "C": "521845"
   },
   {
-   "A": "14",
+   "A": "10",
+   "B": "حسام عدلي عبود(قيصر)",
+   "C": "80275"
+  },
+  {
+   "A": "11",
    "B": "احمد سلامه (حلوان)",
    "C": "81020"
   },
   {
-   "A": "15",
+   "A": "12",
+   "B": "عثمان ربيع _قيصر",
+   "C": "186655"
+  },
+  {
+   "A": "13",
    "B": "مرسي (مدشه)",
    "C": "550"
   },
   {
-   "A": "16",
+   "A": "14",
    "B": "جمعه محمد عبد الحميد (سرسنا)",
    "C": "15200"
   },
   {
-   "A": "17",
+   "A": "15",
+   "B": "محمود سامي ابراهيم سيد(السحابه)",
+   "C": "12890"
+  },
+  {
+   "A": "16",
    "B": "اسامه يحيى (العياط)",
    "C": "1470"
   },
   {
+   "A": "17",
+   "B": "مصطفى محمد حسن (الحطي)",
+   "C": "13700"
+  },
+  {
    "A": "18",
+   "B": "صابر مصطفى محمد",
+   "C": "1845"
+  },
+  {
+   "A": "19",
    "B": "الحاج / ابراهيم ابو سريع",
    "C": "107130"
   },
   {
-   "A": "19",
+   "A": "20",
    "B": "مشهور ابراهيم معوض (الشركة)",
    "C": "8785"
   },
   {
-   "A": "20",
+   "A": "21",
    "B": "عمرو حسن عابد",
    "C": "2400"
   },
   {
-   "A": "21",
+   "A": "22",
+   "B": "محمد علي ذيدان (البيضاء)",
+   "C": "330515"
+  },
+  {
+   "A": "23",
    "B": "محمد فتحي حسن(مرعب)",
    "C": "1400"
   },
   {
-   "A": "22",
+   "A": "24",
+   "B": "رفيق مصطفى عبد المعبود (قيصر)",
+   "C": "5575"
+  },
+  {
+   "A": "25",
+   "B": "فرج محمد مسلم (السحابه)",
+   "C": "950"
+  },
+  {
+   "A": "26",
    "B": "اشرف عدلي مصطفي",
    "C": "2230"
   },
   {
-   "A": "23",
+   "A": "27",
    "B": "رمضان جابر(مدشة) سيلا",
    "C": "2600"
   },
   {
-   "A": "24",
+   "A": "28",
    "B": "ربيع قرني(طريق اسيوط)",
    "C": "2670"
   },
   {
-   "A": "25",
+   "A": "29",
+   "B": "علي حجازي",
+   "C": "690"
+  },
+  {
+   "A": "30",
    "B": "عطيه محمد غريب (العياط)",
    "C": "5945"
   },
   {
-   "A": "26",
+   "A": "31",
    "B": "مفرح سيد فهيم",
    "C": "165400"
   },
   {
-   "A": "27",
+   "A": "32",
    "B": "محمود اسماعيل",
    "C": "60000"
   },
   {
-   "A": "28",
+   "A": "33",
    "B": "عمر زين (حنس)",
    "C": "151155"
   },
   {
-   "A": "29",
+   "A": "34",
    "B": "د. عبد المجيد المرزوقي",
    "C": "2380"
   },
   {
-   "A": "30",
+   "A": "35",
    "B": "محمد عبد العزيز حسين (نصار)",
    "C": "640"
   }
@@ -10667,11 +10746,11 @@
  "collector_follow": [
   {
    "customer": "علي محمد (نصار)",
-   "target_debt": 5350.0,
+   "target_debt": 1800.0,
    "area": "نصار",
-   "last_payment": "2026-06-22",
-   "last_invoice": "2026-06-22",
-   "last_response": "منقطع اكتر من شهر ونص"
+   "last_payment": "2026-08-20",
+   "last_invoice": "2026-08-20",
+   "last_response": "السبت 22/8"
   },
   {
    "customer": "محمد عبد العزيز حسين (نصار)",
@@ -10682,14 +10761,6 @@
    "last_response": "الخميس 6/8/2026"
   },
   {
-   "customer": "فايز دياب(مهدي بيه)",
-   "target_debt": 450.0,
-   "area": "مهدي بيه",
-   "last_payment": "2026-08-13",
-   "last_invoice": "2026-06-21",
-   "last_response": "الباقي خلال اسبوع"
-  },
-  {
    "customer": "محمد فتحي حسن(مرعب)",
    "target_debt": 1400.0,
    "area": "مرعب",
@@ -10698,36 +10769,36 @@
    "last_response": "اخر النهار 18/7/2026"
   },
   {
-   "customer": "علي حجازي",
-   "target_debt": 690.0,
-   "area": "مدشة ",
-   "last_payment": "2026-05-18",
-   "last_invoice": "2026-04-05",
+   "customer": "حسام عدلي عبود(قيصر)",
+   "target_debt": 80275.0,
+   "area": "قيصر",
+   "last_payment": "2026-02-15",
+   "last_invoice": "2026-08-16",
    "last_response": "0"
   },
   {
-   "customer": "مرسي (مدشه)",
-   "target_debt": 550.0,
-   "area": "مدشة ",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-08-12",
-   "last_response": "قالي  10 ايام"
+   "customer": "صابر مصطفى محمد",
+   "target_debt": 1845.0,
+   "area": "قيصر",
+   "last_payment": "2026-07-16",
+   "last_invoice": "2026-07-16",
+   "last_response": "صابر مصطفى معوش فلوس دلوقتي"
   },
   {
-   "customer": "رمضان جابر(مدشة) سيلا",
-   "target_debt": 2600.0,
-   "area": "مدشة",
-   "last_payment": "2026-07-01",
-   "last_invoice": "2026-05-17",
-   "last_response": "بيلم الايجار"
+   "customer": "رفيق مصطفى عبد المعبود (قيصر)",
+   "target_debt": 5575.0,
+   "area": "قيصر",
+   "last_payment": "2026-08-06",
+   "last_invoice": "2026-06-25",
+   "last_response": "مطالبة"
   },
   {
-   "customer": "ربيع قرني(طريق اسيوط)",
-   "target_debt": 7650.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2026-08-15",
-   "last_invoice": "2026-05-13",
-   "last_response": "مطالبة يوم الاثنين 17/8/2026"
+   "customer": "اشرف عدلي مصطفي",
+   "target_debt": 2230.0,
+   "area": "قيصر",
+   "last_payment": "2026-06-20",
+   "last_invoice": "2026-06-04",
+   "last_response": "الاربعاء 19/8"
   },
   {
    "customer": "محمود اسماعيل",
@@ -10738,20 +10809,12 @@
    "last_response": "اسبوع  15/6/2026"
   },
   {
-   "customer": "د. عبد المجيد المرزوقي",
-   "target_debt": 2380.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2025-04-16",
-   "last_invoice": "2025-04-13",
-   "last_response": "زيارة كل جمعة مع ربيع قرني"
-  },
-  {
    "customer": "رجب الدريني سيلا",
-   "target_debt": 67135.0,
+   "target_debt": 76970.0,
    "area": "سيلا",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-07-09",
-   "last_response": "اخد اخر 2 طن وهيصفي  "
+   "last_payment": "2026-08-20",
+   "last_invoice": "2026-08-20",
+   "last_response": "عليه 47 الف قديم اسأل  عنهم "
   },
   {
    "customer": "جمعه محمد عبد الحميد (سرسنا)",
@@ -10762,12 +10825,12 @@
    "last_response": "مطابة بعد اسبوع"
   },
   {
-   "customer": "الحاج / ابراهيم ابو سريع",
-   "target_debt": 107130.0,
-   "area": "أطفيح",
-   "last_payment": "2026-06-17",
-   "last_invoice": "2026-07-15",
-   "last_response": "هيدفع انهردة"
+   "customer": "عاطف راغب (الهداهده)",
+   "target_debt": 21785.0,
+   "area": "الهداهده",
+   "last_payment": "2026-07-21",
+   "last_invoice": "2026-08-17",
+   "last_response": "بلاغ م شعبان "
   },
   {
    "customer": "مشهور ابراهيم معوض (الشركة)",
@@ -10784,30 +10847,6 @@
    "last_payment": "2026-07-09",
    "last_invoice": "2026-07-09",
    "last_response": "بكرا 16/8"
-  },
-  {
-   "customer": "محمود سامي ابراهيم سيد(السحابه)",
-   "target_debt": 12890.0,
-   "area": "السحابه",
-   "last_payment": "2026-07-26",
-   "last_invoice": "2026-08-09",
-   "last_response": "محمود سامي الخميس 20/8"
-  },
-  {
-   "customer": "فرج محمد مسلم (السحابه)",
-   "target_debt": 950.0,
-   "area": "السحابه",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-06-24",
-   "last_response": "بلاغ استاذ احمد "
-  },
-  {
-   "customer": "مفرح سيد فهيم",
-   "target_debt": 165400.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-04-08",
-   "last_invoice": "2025-12-16",
-   "last_response": "اتفاق ومناقشة مع حاج منير"
   },
   {
    "customer": "عيد احمد عبد الفتاح(ابو السعود)",
@@ -10875,6 +10914,17 @@
    "last_visit": "2026-07-25"
   },
   {
+   "customer": "عثمان ربيع _قيصر",
+   "balance": 186655.0,
+   "collector": "محمد شعبان",
+   "area": "قيصر",
+   "due": "2026-08-21",
+   "classification": "عملاء بالدورة",
+   "notes": "لسة لما يبيع  مفيش معاد بيع",
+   "last_payment": "2026-08-12",
+   "last_visit": "2026-07-22"
+  },
+  {
    "customer": "مفرح سيد فهيم",
    "balance": 165400.0,
    "collector": "محمد شعبان",
@@ -10919,6 +10969,17 @@
    "last_visit": "2026-08-12"
   },
   {
+   "customer": "احمد شعبان (البيضاء)",
+   "balance": 85100.0,
+   "collector": "محمد شعبان",
+   "area": "البيضاء",
+   "due": "2026-08-22",
+   "classification": "فاتورة بفاتورة",
+   "notes": "اخوه هيجي السبت 22/8",
+   "last_payment": "2026-08-01",
+   "last_visit": "2026-08-18"
+  },
+  {
    "customer": "احمد سلامه (حلوان)",
    "balance": 81020.0,
    "collector": "محمد شعبان",
@@ -10947,7 +11008,7 @@
    "area": "سيلا",
    "due": "2026-08-20",
    "classification": "عملاء بالدورة",
-   "notes": "اخد اخر 2 طن وهيصفي  ",
+   "notes": "عليه 47 الف قديم اسأل  عنهم ",
    "last_payment": "2026-08-20",
    "last_visit": "2026-08-05"
   },
@@ -10983,6 +11044,28 @@
    "notes": "مطابة بعد اسبوع",
    "last_payment": "2026-08-11",
    "last_visit": "2026-08-12"
+  },
+  {
+   "customer": "مصطفى محمد حسن (الحطي)",
+   "balance": 13700.0,
+   "collector": "محمد شعبان",
+   "area": "الحطي",
+   "due": "2026-08-21",
+   "classification": "فاتورة بفاتورة",
+   "notes": "بلاغ استاذ احمد ",
+   "last_payment": "2025-10-05",
+   "last_visit": "2026-08-15"
+  },
+  {
+   "customer": "جمال سيد عبدالفتاح(قمن العروس)",
+   "balance": 13650.0,
+   "collector": "محمد شعبان",
+   "area": "قمن العروس",
+   "due": "2026-08-22",
+   "classification": "فاتورة بفاتورة",
+   "notes": "خد 25 يوم عشان فاتورة وفاتورة",
+   "last_payment": "2026-06-17",
+   "last_visit": "2026-08-02"
   },
   {
    "customer": "محمود سامي ابراهيم سيد(السحابه)",
@@ -11117,17 +11200,6 @@
    "last_visit": "2026-08-16"
   },
   {
-   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "balance": 2260.0,
-   "collector": "محمد شعبان",
-   "area": "الشيخ علي",
-   "due": "2026-06-01",
-   "classification": "فاتورة بفاتورة",
-   "notes": "",
-   "last_payment": "2026-08-20",
-   "last_visit": "2026-06-01"
-  },
-  {
    "customer": "اشرف عدلي مصطفي",
    "balance": 2230.0,
    "collector": "محمد شعبان",
@@ -11137,6 +11209,28 @@
    "notes": "الاربعاء 19/8",
    "last_payment": "2026-06-20",
    "last_visit": "2026-08-12"
+  },
+  {
+   "customer": "صابر مصطفى محمد",
+   "balance": 1845.0,
+   "collector": "محمد شعبان",
+   "area": "قيصر",
+   "due": "2026-08-21",
+   "classification": "فاتورة بفاتورة",
+   "notes": "صابر مصطفى معوش فلوس دلوقتي",
+   "last_payment": "2026-07-16",
+   "last_visit": "2026-07-22"
+  },
+  {
+   "customer": "علي محمد (نصار)",
+   "balance": 1800.0,
+   "collector": "محمد شعبان",
+   "area": "نصار",
+   "due": "2026-08-22",
+   "classification": "فاتورة بفاتورة",
+   "notes": "السبت 22/8",
+   "last_payment": "2026-08-20",
+   "last_visit": "2026-08-20"
   },
   {
    "customer": "اسامه يحيى (العياط)",
@@ -11203,70 +11297,57 @@
    "notes": "قالي  10 ايام",
    "last_payment": "2026-08-05",
    "last_visit": "2026-04-07"
+  },
+  {
+   "customer": "الحاج / محمد عوده (الفشن)",
+   "balance": 460.0,
+   "collector": "محمد شعبان",
+   "area": "الفشن",
+   "due": "2026-08-22",
+   "classification": "عملاء كاش",
+   "notes": "",
+   "last_payment": "2026-07-22",
+   "last_visit": "2026-07-23"
   }
  ],
  "route_sheets": {
   "محمد شعبان": {
    "today": [
     {
-     "customer": "محمد علي ذيدان (البيضاء)",
-     "balance": 330515.0,
-     "last_invoice": "2026-07-04",
-     "last_payment": "2026-06-06"
+     "customer": "احمد شعبان (البيضاء)",
+     "balance": 85100.0,
+     "last_invoice": "2026-08-02",
+     "last_payment": "2026-08-01"
     },
     {
-     "customer": "علي حجازي",
-     "balance": 690.0,
-     "last_invoice": "2026-04-05",
-     "last_payment": "2026-05-18"
+     "customer": "جمال سيد عبدالفتاح(قمن العروس)",
+     "balance": 13650.0,
+     "last_invoice": "2026-06-28",
+     "last_payment": "2026-06-17"
     },
     {
-     "customer": "رجب الدريني سيلا",
-     "balance": 76970.0,
+     "customer": "علي محمد (نصار)",
+     "balance": 1800.0,
      "last_invoice": "2026-08-20",
      "last_payment": "2026-08-20"
     },
     {
-     "customer": "محمود سامي ابراهيم سيد(السحابه)",
-     "balance": 12890.0,
-     "last_invoice": "2026-08-09",
-     "last_payment": "2026-07-26"
+     "customer": "الحاج / محمد عوده (الفشن)",
+     "balance": 460.0,
+     "last_invoice": "2026-07-22",
+     "last_payment": "2026-07-22"
     },
     {
-     "customer": "فرج محمد مسلم (السحابه)",
-     "balance": 950.0,
-     "last_invoice": "2026-06-24",
-     "last_payment": "2026-08-05"
+     "customer": "عبد الغفورعلي عبد الباقي(كوم ابو راضي)",
+     "balance": 650.0,
+     "last_invoice": "2026-06-06",
+     "last_payment": "2026-08-15"
     },
     {
-     "customer": "رفيق مصطفى عبد المعبود (قيصر)",
-     "balance": 5575.0,
-     "last_invoice": "2026-06-25",
-     "last_payment": "2026-08-06"
-    },
-    {
-     "customer": "حسام عدلي عبود(قيصر)",
-     "balance": 80275.0,
-     "last_invoice": "2026-08-16",
-     "last_payment": "2026-02-15"
-    },
-    {
-     "customer": "صابر مصطفى محمد",
-     "balance": 1845.0,
-     "last_invoice": "2026-07-16",
-     "last_payment": "2026-07-16"
-    },
-    {
-     "customer": "مصطفى محمد حسن (الحطي)",
-     "balance": 13700.0,
-     "last_invoice": "2026-07-20",
-     "last_payment": "2025-10-05"
-    },
-    {
-     "customer": "عثمان ربيع _قيصر",
-     "balance": 186655.0,
-     "last_invoice": "2026-08-12",
-     "last_payment": "2026-08-12"
+     "customer": "عويس سيف(ابو شويقي)",
+     "balance": 14200.0,
+     "last_invoice": "2026-07-08",
+     "last_payment": "2026-07-08"
     }
    ],
    "overdue": [
@@ -11307,6 +11388,12 @@
      "last_payment": "2026-06-02"
     },
     {
+     "customer": "علي حجازي",
+     "balance": 690.0,
+     "last_invoice": "2026-04-05",
+     "last_payment": "2026-05-18"
+    },
+    {
      "customer": "ربيع قرني(طريق اسيوط)",
      "balance": 2670.0,
      "last_invoice": "2026-05-13",
@@ -11325,10 +11412,28 @@
      "last_payment": "2026-06-20"
     },
     {
+     "customer": "فرج محمد مسلم (السحابه)",
+     "balance": 950.0,
+     "last_invoice": "2026-06-24",
+     "last_payment": "2026-08-05"
+    },
+    {
+     "customer": "رفيق مصطفى عبد المعبود (قيصر)",
+     "balance": 5575.0,
+     "last_invoice": "2026-06-25",
+     "last_payment": "2026-08-06"
+    },
+    {
      "customer": "محمد فتحي حسن(مرعب)",
      "balance": 1400.0,
      "last_invoice": "2026-06-27",
      "last_payment": "2026-06-27"
+    },
+    {
+     "customer": "محمد علي ذيدان (البيضاء)",
+     "balance": 330515.0,
+     "last_invoice": "2026-07-04",
+     "last_payment": "2026-06-06"
     },
     {
      "customer": "عمرو حسن عابد",
@@ -11349,10 +11454,28 @@
      "last_payment": "2026-06-17"
     },
     {
+     "customer": "صابر مصطفى محمد",
+     "balance": 1845.0,
+     "last_invoice": "2026-07-16",
+     "last_payment": "2026-07-16"
+    },
+    {
+     "customer": "مصطفى محمد حسن (الحطي)",
+     "balance": 13700.0,
+     "last_invoice": "2026-07-20",
+     "last_payment": "2025-10-05"
+    },
+    {
      "customer": "اسامه يحيى (العياط)",
      "balance": 1470.0,
      "last_invoice": "2026-08-04",
      "last_payment": "2026-06-02"
+    },
+    {
+     "customer": "محمود سامي ابراهيم سيد(السحابه)",
+     "balance": 12890.0,
+     "last_invoice": "2026-08-09",
+     "last_payment": "2026-07-26"
     },
     {
      "customer": "جمعه محمد عبد الحميد (سرسنا)",
@@ -11367,10 +11490,22 @@
      "last_payment": "2026-08-05"
     },
     {
+     "customer": "عثمان ربيع _قيصر",
+     "balance": 186655.0,
+     "last_invoice": "2026-08-12",
+     "last_payment": "2026-08-12"
+    },
+    {
      "customer": "احمد سلامه (حلوان)",
      "balance": 81020.0,
      "last_invoice": "2026-08-13",
      "last_payment": "2026-08-15"
+    },
+    {
+     "customer": "حسام عدلي عبود(قيصر)",
+     "balance": 80275.0,
+     "last_invoice": "2026-08-16",
+     "last_payment": "2026-02-15"
     },
     {
      "customer": "عيد احمد عبد الفتاح(ابو السعود)",
@@ -11385,8 +11520,8 @@
      "last_payment": "2026-07-21"
     },
     {
-     "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-     "balance": 2260.0,
+     "customer": "رجب الدريني سيلا",
+     "balance": 76970.0,
      "last_invoice": "2026-08-20",
      "last_payment": "2026-08-20"
     }
@@ -11395,16 +11530,10 @@
   "مصطفى": {
    "today": [
     {
-     "customer": "مصطفي هاشم  _ طامية",
-     "balance": 4905.0,
-     "last_invoice": "2025-12-06",
-     "last_payment": "2026-03-11"
-    },
-    {
-     "customer": "ناصر سيد جبالي (مهدي بيه)",
-     "balance": 8205.0,
-     "last_invoice": "2026-07-20",
-     "last_payment": "2026-07-23"
+     "customer": "✅ الراحة مطلوبة لمصطفى",
+     "balance": 0.0,
+     "last_invoice": "",
+     "last_payment": ""
     }
    ],
    "overdue": [
@@ -11443,6 +11572,18 @@
      "balance": 102000.0,
      "last_invoice": "2026-08-08",
      "last_payment": ""
+    },
+    {
+     "customer": "مصطفي هاشم  _ طامية",
+     "balance": 4905.0,
+     "last_invoice": "2025-12-06",
+     "last_payment": "2026-03-11"
+    },
+    {
+     "customer": "ناصر سيد جبالي (مهدي بيه)",
+     "balance": 8205.0,
+     "last_invoice": "2026-07-20",
+     "last_payment": "2026-07-23"
     }
    ]
   }
@@ -11455,7 +11596,7 @@
    "due_date": "2026-09-20",
    "cycle_start": "2025-06-16",
    "cycle_end": "2025-12-16",
-   "days_left": -247.0
+   "days_left": -249.0
   },
   {
    "seq": "2",
@@ -11464,7 +11605,7 @@
    "due_date": "2026-08-20",
    "cycle_start": "2025-06-11",
    "cycle_end": "2025-12-11",
-   "days_left": -252.0
+   "days_left": -254.0
   },
   {
    "seq": "3",
@@ -11473,7 +11614,7 @@
    "due_date": "2026-07-29",
    "cycle_start": "2025-07-02",
    "cycle_end": "2026-01-02",
-   "days_left": -230.0
+   "days_left": -232.0
   },
   {
    "seq": "4",
@@ -11482,7 +11623,7 @@
    "due_date": "2026-11-13",
    "cycle_start": "2025-01-27",
    "cycle_end": "2025-07-27",
-   "days_left": -389.0
+   "days_left": -391.0
   },
   {
    "seq": "5",
@@ -11491,7 +11632,7 @@
    "due_date": "2026-08-20",
    "cycle_start": "2025-09-06",
    "cycle_end": "2026-03-06",
-   "days_left": -167.0
+   "days_left": -169.0
   },
   {
    "seq": "6",
@@ -11500,7 +11641,7 @@
    "due_date": "2026-09-10",
    "cycle_start": "2025-12-28",
    "cycle_end": "2026-06-28",
-   "days_left": -53.0
+   "days_left": -55.0
   },
   {
    "seq": "7",
@@ -11509,7 +11650,7 @@
    "due_date": "2026-09-19",
    "cycle_start": "2026-02-07",
    "cycle_end": "2026-08-07",
-   "days_left": -13.0
+   "days_left": -15.0
   },
   {
    "seq": "8",
@@ -11518,7 +11659,7 @@
    "due_date": "2026-08-27",
    "cycle_start": "2026-07-06",
    "cycle_end": "2027-01-06",
-   "days_left": 139.0
+   "days_left": 137.0
   },
   {
    "seq": "9",
@@ -11527,7 +11668,7 @@
    "due_date": "2026-12-18",
    "cycle_start": "2026-06-20",
    "cycle_end": "2026-12-20",
-   "days_left": 122.0
+   "days_left": 120.0
   },
   {
    "seq": "10",
@@ -11536,7 +11677,7 @@
    "due_date": "2026-09-17",
    "cycle_start": "2026-03-15",
    "cycle_end": "2026-09-15",
-   "days_left": 26.0
+   "days_left": 24.0
   },
   {
    "seq": "11",
@@ -11545,7 +11686,7 @@
    "due_date": "2026-10-09",
    "cycle_start": "2026-04-11",
    "cycle_end": "2026-10-11",
-   "days_left": 52.0
+   "days_left": 50.0
   },
   {
    "seq": "12",
@@ -11554,7 +11695,7 @@
    "due_date": "2026-09-23",
    "cycle_start": "2026-04-02",
    "cycle_end": "2026-10-02",
-   "days_left": 43.0
+   "days_left": 41.0
   },
   {
    "seq": "13",
@@ -11563,7 +11704,7 @@
    "due_date": "2026-08-27",
    "cycle_start": "2026-03-07",
    "cycle_end": "2026-09-07",
-   "days_left": 18.0
+   "days_left": 16.0
   },
   {
    "seq": "14",
@@ -11572,7 +11713,7 @@
    "due_date": "2026-12-13",
    "cycle_start": "2026-06-13",
    "cycle_end": "2026-12-13",
-   "days_left": 115.0
+   "days_left": 113.0
   },
   {
    "seq": "15",
@@ -11581,7 +11722,7 @@
    "due_date": "2026-09-19",
    "cycle_start": "2025-12-16",
    "cycle_end": "2026-06-16",
-   "days_left": -65.0
+   "days_left": -67.0
   },
   {
    "seq": "16",
@@ -11590,7 +11731,7 @@
    "due_date": "2026-10-17",
    "cycle_start": "2026-02-10",
    "cycle_end": "2026-08-10",
-   "days_left": -10.0
+   "days_left": -12.0
   },
   {
    "seq": "17",
@@ -11599,7 +11740,7 @@
    "due_date": "2026-09-14",
    "cycle_start": "2026-02-01",
    "cycle_end": "2026-08-01",
-   "days_left": -19.0
+   "days_left": -21.0
   },
   {
    "seq": "18",
@@ -11608,7 +11749,7 @@
    "due_date": "2026-09-07",
    "cycle_start": "2026-03-04",
    "cycle_end": "2026-09-04",
-   "days_left": 15.0
+   "days_left": 13.0
   },
   {
    "seq": "19",
@@ -11617,7 +11758,7 @@
    "due_date": "2026-12-11",
    "cycle_start": "2026-06-11",
    "cycle_end": "2026-12-11",
-   "days_left": 113.0
+   "days_left": 111.0
   },
   {
    "seq": "20",
@@ -11626,7 +11767,7 @@
    "due_date": "2027-01-05",
    "cycle_start": "2026-08-05",
    "cycle_end": "2027-02-05",
-   "days_left": 169.0
+   "days_left": 167.0
   },
   {
    "seq": "21",
@@ -11635,7 +11776,7 @@
    "due_date": "2026-09-19",
    "cycle_start": "2025-11-15",
    "cycle_end": "2026-05-15",
-   "days_left": -97.0
+   "days_left": -99.0
   },
   {
    "seq": "22",
@@ -11644,16 +11785,16 @@
    "due_date": "2027-01-03",
    "cycle_start": "2026-08-05",
    "cycle_end": "2027-02-05",
-   "days_left": 169.0
+   "days_left": 167.0
   },
   {
    "seq": "23",
    "customer": "سمحي ابو زيد عبد الرحمن (الهداهده)",
    "balance": 12955.0,
-   "due_date": "2026-08-23",
+   "due_date": "2026-09-01",
    "cycle_start": "2025-12-30",
    "cycle_end": "2026-06-30",
-   "days_left": -51.0
+   "days_left": -53.0
   },
   {
    "seq": "24",
@@ -11662,7 +11803,7 @@
    "due_date": "2026-12-02",
    "cycle_start": "2026-06-10",
    "cycle_end": "2026-12-10",
-   "days_left": 112.0
+   "days_left": 110.0
   },
   {
    "seq": "25",
@@ -11671,7 +11812,7 @@
    "due_date": "2026-11-29",
    "cycle_start": "2026-06-01",
    "cycle_end": "2026-12-01",
-   "days_left": 103.0
+   "days_left": 101.0
   },
   {
    "seq": "26",
@@ -11680,7 +11821,7 @@
    "due_date": "2026-05-14",
    "cycle_start": "2025-10-04",
    "cycle_end": "2026-04-04",
-   "days_left": -138.0
+   "days_left": -140.0
   },
   {
    "seq": "27",
@@ -11689,7 +11830,7 @@
    "due_date": "2026-09-10",
    "cycle_start": "2026-06-25",
    "cycle_end": "2026-12-25",
-   "days_left": 127.0
+   "days_left": 125.0
   },
   {
    "seq": "28",
@@ -11698,7 +11839,7 @@
    "due_date": "2026-08-31",
    "cycle_start": "2026-06-06",
    "cycle_end": "2026-12-06",
-   "days_left": 108.0
+   "days_left": 106.0
   },
   {
    "seq": "29",
@@ -11707,16 +11848,16 @@
    "due_date": "2026-05-24",
    "cycle_start": "2025-10-13",
    "cycle_end": "2026-04-13",
-   "days_left": -129.0
+   "days_left": -131.0
   },
   {
    "seq": "30",
    "customer": "عاطف راغب (الهداهده)",
    "balance": 21785.0,
    "due_date": "2026-08-19",
-   "cycle_start": "2026-02-18",
-   "cycle_end": "2026-08-18",
-   "days_left": -2.0
+   "cycle_start": "2026-07-22",
+   "cycle_end": "2027-01-22",
+   "days_left": 153.0
   },
   {
    "seq": "31",
@@ -11725,7 +11866,7 @@
    "due_date": "2026-08-26",
    "cycle_start": "2026-03-18",
    "cycle_end": "2026-09-18",
-   "days_left": 29.0
+   "days_left": 27.0
   },
   {
    "seq": "32",
@@ -11734,7 +11875,7 @@
    "due_date": "2026-08-30",
    "cycle_start": "2025-09-18",
    "cycle_end": "2026-03-18",
-   "days_left": -155.0
+   "days_left": -157.0
   },
   {
    "seq": "33",
@@ -11743,7 +11884,7 @@
    "due_date": "2026-08-26",
    "cycle_start": "2026-05-19",
    "cycle_end": "2026-11-19",
-   "days_left": 91.0
+   "days_left": 89.0
   },
   {
    "seq": "34",
@@ -11752,7 +11893,7 @@
    "due_date": "2026-07-14",
    "cycle_start": "2025-09-07",
    "cycle_end": "2026-03-07",
-   "days_left": -166.0
+   "days_left": -168.0
   },
   {
    "seq": "35",
@@ -11761,7 +11902,7 @@
    "due_date": "2027-01-14",
    "cycle_start": "2026-07-25",
    "cycle_end": "2027-01-25",
-   "days_left": 158.0
+   "days_left": 156.0
   },
   {
    "seq": "36",
@@ -11770,7 +11911,7 @@
    "due_date": "2027-01-02",
    "cycle_start": "2026-07-05",
    "cycle_end": "2027-01-05",
-   "days_left": 138.0
+   "days_left": 136.0
   },
   {
    "seq": "37",
@@ -11779,7 +11920,7 @@
    "due_date": "2026-12-14",
    "cycle_start": "2026-06-20",
    "cycle_end": "2026-12-20",
-   "days_left": 122.0
+   "days_left": 120.0
   },
   {
    "seq": "38",
@@ -11788,7 +11929,7 @@
    "due_date": "2026-05-24",
    "cycle_start": "2025-07-12",
    "cycle_end": "2026-01-12",
-   "days_left": -220.0
+   "days_left": -222.0
   },
   {
    "seq": "39",
@@ -11797,7 +11938,7 @@
    "due_date": "2026-09-02",
    "cycle_start": "2025-12-01",
    "cycle_end": "2026-06-01",
-   "days_left": -80.0
+   "days_left": -82.0
   },
   {
    "seq": "40",
@@ -11806,7 +11947,7 @@
    "due_date": "2026-08-02",
    "cycle_start": "2025-11-15",
    "cycle_end": "2026-05-15",
-   "days_left": -97.0
+   "days_left": -99.0
   },
   {
    "seq": "41",
@@ -11815,7 +11956,7 @@
    "due_date": "2026-11-14",
    "cycle_start": "2026-05-17",
    "cycle_end": "2026-11-17",
-   "days_left": 89.0
+   "days_left": 87.0
   },
   {
    "seq": "42",
@@ -11824,7 +11965,7 @@
    "due_date": "2027-01-05",
    "cycle_start": "2026-08-05",
    "cycle_end": "2027-02-05",
-   "days_left": 169.0
+   "days_left": 167.0
   },
   {
    "seq": "43",
@@ -11833,7 +11974,7 @@
    "due_date": "2026-11-17",
    "cycle_start": "2026-05-30",
    "cycle_end": "2026-11-30",
-   "days_left": 102.0
+   "days_left": 100.0
   },
   {
    "seq": "44",
@@ -11842,7 +11983,7 @@
    "due_date": "2026-09-19",
    "cycle_start": "2026-01-31",
    "cycle_end": "2026-07-31",
-   "days_left": -20.0
+   "days_left": -22.0
   },
   {
    "seq": "45",
@@ -11851,7 +11992,7 @@
    "due_date": "2026-08-28",
    "cycle_start": "2026-02-23",
    "cycle_end": "2026-08-23",
-   "days_left": 3.0
+   "days_left": 1.0
   },
   {
    "seq": "46",
@@ -11860,7 +12001,7 @@
    "due_date": "2026-11-20",
    "cycle_start": "2026-05-20",
    "cycle_end": "2026-11-20",
-   "days_left": 92.0
+   "days_left": 90.0
   },
   {
    "seq": "47",
@@ -11869,7 +12010,7 @@
    "due_date": "2026-09-07",
    "cycle_start": "2026-03-09",
    "cycle_end": "2026-09-09",
-   "days_left": 20.0
+   "days_left": 18.0
   },
   {
    "seq": "48",
@@ -11878,7 +12019,7 @@
    "due_date": "2026-10-05",
    "cycle_start": "2026-04-11",
    "cycle_end": "2026-10-11",
-   "days_left": 52.0
+   "days_left": 50.0
   },
   {
    "seq": "49",
@@ -11887,7 +12028,7 @@
    "due_date": "2026-07-21",
    "cycle_start": "2025-07-08",
    "cycle_end": "2026-01-08",
-   "days_left": -224.0
+   "days_left": -226.0
   },
   {
    "seq": "50",
@@ -11896,7 +12037,7 @@
    "due_date": "2026-08-30",
    "cycle_start": "2026-01-07",
    "cycle_end": "2026-07-07",
-   "days_left": -44.0
+   "days_left": -46.0
   },
   {
    "seq": "51",
@@ -11905,7 +12046,7 @@
    "due_date": "2026-08-26",
    "cycle_start": "2025-09-13",
    "cycle_end": "2026-03-13",
-   "days_left": -160.0
+   "days_left": -162.0
   },
   {
    "seq": "52",
@@ -11914,7 +12055,7 @@
    "due_date": "2026-09-08",
    "cycle_start": "2025-12-08",
    "cycle_end": "2026-06-08",
-   "days_left": -73.0
+   "days_left": -75.0
   },
   {
    "seq": "53",
@@ -11923,7 +12064,7 @@
    "due_date": "2026-09-01",
    "cycle_start": "2026-03-15",
    "cycle_end": "2026-09-15",
-   "days_left": 26.0
+   "days_left": 24.0
   },
   {
    "seq": "54",
@@ -11932,7 +12073,7 @@
    "due_date": "2026-09-05",
    "cycle_start": "2026-02-14",
    "cycle_end": "2026-08-14",
-   "days_left": -6.0
+   "days_left": -8.0
   },
   {
    "seq": "55",
@@ -11941,7 +12082,7 @@
    "due_date": "2026-10-21",
    "cycle_start": "2026-06-22",
    "cycle_end": "2026-12-22",
-   "days_left": 124.0
+   "days_left": 122.0
   },
   {
    "seq": "56",
@@ -11950,7 +12091,7 @@
    "due_date": "2026-08-20",
    "cycle_start": "2026-02-01",
    "cycle_end": "2026-08-01",
-   "days_left": -19.0
+   "days_left": -21.0
   },
   {
    "seq": "57",
@@ -11959,7 +12100,7 @@
    "due_date": "2026-06-06",
    "cycle_start": "2026-02-09",
    "cycle_end": "2026-08-09",
-   "days_left": -11.0
+   "days_left": -13.0
   },
   {
    "seq": "58",
@@ -11968,7 +12109,7 @@
    "due_date": "2027-01-03",
    "cycle_start": "2026-01-15",
    "cycle_end": "2026-07-15",
-   "days_left": -36.0
+   "days_left": -38.0
   },
   {
    "seq": "59",
@@ -11977,7 +12118,7 @@
    "due_date": "2027-01-31",
    "cycle_start": "2026-08-12",
    "cycle_end": "2027-02-12",
-   "days_left": 176.0
+   "days_left": 174.0
   },
   {
    "seq": "60",
@@ -11986,7 +12127,7 @@
    "due_date": "2026-06-27",
    "cycle_start": "2026-04-23",
    "cycle_end": "2026-10-23",
-   "days_left": 64.0
+   "days_left": 62.0
   },
   {
    "seq": "61",
@@ -11995,7 +12136,7 @@
    "due_date": "2026-08-30",
    "cycle_start": "2026-05-18",
    "cycle_end": "2026-11-18",
-   "days_left": 90.0
+   "days_left": 88.0
   },
   {
    "seq": "62",
@@ -12004,7 +12145,7 @@
    "due_date": "2026-08-26",
    "cycle_start": "2025-12-21",
    "cycle_end": "2026-06-21",
-   "days_left": -60.0
+   "days_left": -62.0
   },
   {
    "seq": "63",
@@ -12013,7 +12154,7 @@
    "due_date": "2026-11-06",
    "cycle_start": "2026-05-06",
    "cycle_end": "2026-11-06",
-   "days_left": 78.0
+   "days_left": 76.0
   },
   {
    "seq": "64",
@@ -12022,7 +12163,7 @@
    "due_date": "2026-10-19",
    "cycle_start": "2026-04-19",
    "cycle_end": "2026-10-19",
-   "days_left": 60.0
+   "days_left": 58.0
   },
   {
    "seq": "65",
@@ -12031,7 +12172,7 @@
    "due_date": "2026-12-15",
    "cycle_start": "2026-06-21",
    "cycle_end": "2026-12-21",
-   "days_left": 123.0
+   "days_left": 121.0
   },
   {
    "seq": "66",
@@ -12040,7 +12181,7 @@
    "due_date": "2026-08-20",
    "cycle_start": "2025-10-23",
    "cycle_end": "2026-04-23",
-   "days_left": -119.0
+   "days_left": -121.0
   },
   {
    "seq": "67",
@@ -12049,7 +12190,7 @@
    "due_date": "2026-08-21",
    "cycle_start": "2025-10-23",
    "cycle_end": "2026-04-23",
-   "days_left": -119.0
+   "days_left": -121.0
   },
   {
    "seq": "68",
@@ -12058,7 +12199,7 @@
    "due_date": "2026-09-05",
    "cycle_start": "2025-12-15",
    "cycle_end": "2026-06-15",
-   "days_left": -66.0
+   "days_left": -68.0
   },
   {
    "seq": "69",
@@ -12076,7 +12217,7 @@
    "due_date": "2026-06-13",
    "cycle_start": "2026-01-15",
    "cycle_end": "2026-07-15",
-   "days_left": -36.0
+   "days_left": -38.0
   },
   {
    "seq": "71",
@@ -12085,7 +12226,7 @@
    "due_date": "2027-01-01",
    "cycle_start": "2026-07-01",
    "cycle_end": "2027-01-01",
-   "days_left": 134.0
+   "days_left": 132.0
   },
   {
    "seq": "72",
@@ -12094,28 +12235,37 @@
    "due_date": "2026-06-13",
    "cycle_start": "2025-12-18",
    "cycle_end": "2026-06-18",
-   "days_left": -63.0
+   "days_left": -65.0
   },
   {
    "seq": "73",
+   "customer": "قرنى احمد محمد حسين (كمال علوى)",
+   "balance": 19215.0,
+   "due_date": "2026-09-11",
+   "cycle_start": "2026-01-15",
+   "cycle_end": "2026-07-15",
+   "days_left": -38.0
+  },
+  {
+   "seq": "74",
    "customer": "حسام عدلي عبود(قيصر)",
    "balance": 80275.0,
    "due_date": "2026-08-20",
    "cycle_start": "2025-12-28",
    "cycle_end": "2026-06-28",
-   "days_left": -53.0
+   "days_left": -55.0
   },
   {
-   "seq": "74",
+   "seq": "75",
    "customer": "فايز دياب(مهدي بيه)",
    "balance": 450.0,
    "due_date": "2026-09-19",
    "cycle_start": "2026-06-21",
    "cycle_end": "2026-12-21",
-   "days_left": 123.0
+   "days_left": 121.0
   },
   {
-   "seq": "75",
+   "seq": "76",
    "customer": "العمدة / مبارك الديب - الميمون بني سويف",
    "balance": 0.0,
    "due_date": "2026-03-21",
@@ -12124,16 +12274,16 @@
    "days_left": null
   },
   {
-   "seq": "76",
+   "seq": "77",
    "customer": "مراد عبد القادر",
    "balance": -290.0,
    "due_date": "2026-08-20",
    "cycle_start": "2026-02-10",
    "cycle_end": "2026-08-10",
-   "days_left": -10.0
+   "days_left": -12.0
   },
   {
-   "seq": "77",
+   "seq": "",
    "customer": "اسلام عيد رضوان - منشية دمو",
    "balance": 0.0,
    "due_date": "2026-05-30",
@@ -12148,7 +12298,7 @@
    "due_date": "2026-09-16",
    "cycle_start": "2026-03-18",
    "cycle_end": "2026-09-18",
-   "days_left": 29.0
+   "days_left": 27.0
   },
   {
    "seq": "",
@@ -12157,7 +12307,7 @@
    "due_date": "2027-02-02",
    "cycle_start": "2026-08-05",
    "cycle_end": "2027-02-05",
-   "days_left": 169.0
+   "days_left": 167.0
   },
   {
    "seq": "",
@@ -12166,7 +12316,7 @@
    "due_date": "2026-11-07",
    "cycle_start": "2026-06-03",
    "cycle_end": "2026-12-03",
-   "days_left": 105.0
+   "days_left": 103.0
   },
   {
    "seq": "",
@@ -12175,7 +12325,7 @@
    "due_date": "2027-01-12",
    "cycle_start": "2026-07-21",
    "cycle_end": "2027-01-21",
-   "days_left": 154.0
+   "days_left": 152.0
   },
   {
    "seq": "",
@@ -12184,7 +12334,7 @@
    "due_date": "2026-11-14",
    "cycle_start": "2026-08-16",
    "cycle_end": "2027-02-16",
-   "days_left": 180.0
+   "days_left": 178.0
   }
  ]
 }
