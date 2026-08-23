@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-23 19:03:19",
+  "generated_at": "2026-08-23 19:03:58",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -1491,8 +1491,8 @@
    "balance": 650.0,
    "last_payment": "2026-08-15",
    "last_invoice": "2026-06-06",
-   "last_visit": "2026-08-13",
-   "agreement_days": "10",
+   "last_visit": "2026-08-23",
+   "agreement_days": "0",
    "due_date": "2026-08-23",
    "status": "نشط",
    "collector": "محمد شعبان",
@@ -9430,8 +9430,8 @@
    "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
-   "prev_due": "2026-08-13",
-   "appt_status": "10",
+   "prev_due": "2026-08-23",
+   "appt_status": "0",
    "new_due": "2026-08-23",
    "customer": "عبد الغفورعلي عبد الباقي(كوم ابو راضي)",
    "target_debt": 650.0,
@@ -11023,7 +11023,7 @@
    "classification": "فاتورة بفاتورة",
    "notes": "هيجي واحده",
    "last_payment": "2026-08-15",
-   "last_visit": "2026-08-13"
+   "last_visit": "2026-08-23"
   },
   {
    "customer": "محمد عبد العزيز حسين (نصار)",
