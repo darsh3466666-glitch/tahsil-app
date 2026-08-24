@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-24 14:56:45",
+  "generated_at": "2026-08-24 16:15:55",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10158,17 +10158,6 @@
    "notes": ""
   },
   {
-   "customer": "احمد سعد (السحابه)",
-   "balance": 119445.0,
-   "expected": 50000.0,
-   "collected": 0.0,
-   "due": "2026-08-26",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 50000.0,
-   "notes": ""
-  },
-  {
    "customer": "عبد التواب احمد( ميدوم )",
    "balance": 139900.0,
    "expected": 60000.0,
@@ -10177,6 +10166,17 @@
    "pay_ratio": "0.66666666666666663",
    "pay_status": "جزئي",
    "remaining": 20000.0,
+   "notes": ""
+  },
+  {
+   "customer": "احمد سعد (السحابه)",
+   "balance": 119445.0,
+   "expected": 0.0,
+   "collected": 0.0,
+   "due": "2026-08-26",
+   "pay_ratio": "0",
+   "pay_status": "",
+   "remaining": 0.0,
    "notes": ""
   },
   {
