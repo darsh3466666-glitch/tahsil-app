@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-26 10:10:49",
+  "generated_at": "2026-08-26 13:41:58",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -7678,7 +7678,7 @@
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
-   "notes": "الباقي اخر 8",
+   "notes": "محمد سيد هيجي بكره او بعده وهي كلم عبد الرحمن علي",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 121345.0,
@@ -9524,7 +9524,7 @@
    "area": "مصطفى الصعيدي",
    "last_payment": "2026-07-08",
    "last_invoice": "2026-07-08",
-   "last_response": "الباقي اخر 8",
+   "last_response": "محمد سيد هيجي بكره او بعده وهي كلم عبد الرحمن علي",
    "total_withdrawn": 121345.0,
    "total_paid": 45000.0,
    "collected": 0.0,
@@ -10252,6 +10252,17 @@
    "notes": ""
   },
   {
+   "customer": "حمدان احمد ابو هوله - دوار",
+   "balance": 9470.0,
+   "expected": 5000.0,
+   "collected": 5000.0,
+   "due": "2026-08-25",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
    "customer": "بادية فارم (كوم ابو راضي)",
    "balance": 190058.8571390002,
    "expected": 150000.0,
@@ -10282,6 +10293,17 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 107130.0,
+   "notes": ""
+  },
+  {
+   "customer": "محمود عبد المنعم (اللاهون)",
+   "balance": 73105.0,
+   "expected": 10000.0,
+   "collected": 0.0,
+   "due": "2026-10-21",
+   "pay_ratio": "0",
+   "pay_status": "لم يسدد",
+   "remaining": 10000.0,
    "notes": ""
   },
   {
@@ -10444,17 +10466,6 @@
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-08-16",
-   "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
-   "customer": "حمدان احمد ابو هوله - دوار",
-   "balance": 9470.0,
-   "expected": 0.0,
-   "collected": 0.0,
-   "due": "2026-08-25",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
