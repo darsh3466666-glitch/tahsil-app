@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-26 19:08:15",
+  "generated_at": "2026-08-26 19:11:30",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9977,56 +9977,56 @@
   {
    "customer": "ابو حمزة للأعلاف",
    "balance": 179.99599999934435,
-   "expected": 0.0,
+   "expected": 130400.0,
    "collected": 0.0,
    "due": "2026-10-13",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 130400.0,
    "notes": ""
   },
   {
    "customer": "مزرعه الخيرات",
    "balance": 777119.7699999996,
-   "expected": 0.0,
+   "expected": 200000.0,
    "collected": 0.0,
    "due": "2026-08-28",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 200000.0,
    "notes": ""
   },
   {
    "customer": "د.هاني محمود يوسف (طاميه)",
    "balance": 1128796.0,
-   "expected": 0.0,
+   "expected": 200000.0,
    "collected": 0.0,
    "due": "2026-08-29",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 200000.0,
    "notes": ""
   },
   {
    "customer": "محمد يونس عبد اللطيف(قلمشاه)",
    "balance": 530793.3000000007,
-   "expected": 0.0,
+   "expected": 200000.0,
    "collected": 0.0,
    "due": "2026-09-09",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 200000.0,
    "notes": ""
   },
   {
    "customer": "ايمن محمود يوسف (طاميه)",
    "balance": 976121.0,
-   "expected": 0.0,
+   "expected": 150000.0,
    "collected": 0.0,
    "due": "2026-08-29",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 150000.0,
    "notes": ""
   },
   {
@@ -10043,23 +10043,23 @@
   {
    "customer": "عيد احمد عبد الفتاح(ابو السعود)",
    "balance": 698035.0,
-   "expected": 0.0,
+   "expected": 150000.0,
    "collected": 0.0,
    "due": "2026-08-29",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 150000.0,
    "notes": ""
   },
   {
    "customer": "الحاج / ابراهيم ابو سريع",
    "balance": 107130.0,
-   "expected": 0.0,
+   "expected": 107130.0,
    "collected": 0.0,
    "due": "2026-08-05",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 107130.0,
    "notes": ""
   },
   {
@@ -10076,12 +10076,12 @@
   {
    "customer": "عبد التواب احمد( ميدوم )",
    "balance": 139900.0,
-   "expected": 0.0,
+   "expected": 60000.0,
    "collected": 0.0,
    "due": "2026-08-29",
    "pay_ratio": "0",
-   "pay_status": "",
-   "remaining": 0.0,
+   "pay_status": "لم يسدد",
+   "remaining": 60000.0,
    "notes": ""
   },
   {
