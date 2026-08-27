@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-27 13:43:03",
+  "generated_at": "2026-08-27 13:45:43",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -9303,7 +9303,7 @@
    "cycle_start": "",
    "total_withdrawn": 0.0,
    "total_paid": 0.0,
-   "area": ""
+   "area": "الصفيح "
   },
   {
    "code": "1467",
@@ -9311,19 +9311,19 @@
    "balance": 6125.0,
    "last_payment": "2026-08-26",
    "last_invoice": "2026-08-26",
-   "last_visit": "",
-   "agreement_days": "",
-   "due_date": "",
+   "last_visit": "2026-08-27",
+   "agreement_days": "30",
+   "due_date": "2026-09-26",
    "status": "نشط",
-   "collector": "",
-   "today_status": "",
-   "classification": "",
-   "notes": "",
+   "collector": "محمد شعبان",
+   "today_status": "🟢 ساري",
+   "classification": "فاتورة بفاتورة",
+   "notes": "بلاغ ا احمد",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 0.0,
    "total_paid": 0.0,
-   "area": ""
+   "area": "اسعد نصيف"
   }
  ],
  "payments": [
@@ -10030,7 +10030,7 @@
    "balance": 6125.0,
    "expected": 3000.0,
    "collected": 3000.0,
-   "due": "",
+   "due": "2026-09-26",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
