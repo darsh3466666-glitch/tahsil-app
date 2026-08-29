@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-29 10:52:48",
+  "generated_at": "2026-08-29 11:04:46",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -4672,13 +4672,13 @@
    "last_payment": "2026-08-26",
    "last_invoice": "2026-08-25",
    "last_visit": "2026-08-29",
-   "agreement_days": "30",
-   "due_date": "2026-09-28",
+   "agreement_days": "2",
+   "due_date": "2026-08-31",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
    "classification": "اتفاقات",
-   "notes": "احمد سيد اخر النهار",
+   "notes": "احمد سيد تواصل معاه يوم الاثنين ",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 13672840.790000001,
@@ -10219,7 +10219,7 @@
    "balance": 279078.64999999944,
    "expected": 263615.0,
    "collected": 263615.0,
-   "due": "2026-09-28",
+   "due": "2026-08-31",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
