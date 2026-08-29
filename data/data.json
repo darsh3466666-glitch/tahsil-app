@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-29 10:21:13",
+  "generated_at": "2026-08-29 10:23:28",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -1031,9 +1031,9 @@
    "balance": 349999.0999999996,
    "last_payment": "2026-08-24",
    "last_invoice": "2026-08-09",
-   "last_visit": "2026-08-25",
-   "agreement_days": "5",
-   "due_date": "2026-08-30",
+   "last_visit": "2026-08-29",
+   "agreement_days": "7",
+   "due_date": "2026-09-05",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🟢 ساري",
@@ -2271,9 +2271,9 @@
    "balance": 49445.0,
    "last_payment": "2026-08-27",
    "last_invoice": "2026-07-29",
-   "last_visit": "2026-08-23",
-   "agreement_days": "3",
-   "due_date": "2026-08-26",
+   "last_visit": "2026-08-29",
+   "agreement_days": "0",
+   "due_date": "2026-08-29",
    "status": "نشط",
    "collector": "مصطفى",
    "today_status": "🎯 هدف اليوم",
@@ -3831,12 +3831,12 @@
    "balance": 84900.0,
    "last_payment": "2026-08-27",
    "last_invoice": "2026-08-16",
-   "last_visit": "2026-08-22",
-   "agreement_days": "7",
-   "due_date": "2026-08-29",
+   "last_visit": "2026-08-29",
+   "agreement_days": "30",
+   "due_date": "2026-09-28",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "المزارع الكبيره",
    "notes": "الاثنين",
    "agreements": "",
@@ -4131,12 +4131,12 @@
    "balance": 1128796.0,
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-24",
-   "last_visit": "2026-08-22",
-   "agreement_days": "7",
-   "due_date": "2026-08-29",
+   "last_visit": "2026-08-29",
+   "agreement_days": "15",
+   "due_date": "2026-09-13",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "اتفاقات",
    "notes": "الخميس 18/6/2026",
    "agreements": "",
@@ -4671,12 +4671,12 @@
    "balance": 279078.64999999944,
    "last_payment": "2026-08-26",
    "last_invoice": "2026-08-25",
-   "last_visit": "2026-08-12",
-   "agreement_days": "1",
-   "due_date": "2026-08-13",
+   "last_visit": "2026-08-29",
+   "agreement_days": "30",
+   "due_date": "2026-09-28",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "اتفاقات",
    "notes": "احمد سيد اخر النهار",
    "agreements": "",
@@ -5911,12 +5911,12 @@
    "balance": 155903.85713900067,
    "last_payment": "2026-08-26",
    "last_invoice": "2026-08-27",
-   "last_visit": "2026-08-22",
+   "last_visit": "2026-08-29",
    "agreement_days": "7",
-   "due_date": "2026-08-29",
+   "due_date": "2026-09-05",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء كاش ",
    "notes": "بكرا",
    "agreements": "",
@@ -10118,76 +10118,22 @@
    "rating": "جيد 🟡 (منتظم)"
   },
   {
-   "prev_due": "2026-08-22",
-   "appt_status": "7",
+   "prev_due": "2026-08-29",
+   "appt_status": "0",
    "new_due": "2026-08-29",
-   "customer": "عبد التواب احمد( ميدوم )",
-   "target_debt": 84900.0,
-   "area": "ميدوم",
+   "customer": "احمد سعد (السحابه)",
+   "target_debt": 49445.0,
+   "area": "السحابه",
    "last_payment": "2026-08-27",
-   "last_invoice": "2026-08-16",
-   "last_response": "الاثنين",
-   "total_withdrawn": 5421185.0,
-   "total_paid": 4767580.0,
+   "last_invoice": "2026-07-29",
+   "last_response": "الاربعاء  26/8/2026",
+   "total_withdrawn": 402630.0,
+   "total_paid": 393800.0,
    "collected": 0.0,
-   "remaining": 84900.0,
+   "remaining": 49445.0,
    "collection_rate": "0",
-   "turnover": "63.8537691401649",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-22",
-   "appt_status": "7",
-   "new_due": "2026-08-29",
-   "customer": "د.هاني محمود يوسف (طاميه)",
-   "target_debt": 1128796.0,
-   "area": "طامية",
-   "last_payment": "2026-08-20",
-   "last_invoice": "2026-08-24",
-   "last_response": "الخميس 18/6/2026",
-   "total_withdrawn": 14657501.0,
-   "total_paid": 12250450.0,
-   "collected": 0.0,
-   "remaining": 1128796.0,
-   "collection_rate": "0",
-   "turnover": "12.985075248317676",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-22",
-   "appt_status": "7",
-   "new_due": "2026-08-29",
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "target_debt": 155903.85713900067,
-   "area": "كوم ابو راضي",
-   "last_payment": "2026-08-26",
-   "last_invoice": "2026-08-27",
-   "last_response": "بكرا",
-   "total_withdrawn": 5374650.0,
-   "total_paid": 4407845.0,
-   "collected": 0.0,
-   "remaining": 155903.85713900067,
-   "collection_rate": "0",
-   "turnover": "34.474131035822111",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-08-25",
-   "appt_status": "5",
-   "new_due": "2026-08-30",
-   "customer": "مزرعة بيور",
-   "target_debt": 349999.0999999996,
-   "area": "العاشر من رمضان",
-   "last_payment": "2026-08-24",
-   "last_invoice": "2026-08-09",
-   "last_response": "سداد ع دفعتين بدا من الاسبوع القادم ",
-   "total_withdrawn": 7039939.0,
-   "total_paid": 6949190.0,
-   "collected": 0.0,
-   "remaining": 349999.0999999996,
-   "collection_rate": "0",
-   "turnover": "20.114163150705267",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
+   "turnover": "8.1429871574476689",
+   "rating": "جيد 🟡 (منتظم)"
   }
  ],
  "cash_flow": [
@@ -10262,7 +10208,7 @@
    "balance": 155903.85713900067,
    "expected": 150000.0,
    "collected": 150000.0,
-   "due": "2026-08-29",
+   "due": "2026-09-05",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10273,7 +10219,7 @@
    "balance": 279078.64999999944,
    "expected": 263615.0,
    "collected": 263615.0,
-   "due": "2026-08-13",
+   "due": "2026-09-28",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10317,7 +10263,7 @@
    "balance": 49445.0,
    "expected": 70000.0,
    "collected": 70000.0,
-   "due": "2026-08-26",
+   "due": "2026-08-29",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10328,7 +10274,7 @@
    "balance": 84900.0,
    "expected": 55000.0,
    "collected": 55000.0,
-   "due": "2026-08-29",
+   "due": "2026-09-28",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10438,7 +10384,7 @@
    "balance": 349999.0999999996,
    "expected": 200000.0,
    "collected": 0.0,
-   "due": "2026-08-30",
+   "due": "2026-09-05",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 200000.0,
@@ -11092,17 +11038,6 @@
  ],
  "daily_targets": [
   {
-   "customer": "د.هاني محمود يوسف (طاميه)",
-   "balance": 1128796.0,
-   "collector": "مصطفى",
-   "area": "طامية",
-   "due": "2026-08-29",
-   "classification": "اتفاقات",
-   "notes": "الخميس 18/6/2026",
-   "last_payment": "2026-08-20",
-   "last_visit": "2026-08-22"
-  },
-  {
    "customer": "ايمن محمود يوسف (طاميه)",
    "balance": 976121.0,
    "collector": "مصطفى",
@@ -11147,17 +11082,6 @@
    "last_visit": "2026-08-01"
   },
   {
-   "customer": "د.محمد العسكري (اطفيح)",
-   "balance": 279078.64999999944,
-   "collector": "مصطفى",
-   "area": "أطفيح",
-   "due": "2026-08-13",
-   "classification": "اتفاقات",
-   "notes": "احمد سيد اخر النهار",
-   "last_payment": "2026-08-26",
-   "last_visit": "2026-08-12"
-  },
-  {
    "customer": "حازم برغوت (ياسر عبد الصمد)",
    "balance": 231300.0,
    "collector": "مصطفى",
@@ -11178,17 +11102,6 @@
    "notes": "اتفاق ومناقشة مع حاج منير",
    "last_payment": "2026-04-08",
    "last_visit": "2026-08-11"
-  },
-  {
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "balance": 155903.85713900067,
-   "collector": "مصطفى",
-   "area": "كوم ابو راضي",
-   "due": "2026-08-29",
-   "classification": "عملاء كاش ",
-   "notes": "بكرا",
-   "last_payment": "2026-08-26",
-   "last_visit": "2026-08-22"
   },
   {
    "customer": "عمر زين (حنس)",
@@ -11224,17 +11137,6 @@
    "last_visit": "2026-08-01"
   },
   {
-   "customer": "عبد التواب احمد( ميدوم )",
-   "balance": 84900.0,
-   "collector": "مصطفى",
-   "area": "ميدوم",
-   "due": "2026-08-29",
-   "classification": "المزارع الكبيره",
-   "notes": "الاثنين",
-   "last_payment": "2026-08-27",
-   "last_visit": "2026-08-22"
-  },
-  {
    "customer": "محمود اسماعيل",
    "balance": 60000.0,
    "collector": "محمد شعبان",
@@ -11261,11 +11163,11 @@
    "balance": 49445.0,
    "collector": "مصطفى",
    "area": "السحابه",
-   "due": "2026-08-26",
+   "due": "2026-08-29",
    "classification": "فاتورة بفاتورة",
    "notes": "الاربعاء  26/8/2026",
    "last_payment": "2026-08-27",
-   "last_visit": "2026-08-23"
+   "last_visit": "2026-08-29"
   },
   {
    "customer": "محمد ابو فهد-المنيب",
@@ -11752,28 +11654,10 @@
      "last_payment": "2026-08-24"
     },
     {
-     "customer": "عبد التواب احمد( ميدوم )",
-     "balance": 84900.0,
-     "last_invoice": "2026-08-16",
+     "customer": "احمد سعد (السحابه)",
+     "balance": 49445.0,
+     "last_invoice": "2026-07-29",
      "last_payment": "2026-08-27"
-    },
-    {
-     "customer": "د.هاني محمود يوسف (طاميه)",
-     "balance": 1128796.0,
-     "last_invoice": "2026-08-24",
-     "last_payment": "2026-08-20"
-    },
-    {
-     "customer": "بادية فارم (كوم ابو راضي)",
-     "balance": 155903.85713900067,
-     "last_invoice": "2026-08-27",
-     "last_payment": "2026-08-26"
-    },
-    {
-     "customer": "مزرعة بيور",
-     "balance": 349999.0999999996,
-     "last_invoice": "2026-08-09",
-     "last_payment": "2026-08-24"
     }
    ],
    "overdue": [
@@ -11802,12 +11686,6 @@
      "last_payment": "2026-06-02"
     },
     {
-     "customer": "د.محمد العسكري (اطفيح)",
-     "balance": 279078.64999999944,
-     "last_invoice": "2026-08-25",
-     "last_payment": "2026-08-26"
-    },
-    {
      "customer": "عمرو صلاح الكومي (ياسر عبد الصمد)",
      "balance": 50100.0,
      "last_invoice": "2026-08-08",
@@ -11824,12 +11702,6 @@
      "balance": 8205.0,
      "last_invoice": "2026-07-20",
      "last_payment": "2026-07-23"
-    },
-    {
-     "customer": "احمد سعد (السحابه)",
-     "balance": 49445.0,
-     "last_invoice": "2026-07-29",
-     "last_payment": "2026-08-27"
     }
    ]
   }
