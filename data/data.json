@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-29 18:29:42",
+  "generated_at": "2026-08-29 19:08:26",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10024,17 +10024,6 @@
    "notes": ""
   },
   {
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "balance": 155903.85713900067,
-   "expected": 150000.0,
-   "collected": 150000.0,
-   "due": "2026-09-05",
-   "pay_ratio": "1",
-   "pay_status": "مكتمل",
-   "remaining": 0.0,
-   "notes": ""
-  },
-  {
    "customer": "د.محمد العسكري (اطفيح)",
    "balance": 279078.64999999944,
    "expected": 263615.0,
@@ -10208,6 +10197,17 @@
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 200000.0,
+   "notes": ""
+  },
+  {
+   "customer": "بادية فارم (كوم ابو راضي)",
+   "balance": 155903.85713900067,
+   "expected": 300000.0,
+   "collected": 150000.0,
+   "due": "2026-09-05",
+   "pay_ratio": "0.5",
+   "pay_status": "جزئي",
+   "remaining": 150000.0,
    "notes": ""
   },
   {
