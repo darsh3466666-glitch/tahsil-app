@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-29 10:24:07",
+  "generated_at": "2026-08-29 10:52:48",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -7811,14 +7811,14 @@
    "balance": 37200.0,
    "last_payment": "2026-08-05",
    "last_invoice": "2026-08-27",
-   "last_visit": "2026-04-02",
-   "agreement_days": "3",
-   "due_date": "2026-04-05",
+   "last_visit": "2026-08-29",
+   "agreement_days": "1",
+   "due_date": "2026-08-30",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء كاش",
-   "notes": "",
+   "notes": "بكرا الاحد ",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 518400.0,
@@ -8991,14 +8991,14 @@
    "balance": 8205.0,
    "last_payment": "2026-07-23",
    "last_invoice": "2026-07-20",
-   "last_visit": "2026-08-08",
-   "agreement_days": "12",
-   "due_date": "2026-08-20",
+   "last_visit": "2026-08-29",
+   "agreement_days": "60",
+   "due_date": "2026-10-28",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "علاء كاش ",
-   "notes": "عنده عجلين هيبعهم ويصفي متابعة مع م علي ",
+   "notes": "هيدفع بعد شهرين 40:50 الف وتصفية  رمضان ",
    "agreements": "",
    "cycle_start": "",
    "total_withdrawn": 0.0,
@@ -9632,6 +9632,24 @@
    "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
+   "prev_due": "2026-08-29",
+   "appt_status": "1",
+   "new_due": "2026-08-30",
+   "customer": "محمد ابو فهد-المنيب",
+   "target_debt": 37200.0,
+   "area": "المنيب",
+   "last_payment": "2026-08-05",
+   "last_invoice": "2026-08-27",
+   "last_response": "بكرا الاحد ",
+   "total_withdrawn": 518400.0,
+   "total_paid": 260000.0,
+   "collected": 0.0,
+   "remaining": 37200.0,
+   "collection_rate": "0",
+   "turnover": "13.935483870967742",
+   "rating": "ممتاز 🟢 (سريع الدوران)"
+  },
+  {
    "prev_due": "2026-08-16",
    "appt_status": "14",
    "new_due": "2026-08-30",
@@ -9702,24 +9720,6 @@
    "collection_rate": "0",
    "turnover": "0",
    "rating": "خطر 🔴 (متوقف/راكد)"
-  },
-  {
-   "prev_due": "2026-04-02",
-   "appt_status": "3",
-   "new_due": "2026-04-05",
-   "customer": "محمد ابو فهد-المنيب",
-   "target_debt": 37200.0,
-   "area": "المنيب",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-08-27",
-   "last_response": "0",
-   "total_withdrawn": 518400.0,
-   "total_paid": 260000.0,
-   "collected": 0.0,
-   "remaining": 37200.0,
-   "collection_rate": "0",
-   "turnover": "13.935483870967742",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
    "prev_due": "2026-01-01",
@@ -10494,7 +10494,7 @@
    "balance": 8205.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-08-20",
+   "due": "2026-10-28",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10785,28 +10785,28 @@
   },
   {
    "A": "9",
+   "B": "محمد ابو فهد-المنيب",
+   "C": "37200"
+  },
+  {
+   "A": "10",
    "B": "شعبان محمد - نجع اللهيب",
    "C": "4450"
   },
   {
-   "A": "10",
+   "A": "11",
    "B": "فايز دياب(مهدي بيه)",
    "C": "450"
   },
   {
-   "A": "11",
+   "A": "12",
    "B": "معوض صابر (البرنسة)",
    "C": "16390"
   },
   {
-   "A": "12",
+   "A": "13",
    "B": "جمال سيد عبدالفتاح(قمن العروس)",
    "C": "13650"
-  },
-  {
-   "A": "13",
-   "B": "محمد ابو فهد-المنيب",
-   "C": "37200"
   },
   {
    "A": "14",
@@ -11170,17 +11170,6 @@
    "last_visit": "2026-08-29"
   },
   {
-   "customer": "محمد ابو فهد-المنيب",
-   "balance": 37200.0,
-   "collector": "محمد شعبان",
-   "area": "المنيب",
-   "due": "2026-04-05",
-   "classification": "عملاء كاش",
-   "notes": "",
-   "last_payment": "2026-08-05",
-   "last_visit": "2026-04-02"
-  },
-  {
    "customer": "عبد الرحمن علي - مصطفى الصعيدي",
    "balance": 34390.0,
    "collector": "محمد شعبان",
@@ -11267,17 +11256,6 @@
    "notes": "اخر الشهر بالمتابعة مع م علي ",
    "last_payment": "2025-03-26",
    "last_visit": "2026-07-11"
-  },
-  {
-   "customer": "ناصر سيد جبالي (مهدي بيه)",
-   "balance": 8205.0,
-   "collector": "مصطفى",
-   "area": "مهدي بيه",
-   "due": "2026-08-20",
-   "classification": "علاء كاش ",
-   "notes": "عنده عجلين هيبعهم ويصفي متابعة مع م علي ",
-   "last_payment": "2026-07-23",
-   "last_visit": "2026-08-08"
   },
   {
    "customer": "م.حسن حسان (كوم ابو راضي)",
@@ -11486,6 +11464,12 @@
      "last_payment": "2026-08-18"
     },
     {
+     "customer": "محمد ابو فهد-المنيب",
+     "balance": 37200.0,
+     "last_invoice": "2026-08-27",
+     "last_payment": "2026-08-05"
+    },
+    {
      "customer": "شعبان محمد - نجع اللهيب",
      "balance": 4450.0,
      "last_invoice": "2026-07-16",
@@ -11636,12 +11620,6 @@
      "balance": 27750.0,
      "last_invoice": "2026-08-27",
      "last_payment": "2026-07-25"
-    },
-    {
-     "customer": "محمد ابو فهد-المنيب",
-     "balance": 37200.0,
-     "last_invoice": "2026-08-27",
-     "last_payment": "2026-08-05"
     }
    ]
   },
@@ -11696,12 +11674,6 @@
      "balance": 4905.0,
      "last_invoice": "2025-12-06",
      "last_payment": "2026-03-11"
-    },
-    {
-     "customer": "ناصر سيد جبالي (مهدي بيه)",
-     "balance": 8205.0,
-     "last_invoice": "2026-07-20",
-     "last_payment": "2026-07-23"
     }
    ]
   }
