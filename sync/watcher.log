@@ -405,3 +405,7 @@
 
 [2026-08-29 11:05:09]   ✔ مزامنة GitHub اكتملت
 [2026-08-29 12:59:15] تغيّر الشيت — تصدير...
+[2026-08-29 12:59:39] CMD FAIL git push origin main: fatal: unable to access 'https://github.com/darsh3466666-glitch/tahsil-app.git/': Failed to connect to github.com:443 after 21100 ms: Could not connect to server
+
+[2026-08-29 12:59:39]   ✔ مزامنة GitHub اكتملت
+[2026-08-29 13:00:14] تغيّر الشيت — تصدير...
