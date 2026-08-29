@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-29 13:53:38",
+  "generated_at": "2026-08-29 14:13:01",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -2991,9 +2991,9 @@
    "balance": 68130.0,
    "last_payment": "2026-05-19",
    "last_invoice": "2026-07-20",
-   "last_visit": "2026-08-25",
-   "agreement_days": "7",
-   "due_date": "2026-09-01",
+   "last_visit": "2026-08-29",
+   "agreement_days": "90",
+   "due_date": "2026-11-27",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
@@ -11698,7 +11698,7 @@
    "seq": "34",
    "customer": "عبد الله كمال شاهين (معوض)",
    "balance": 68130.0,
-   "due_date": "2026-09-01",
+   "due_date": "2026-11-27",
    "cycle_start": "2026-05-19",
    "cycle_end": "2026-11-19",
    "days_left": 82.0
