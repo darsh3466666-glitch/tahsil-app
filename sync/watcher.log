@@ -447,3 +447,7 @@
 [2026-08-30 14:52:21]   ✔ مزامنة GitHub اكتملت
 [2026-08-30 18:09:40] Watcher بدأ (فترة الفحص: 30s)
 [2026-08-30 18:10:45] تغيّر الشيت — تصدير...
+[2026-08-30 18:11:16] CMD FAIL git push origin main: fatal: unable to access 'https://github.com/darsh3466666-glitch/tahsil-app.git/': Failed to connect to github.com:443 after 21094 ms: Could not connect to server
+
+[2026-08-30 18:11:16]   ✔ مزامنة GitHub اكتملت
+[2026-08-30 19:27:51] تغيّر الشيت — تصدير...
