@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-08-31 10:09:33",
+  "generated_at": "2026-08-31 10:11:17",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10938,14 +10938,6 @@
  ],
  "collector_follow": [
   {
-   "customer": "محمد عبد العزيز حسين (نصار)",
-   "target_debt": 640.0,
-   "area": "نصار",
-   "last_payment": "2026-07-05",
-   "last_invoice": "2024-03-28",
-   "last_response": "الخميس 6/8/2026"
-  },
-  {
    "customer": "توفيق محمد (نجع العرب)",
    "target_debt": 9490.0,
    "area": "نجع العرب",
@@ -10968,14 +10960,6 @@
    "last_payment": "2026-08-17",
    "last_invoice": "2026-08-26",
    "last_response": "بكرا 30/8"
-  },
-  {
-   "customer": "مرسي (مدشه)",
-   "target_debt": 350.0,
-   "area": "مدشة ",
-   "last_payment": "2026-08-25",
-   "last_invoice": "2026-08-12",
-   "last_response": "قالي  10 ايام"
   },
   {
    "customer": "علي حجازي",
@@ -11026,14 +11010,6 @@
    "last_response": "مطالبة يوم الاثنين 17/8/2026"
   },
   {
-   "customer": "محمود اسماعيل",
-   "target_debt": 60000.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2025-08-27",
-   "last_invoice": "2025-08-25",
-   "last_response": "اسبوع  15/6/2026"
-  },
-  {
    "customer": "د. عبد المجيد المرزوقي",
    "target_debt": 2380.0,
    "area": "طريق اسيوط",
@@ -11058,22 +11034,6 @@
    "last_response": "سدد 2500 فاضل الباقي"
   },
   {
-   "customer": "محمود عباس (القطوري)",
-   "target_debt": 7275.0,
-   "area": "العياط",
-   "last_payment": "2026-08-30",
-   "last_invoice": "2026-08-30",
-   "last_response": "المرة الجاية هصفي  مش هيبقي تاني "
-  },
-  {
-   "customer": "عطيه محمد غريب (العياط)",
-   "target_debt": 5945.0,
-   "area": "العياط",
-   "last_payment": "2026-06-02",
-   "last_invoice": "2026-01-19",
-   "last_response": "مطالبة   "
-  },
-  {
    "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
    "target_debt": 2260.0,
    "area": "الشيخ علي",
@@ -11095,7 +11055,7 @@
    "area": "البراني ",
    "last_payment": "2026-08-18",
    "last_invoice": "2026-08-13",
-   "last_response": "دورة اربع شهور + دفعات"
+   "last_response": "باع ومستني فلوس بقاله فترة ؟؟"
   },
   {
    "customer": "عويس سيف(ابو شويقي)",
@@ -11104,22 +11064,6 @@
    "last_payment": "2026-07-08",
    "last_invoice": "2026-07-08",
    "last_response": "السبت 29/8/2026"
-  },
-  {
-   "customer": "مفرح سيد فهيم",
-   "target_debt": 165400.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-04-08",
-   "last_invoice": "2025-12-16",
-   "last_response": "اتفاق ومناقشة مع حاج منير"
-  },
-  {
-   "customer": "عيد احمد عبد الفتاح(ابو السعود)",
-   "target_debt": 569035.0,
-   "area": "ابو السعود",
-   "last_payment": "2026-08-30",
-   "last_invoice": "2026-08-22",
-   "last_response": "اول الاسبوع الجي 29/8"
   }
  ],
  "daily_targets": [
