@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-02 10:29:27",
+  "generated_at": "2026-09-02 10:31:36",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -4671,12 +4671,12 @@
    "balance": 279078.64999999944,
    "last_payment": "2026-08-26",
    "last_invoice": "2026-08-25",
-   "last_visit": "2026-08-29",
-   "agreement_days": "2",
-   "due_date": "2026-08-31",
+   "last_visit": "2026-09-02",
+   "agreement_days": "4",
+   "due_date": "2026-09-06",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "اتفاقات",
    "notes": "احمد سيد تواصل معاه يوم الاثنين ",
    "agreements": "",
@@ -10487,7 +10487,7 @@
    "balance": 279078.64999999944,
    "expected": 542694.0,
    "collected": 263615.0,
-   "due": "2026-08-31",
+   "due": "2026-09-06",
    "pay_ratio": "0.48575256037472314",
    "pay_status": "جزئي",
    "remaining": 279079.0,
@@ -11127,17 +11127,6 @@
    "last_visit": "2026-08-24"
   },
   {
-   "customer": "د.محمد العسكري (اطفيح)",
-   "balance": 279078.64999999944,
-   "collector": "مصطفى",
-   "area": "أطفيح",
-   "due": "2026-08-31",
-   "classification": "اتفاقات",
-   "notes": "احمد سيد تواصل معاه يوم الاثنين ",
-   "last_payment": "2026-08-26",
-   "last_visit": "2026-08-29"
-  },
-  {
    "customer": "ايمن منصور البحيرة(ياسر عبدالصمد)",
    "balance": 255750.0,
    "collector": "محمد شعبان",
@@ -11688,12 +11677,6 @@
      "balance": 4905.0,
      "last_invoice": "2025-12-06",
      "last_payment": "2026-03-11"
-    },
-    {
-     "customer": "د.محمد العسكري (اطفيح)",
-     "balance": 279078.64999999944,
-     "last_invoice": "2026-08-25",
-     "last_payment": "2026-08-26"
     }
    ]
   }
