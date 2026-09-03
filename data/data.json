@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-03 18:35:59",
+  "generated_at": "2026-09-03 18:37:41",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10058,8 +10058,8 @@
   {
    "customer": "خالد عبد الوهاب (البيضاء)",
    "balance": 50950.0,
-   "expected": 15000.0,
-   "collected": 15000.0,
+   "expected": 30000.0,
+   "collected": 30000.0,
    "due": "2027-01-03",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
@@ -10144,25 +10144,69 @@
    "notes": ""
   },
   {
+   "customer": "هشام يحى",
+   "balance": 15.0,
+   "expected": 7900.0,
+   "collected": 7900.0,
+   "due": "2026-01-16",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "محمد احمد (الوسطى)",
+   "balance": 25765.0,
+   "expected": 10000.0,
+   "collected": 10000.0,
+   "due": "2026-08-30",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "فايز دياب(مهدي بيه)",
+   "balance": 0.0,
+   "expected": 450.0,
+   "collected": 450.0,
+   "due": "2026-09-04",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
+   "customer": "محمد شعبان هاشم",
+   "balance": 570.0,
+   "expected": 630.0,
+   "collected": 630.0,
+   "due": "2026-09-03",
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
+   "notes": ""
+  },
+  {
    "customer": "ايه بي ديري /هشام فؤادطارق حسن وشركاه",
    "balance": 990853.5999999996,
    "expected": 150000.0,
-   "collected": 0.0,
+   "collected": 150000.0,
    "due": "2026-10-04",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 150000.0,
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
    "notes": ""
   },
   {
    "customer": "عيد احمد عبد الفتاح(ابو السعود)",
    "balance": 459564.0,
-   "expected": 100000.0,
-   "collected": 0.0,
+   "expected": 24711.0,
+   "collected": 24711.0,
    "due": "2026-08-29",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 100000.0,
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
    "notes": ""
   },
   {
