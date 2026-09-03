@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-03 13:06:59",
+  "generated_at": "2026-09-03 17:43:40",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -10116,12 +10116,12 @@
   {
    "customer": "ايه بي ديري /هشام فؤادطارق حسن وشركاه",
    "balance": 1140853.5999999996,
-   "expected": 100000.0,
+   "expected": 150000.0,
    "collected": 0.0,
    "due": "2026-10-04",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
-   "remaining": 100000.0,
+   "remaining": 150000.0,
    "notes": ""
   },
   {
