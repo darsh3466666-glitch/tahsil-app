@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-03 17:43:40",
+  "generated_at": "2026-09-03 17:50:50",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -6611,9 +6611,9 @@
    "balance": 0.0,
    "last_payment": "2026-08-03",
    "last_invoice": "2026-02-22",
-   "last_visit": "2026-06-23",
+   "last_visit": "2026-09-03",
    "agreement_days": "7",
-   "due_date": "2026-06-30",
+   "due_date": "2026-09-10",
    "status": "عميل خالص",
    "collector": "محمد شعبان",
    "today_status": "✅ خالص",
