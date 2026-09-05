@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-05 14:15:41",
+  "generated_at": "2026-09-05 14:16:21",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -2678,7 +2678,7 @@
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "  عليه 3 الف قديم",
+   "notes": "  عليه 3 الف قديم لما يجي المرة الجاية",
    "agreements": "",
    "cycle_start": "2026-06-06",
    "total_withdrawn": 102085.0,
@@ -6518,7 +6518,7 @@
    "collector": "مصطفى",
    "today_status": "🎯 هدف اليوم",
    "classification": "عملاء بالدورة",
-   "notes": "20 يوم وهيبيع",
+   "notes": "عليه 13 قديم",
    "agreements": "دفعات",
    "cycle_start": "2026-02-14",
    "total_withdrawn": 99880.0,
@@ -10098,7 +10098,7 @@
    "area": "الهداهده",
    "last_payment": "2026-08-05",
    "last_invoice": "2026-09-03",
-   "last_response": "20 يوم وهيبيع",
+   "last_response": "عليه 13 قديم",
    "total_withdrawn": 99880.0,
    "total_paid": 46050.0,
    "collected": 0.0,
@@ -11027,7 +11027,7 @@
    "area": "الهداهده",
    "due": "2026-09-05",
    "classification": "عملاء بالدورة",
-   "notes": "20 يوم وهيبيع",
+   "notes": "عليه 13 قديم",
    "last_payment": "2026-08-05",
    "last_visit": "2026-08-16"
   },
