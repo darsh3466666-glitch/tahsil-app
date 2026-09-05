@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-05 14:13:51",
+  "generated_at": "2026-09-05 14:14:32",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -1631,14 +1631,14 @@
    "balance": 267809.95,
    "last_payment": "2026-03-05",
    "last_invoice": "2026-09-03",
-   "last_visit": "2026-08-25",
-   "agreement_days": "15",
-   "due_date": "2026-09-09",
+   "last_visit": "2026-09-05",
+   "agreement_days": "7",
+   "due_date": "2026-09-12",
    "status": "نشط",
    "collector": "محمد شعبان",
    "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "باع   25480 قديم",
+   "notes": "قرب يبيع   25480 قديم",
    "agreements": "",
    "cycle_start": "2026-03-07",
    "total_withdrawn": 438655.0,
@@ -11634,7 +11634,7 @@
    "seq": "14",
    "customer": "ايمن عدلي عبود قيصر",
    "balance": 267809.95,
-   "due_date": "2026-09-09",
+   "due_date": "2026-09-12",
    "cycle_start": "2026-03-07",
    "cycle_end": "2026-09-07",
    "days_left": 2.0
