@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-05 10:53:28",
+  "generated_at": "2026-09-05 13:07:38",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -891,12 +891,12 @@
    "balance": 75380.0,
    "last_payment": "2026-08-27",
    "last_invoice": "2026-08-27",
-   "last_visit": "2026-08-05",
+   "last_visit": "2026-09-05",
    "agreement_days": "30",
-   "due_date": "2026-09-04",
+   "due_date": "2026-10-05",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
    "notes": "",
    "agreements": "",
@@ -5911,12 +5911,12 @@
    "balance": 80453.85713900067,
    "last_payment": "2026-09-01",
    "last_invoice": "2026-09-03",
-   "last_visit": "2026-08-29",
-   "agreement_days": "7",
-   "due_date": "2026-09-05",
+   "last_visit": "2026-09-05",
+   "agreement_days": "14",
+   "due_date": "2026-09-19",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء كاش ",
    "notes": "بكرا",
    "agreements": "",
@@ -6431,12 +6431,12 @@
    "balance": 25765.0,
    "last_payment": "2026-09-03",
    "last_invoice": "2026-09-03",
-   "last_visit": "2026-08-29",
-   "agreement_days": "1",
-   "due_date": "2026-08-30",
+   "last_visit": "2026-09-05",
+   "agreement_days": "4",
+   "due_date": "2026-09-09",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "فاتورة بفاتورة",
    "notes": "بكرا 30/8",
    "agreements": "",
@@ -7011,14 +7011,14 @@
    "balance": 55205.0,
    "last_payment": "2026-08-18",
    "last_invoice": "2026-08-13",
-   "last_visit": "2026-08-31",
-   "agreement_days": "3",
-   "due_date": "2026-09-03",
+   "last_visit": "2026-09-05",
+   "agreement_days": "11",
+   "due_date": "2026-09-16",
    "status": "نشط",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
-   "notes": "دورة اربع شهور + دفعات",
+   "notes": "الباقي بعد 10 ايام",
    "agreements": "دورة ودفعات ",
    "cycle_start": "2026-05-18",
    "total_withdrawn": 40845.0,
@@ -8648,15 +8648,15 @@
   {
    "code": "1434",
    "name": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "balance": 2260.0,
+   "balance": 0.0,
    "last_payment": "2026-08-20",
    "last_invoice": "2026-08-20",
    "last_visit": "2026-09-02",
    "agreement_days": "1",
    "due_date": "2026-09-03",
-   "status": "نشط",
+   "status": "عميل خالص",
    "collector": "محمد شعبان",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "✅ خالص",
    "classification": "فاتورة بفاتورة",
    "notes": "الخميس 3/9",
    "agreements": "",
@@ -9784,24 +9784,6 @@
    "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
-   "prev_due": "2026-08-29",
-   "appt_status": "1",
-   "new_due": "2026-08-30",
-   "customer": "محمد احمد (الوسطى)",
-   "target_debt": 25765.0,
-   "area": "مرعب",
-   "last_payment": "2026-09-03",
-   "last_invoice": "2026-09-03",
-   "last_response": "بكرا 30/8",
-   "total_withdrawn": 133460.0,
-   "total_paid": 89360.0,
-   "collected": 0.0,
-   "remaining": 25765.0,
-   "collection_rate": "0",
-   "turnover": "5.1798952066757229",
-   "rating": "جيد 🟡 (منتظم)"
-  },
-  {
    "prev_due": "2026-07-04",
    "appt_status": "25",
    "new_due": "2026-07-29",
@@ -9874,24 +9856,6 @@
    "rating": "ممتاز 🟢 (سريع الدوران)"
   },
   {
-   "prev_due": "2026-08-05",
-   "appt_status": "30",
-   "new_due": "2026-09-04",
-   "customer": "حمدي عبد الحميد(سيلا)",
-   "target_debt": 75380.0,
-   "area": "سيلا",
-   "last_payment": "2026-08-27",
-   "last_invoice": "2026-08-27",
-   "last_response": "0",
-   "total_withdrawn": 841230.0,
-   "total_paid": 748310.0,
-   "collected": 0.0,
-   "remaining": 75380.0,
-   "collection_rate": "0",
-   "turnover": "11.159856725921996",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
    "prev_due": "2026-08-01",
    "appt_status": "3",
    "new_due": "2026-08-04",
@@ -9908,42 +9872,6 @@
    "collection_rate": "0",
    "turnover": "22.793943269007208",
    "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
-   "prev_due": "2026-09-02",
-   "appt_status": "1",
-   "new_due": "2026-09-03",
-   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "target_debt": 2260.0,
-   "area": "الشيخ علي",
-   "last_payment": "2026-08-20",
-   "last_invoice": "2026-08-20",
-   "last_response": "الخميس 3/9",
-   "total_withdrawn": 0.0,
-   "total_paid": 0.0,
-   "collected": 0.0,
-   "remaining": 2260.0,
-   "collection_rate": "0",
-   "turnover": "0",
-   "rating": "سيء ⚫ (بطيء جداً)"
-  },
-  {
-   "prev_due": "2026-08-31",
-   "appt_status": "3",
-   "new_due": "2026-09-03",
-   "customer": "نور حميده (البراني)",
-   "target_debt": 55205.0,
-   "area": "البراني ",
-   "last_payment": "2026-08-18",
-   "last_invoice": "2026-08-13",
-   "last_response": "دورة اربع شهور + دفعات",
-   "total_withdrawn": 40845.0,
-   "total_paid": 27835.0,
-   "collected": 0.0,
-   "remaining": 55205.0,
-   "collection_rate": "0",
-   "turnover": "0.73987863418168642",
-   "rating": "سيء ⚫ (بطيء جداً)"
   },
   {
    "prev_due": "2026-04-07",
@@ -10198,24 +10126,6 @@
    "rating": "خطر 🔴 (متوقف/راكد)"
   },
   {
-   "prev_due": "2026-08-29",
-   "appt_status": "7",
-   "new_due": "2026-09-05",
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "target_debt": 80453.85713900067,
-   "area": "كوم ابو راضي",
-   "last_payment": "2026-09-01",
-   "last_invoice": "2026-09-03",
-   "last_response": "بكرا",
-   "total_withdrawn": 5374650.0,
-   "total_paid": 4407845.0,
-   "collected": 0.0,
-   "remaining": 80453.85713900067,
-   "collection_rate": "0",
-   "turnover": "66.80413085371633",
-   "rating": "ممتاز 🟢 (سريع الدوران)"
-  },
-  {
    "prev_due": "2026-08-16",
    "appt_status": "20",
    "new_due": "2026-09-05",
@@ -10375,7 +10285,7 @@
    "balance": 25765.0,
    "expected": 10000.0,
    "collected": 10000.0,
-   "due": "2026-08-30",
+   "due": "2026-09-09",
    "pay_ratio": "1",
    "pay_status": "مكتمل",
    "remaining": 0.0,
@@ -10429,11 +10339,11 @@
    "customer": "محمد يونس عبد اللطيف(قلمشاه)",
    "balance": 722443.3000000007,
    "expected": 100000.0,
-   "collected": 0.0,
+   "collected": 100000.0,
    "due": "2026-09-09",
-   "pay_ratio": "0",
-   "pay_status": "لم يسدد",
-   "remaining": 100000.0,
+   "pay_ratio": "1",
+   "pay_status": "مكتمل",
+   "remaining": 0.0,
    "notes": ""
   },
   {
@@ -10507,7 +10417,7 @@
    "balance": 80453.85713900067,
    "expected": 47603.85713900067,
    "collected": 0.0,
-   "due": "2026-09-05",
+   "due": "2026-09-19",
    "pay_ratio": "0",
    "pay_status": "لم يسدد",
    "remaining": 47603.85713900067,
@@ -10650,7 +10560,7 @@
    "balance": 55205.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-09-03",
+   "due": "2026-09-16",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -10691,7 +10601,7 @@
   },
   {
    "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "balance": 2260.0,
+   "balance": 0.0,
    "expected": 0.0,
    "collected": 0.0,
    "due": "2026-09-03",
@@ -10737,7 +10647,7 @@
    "B": "ايمن منصور البحيرة(ياسر عبدالصمد)",
    "C": "255750",
    "I": "الباقي",
-   "J": "1828149",
+   "J": "1669539",
    "M": "لم يتم التواصل"
   },
   {
@@ -10802,288 +10712,108 @@
   },
   {
    "A": "12",
-   "B": "محمد احمد (الوسطى)",
-   "C": "25765"
-  },
-  {
-   "A": "13",
    "B": "مجدي احمد محمد (دوار)",
    "C": "152900"
   },
   {
-   "A": "14",
+   "A": "13",
    "B": "عبد الرحمن علي - مصطفى الصعيدي",
    "C": "53300"
   },
   {
-   "A": "15",
+   "A": "14",
    "B": "محمد شعبان هاشم",
    "C": "570"
   },
   {
-   "A": "16",
+   "A": "15",
    "B": "عيد احمد عبد الفتاح(ابو السعود)",
    "C": "459564"
   },
   {
-   "A": "17",
-   "B": "حمدي عبد الحميد(سيلا)",
-   "C": "75380"
-  },
-  {
-   "A": "18",
+   "A": "16",
    "B": "احمد سلامه (حلوان)",
    "C": "86020"
   },
   {
-   "A": "19",
-   "B": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "C": "2260"
-  },
-  {
-   "A": "20",
-   "B": "نور حميده (البراني)",
-   "C": "55205"
-  },
-  {
-   "A": "21",
+   "A": "17",
    "B": "مرسي (مدشه)",
    "C": "350"
   },
   {
-   "A": "22",
+   "A": "18",
    "B": "توفيق محمد (نجع العرب)",
    "C": "9490"
   },
   {
-   "A": "23",
+   "A": "19",
    "B": "عويس سيف(ابو شويقي)",
    "C": "14200"
   },
   {
-   "A": "24",
+   "A": "20",
    "B": "محمد فتحي حسن(مرعب)",
    "C": "1400"
   },
   {
-   "A": "25",
+   "A": "21",
    "B": "فرج محمد مسلم (السحابه)",
    "C": "950"
   },
   {
-   "A": "26",
+   "A": "22",
    "B": "محمد عدلي (الوسطى)",
    "C": "535"
   },
   {
-   "A": "27",
+   "A": "23",
    "B": "ربيع قرني(طريق اسيوط)",
    "C": "2670"
   },
   {
-   "A": "28",
+   "A": "24",
    "B": "عطيه محمد غريب (العياط)",
    "C": "5945"
   },
   {
-   "A": "29",
+   "A": "25",
    "B": "حسين عبد الفتاح ابويط",
    "C": "9750"
   },
   {
-   "A": "30",
+   "A": "26",
    "B": "محمود اسماعيل",
    "C": "60000"
   },
   {
-   "A": "31",
+   "A": "27",
    "B": "مصطفى منشاوي(البيضاء)",
    "C": "12360"
   },
   {
-   "A": "32",
+   "A": "28",
    "B": "عمر زين (حنس)",
    "C": "151155"
   },
   {
-   "A": "33",
+   "A": "29",
    "B": "د. عبد المجيد المرزوقي",
    "C": "2380"
   },
   {
-   "A": "34",
+   "A": "30",
    "B": "محمد عبد العزيز حسين (نصار)",
    "C": "640"
   }
  ],
  "collector_follow": [
   {
-   "customer": "عبد الله ضيف (الصفيح)",
-   "target_debt": 730.0,
-   "area": "مرعب",
-   "last_payment": "2026-09-02",
-   "last_invoice": "2026-09-03",
-   "last_response": "بكرا 5/7/2026"
-  },
-  {
-   "customer": "ايمن منصور البحيرة(ياسر عبدالصمد)",
-   "target_debt": 255750.0,
-   "area": "ياسر عبدالصمد",
-   "last_payment": "2026-08-30",
-   "last_invoice": "2026-08-26",
-   "last_response": "أيمن منصور يوم السبت هيوصل الفلوس للحاج ياسر"
-  },
-  {
-   "customer": "جمال سيد عبدالفتاح(قمن العروس)",
-   "target_debt": 13650.0,
-   "area": "قمن العروس",
-   "last_payment": "2026-06-17",
-   "last_invoice": "2026-06-28",
-   "last_response": "السبت 5/9/2026"
-  },
-  {
-   "customer": "علي حجازي",
-   "target_debt": 690.0,
-   "area": "مدشة ",
-   "last_payment": "2026-05-18",
-   "last_invoice": "2026-04-05",
-   "last_response": "السبت 5/9/2026"
-  },
-  {
-   "customer": "جمعه محمد (مصطفى الصعيدي)",
-   "target_debt": 24765.0,
-   "area": "مصطفى الصعيدي",
-   "last_payment": "2026-07-21",
-   "last_invoice": "2026-08-15",
-   "last_response": "شغال فاتورة وفاتوررة"
-  },
-  {
-   "customer": "الحاج / ابراهيم ابو سريع",
-   "target_debt": 107130.0,
-   "area": "أطفيح",
-   "last_payment": "2026-06-17",
-   "last_invoice": "2026-07-15",
-   "last_response": "هيدفع انهردة"
-  },
-  {
-   "customer": "جمعه محمد عبد الحميد (سرسنا)",
-   "target_debt": 11200.0,
-   "area": "سرسنا",
-   "last_payment": "2026-08-30",
-   "last_invoice": "2026-08-11",
-   "last_response": "الباقي بعد اسبوع هخد علف ويدفع"
-  },
-  {
-   "customer": "مشهور ابراهيم معوض (الشركة)",
-   "target_debt": 6785.0,
-   "area": "الشركه",
-   "last_payment": "2026-08-22",
-   "last_invoice": "2026-07-14",
-   "last_response": "10 ايام بلاغ محمد شعبان"
-  },
-  {
-   "customer": "طارق ايوب (باديه فارم)",
-   "target_debt": 11885.0,
-   "area": "كوم ابو راضي",
-   "last_payment": "2026-09-01",
-   "last_invoice": "2026-09-03",
-   "last_response": "اخد 20 يوم عشان فاتورة وفاتورة"
-  },
-  {
-   "customer": "بدوي احمد سالم (ابو شويقي)",
-   "target_debt": 2200.0,
-   "area": "ابو شويقي",
-   "last_payment": "2026-08-01",
-   "last_invoice": "2026-08-01",
-   "last_response": "اول شهر 8"
-  },
-  {
-   "customer": "حسين احمدحسين (قيصر)",
-   "target_debt": 60345.0,
-   "area": "قيصر",
-   "last_payment": "2026-07-13",
-   "last_invoice": "2026-09-03",
-   "last_response": "موعده 2/9/2026   عليه 12880 قديم "
-  },
-  {
-   "customer": "محمد احمد (الوسطى)",
-   "target_debt": 25765.0,
-   "area": "مرعب",
-   "last_payment": "2026-09-03",
-   "last_invoice": "2026-09-03",
-   "last_response": "بكرا 30/8"
-  },
-  {
-   "customer": "مجدي احمد محمد (دوار)",
-   "target_debt": 152900.0,
-   "area": "دوار",
-   "last_payment": "2026-07-27",
-   "last_invoice": "2026-09-03",
-   "last_response": "اخر الشهر "
-  },
-  {
-   "customer": "عبد الرحمن علي - مصطفى الصعيدي",
-   "target_debt": 53300.0,
-   "area": "مصطفى الصعيدي",
-   "last_payment": "2026-07-08",
-   "last_invoice": "2026-09-03",
-   "last_response": "جايله فلوس طماطم"
-  },
-  {
-   "customer": "محمد شعبان هاشم",
-   "target_debt": 570.0,
-   "area": "دوار",
-   "last_payment": "2026-09-03",
-   "last_invoice": "2026-09-03",
-   "last_response": "اخر الشهر"
-  },
-  {
-   "customer": "عيد احمد عبد الفتاح(ابو السعود)",
-   "target_debt": 459564.0,
-   "area": "ابو السعود",
-   "last_payment": "2026-09-03",
-   "last_invoice": "2026-08-31",
-   "last_response": "اول الاسبوع الجي 29/8"
-  },
-  {
-   "customer": "حمدي عبد الحميد(سيلا)",
-   "target_debt": 75380.0,
-   "area": "سيلا",
-   "last_payment": "2026-08-27",
-   "last_invoice": "2026-08-27",
-   "last_response": "0"
-  },
-  {
-   "customer": "احمد سلامه (حلوان)",
-   "target_debt": 86020.0,
-   "area": "حلوان",
-   "last_payment": "2026-08-29",
-   "last_invoice": "2026-08-27",
-   "last_response": "مع فلوس ابراهيم سويلم   الثلاثاء 4/8/2026"
-  },
-  {
-   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "target_debt": 2260.0,
-   "area": "الشيخ علي",
-   "last_payment": "2026-08-20",
-   "last_invoice": "2026-08-20",
-   "last_response": "الخميس 3/9"
-  },
-  {
-   "customer": "نور حميده (البراني)",
-   "target_debt": 55205.0,
-   "area": "البراني ",
-   "last_payment": "2026-08-18",
-   "last_invoice": "2026-08-13",
-   "last_response": "دورة اربع شهور + دفعات"
-  },
-  {
-   "customer": "مرسي (مدشه)",
-   "target_debt": 350.0,
-   "area": "مدشة ",
-   "last_payment": "2026-08-25",
-   "last_invoice": "2026-08-12",
-   "last_response": "قالي  10 ايام"
+   "customer": "محمد عبد العزيز حسين (نصار)",
+   "target_debt": 640.0,
+   "area": "نصار",
+   "last_payment": "2026-07-05",
+   "last_invoice": "2024-03-28",
+   "last_response": "الخميس 6/8/2026"
   },
   {
    "customer": "توفيق محمد (نجع العرب)",
@@ -11094,12 +10824,12 @@
    "last_response": "بعد 10 ايام الباقي"
   },
   {
-   "customer": "عويس سيف(ابو شويقي)",
-   "target_debt": 14200.0,
-   "area": "ابو شويقي",
+   "customer": "عبد الرحمن علي - مصطفى الصعيدي",
+   "target_debt": 53300.0,
+   "area": "مصطفى الصعيدي",
    "last_payment": "2026-07-08",
-   "last_invoice": "2026-07-08",
-   "last_response": "السبت 29/8/2026"
+   "last_invoice": "2026-09-03",
+   "last_response": "جايله فلوس طماطم"
   },
   {
    "customer": "محمد فتحي حسن(مرعب)",
@@ -11110,68 +10840,20 @@
    "last_response": "اخر الشهر  "
   },
   {
-   "customer": "فرج محمد مسلم (السحابه)",
-   "target_debt": 950.0,
-   "area": "السحابه",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-06-24",
-   "last_response": "الاربعاء 2/9"
+   "customer": "علي حجازي",
+   "target_debt": 690.0,
+   "area": "مدشة ",
+   "last_payment": "2026-05-18",
+   "last_invoice": "2026-04-05",
+   "last_response": "السبت 5/9/2026"
   },
   {
-   "customer": "محمد عدلي (الوسطى)",
-   "target_debt": 535.0,
-   "area": "الوسطى",
-   "last_payment": "2026-08-13",
-   "last_invoice": "2026-06-15",
-   "last_response": "سدد 2500 فاضل الباقي"
-  },
-  {
-   "customer": "ربيع قرني(طريق اسيوط)",
-   "target_debt": 2670.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2026-08-15",
-   "last_invoice": "2026-05-13",
-   "last_response": "مطالبة يوم الاثنين 17/8/2026"
-  },
-  {
-   "customer": "عطيه محمد غريب (العياط)",
-   "target_debt": 5945.0,
-   "area": "العياط",
-   "last_payment": "2026-06-02",
-   "last_invoice": "2026-01-19",
-   "last_response": "46266"
-  },
-  {
-   "customer": "حسين عبد الفتاح ابويط",
-   "target_debt": 9750.0,
-   "area": "ابويط",
-   "last_payment": "2025-11-26",
-   "last_invoice": "2025-09-18",
-   "last_response": "سداد 4750 بعد شهر "
-  },
-  {
-   "customer": "محمود اسماعيل",
-   "target_debt": 60000.0,
-   "area": "طريق اسيوط",
-   "last_payment": "2025-08-27",
-   "last_invoice": "2025-08-25",
-   "last_response": "اسبوع  15/6/2026"
-  },
-  {
-   "customer": "مصطفى منشاوي(البيضاء)",
-   "target_debt": 12360.0,
-   "area": "البيضاء",
-   "last_payment": "2025-08-02",
-   "last_invoice": "2025-08-02",
-   "last_response": " نص الفلوس اخر الشهر والنص الثاني الشهر الي بعده"
-  },
-  {
-   "customer": "عمر زين (حنس)",
-   "target_debt": 151155.0,
-   "area": "حنس- مصر الجديدة",
-   "last_payment": "2025-05-29",
-   "last_invoice": "2025-04-20",
-   "last_response": "مطالبة واتصال حتى السداد "
+   "customer": "جمال سيد عبدالفتاح(قمن العروس)",
+   "target_debt": 13650.0,
+   "area": "قمن العروس",
+   "last_payment": "2026-06-17",
+   "last_invoice": "2026-06-28",
+   "last_response": "السبت 5/9/2026"
   },
   {
    "customer": "د. عبد المجيد المرزوقي",
@@ -11182,44 +10864,84 @@
    "last_response": "زيارة كل جمعة مع ربيع قرني"
   },
   {
-   "customer": "محمد عبد العزيز حسين (نصار)",
-   "target_debt": 640.0,
-   "area": "نصار",
-   "last_payment": "2026-07-05",
-   "last_invoice": "2024-03-28",
-   "last_response": "الخميس 6/8/2026"
+   "customer": "ربيع قرني(طريق اسيوط)",
+   "target_debt": 2670.0,
+   "area": "طريق اسيوط",
+   "last_payment": "2026-08-15",
+   "last_invoice": "2026-05-13",
+   "last_response": "مطالبة يوم الاثنين 17/8/2026"
   },
   {
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "target_debt": 80453.85713900067,
-   "area": "كوم ابو راضي",
-   "last_payment": "2026-09-01",
-   "last_invoice": "2026-09-03",
-   "last_response": "بكرا"
+   "customer": "جمعه محمد عبد الحميد (سرسنا)",
+   "target_debt": 11200.0,
+   "area": "سرسنا",
+   "last_payment": "2026-08-30",
+   "last_invoice": "2026-08-11",
+   "last_response": "الباقي بعد اسبوع هخد علف ويدفع"
   },
   {
-   "customer": "محمد راغب (الهداهده)",
-   "target_debt": 22065.0,
-   "area": "الهداهده",
+   "customer": "محمد عدلي (الوسطى)",
+   "target_debt": 535.0,
+   "area": "الوسطى",
+   "last_payment": "2026-08-13",
+   "last_invoice": "2026-06-15",
+   "last_response": "سدد 2500 فاضل الباقي"
+  },
+  {
+   "customer": "مشهور ابراهيم معوض (الشركة)",
+   "target_debt": 6785.0,
+   "area": "الشركه",
+   "last_payment": "2026-08-22",
+   "last_invoice": "2026-07-14",
+   "last_response": "10 ايام بلاغ محمد شعبان"
+  },
+  {
+   "customer": "فرج محمد مسلم (السحابه)",
+   "target_debt": 950.0,
+   "area": "السحابه",
    "last_payment": "2026-08-05",
-   "last_invoice": "2026-09-03",
-   "last_response": "20 يوم وهيبيع"
+   "last_invoice": "2026-06-24",
+   "last_response": "الاربعاء 2/9"
   },
   {
-   "customer": "محمد حفني (اهناسيا) المسيد",
-   "target_debt": 886.0500000000029,
-   "area": "اهناسيا",
-   "last_payment": "2026-04-16",
-   "last_invoice": "2026-07-18",
-   "last_response": "طلب الحساب يكون مفتوح"
+   "customer": "مصطفى منشاوي(البيضاء)",
+   "target_debt": 12360.0,
+   "area": "البيضاء",
+   "last_payment": "2025-08-02",
+   "last_invoice": "2025-08-02",
+   "last_response": " نص الفلوس اخر الشهر والنص الثاني الشهر الي بعده"
   },
   {
-   "customer": "د.محمد العسكري (اطفيح)",
-   "target_debt": 139078.65000000037,
-   "area": "أطفيح",
-   "last_payment": "2026-09-02",
-   "last_invoice": "2026-08-25",
-   "last_response": "احمد سيد تواصل معاه يوم الاثنين "
+   "customer": "حسين عبد الفتاح ابويط",
+   "target_debt": 9750.0,
+   "area": "ابويط",
+   "last_payment": "2025-11-26",
+   "last_invoice": "2025-09-18",
+   "last_response": "سداد 4750 بعد شهر "
+  },
+  {
+   "customer": "بدوي احمد سالم (ابو شويقي)",
+   "target_debt": 2200.0,
+   "area": "ابو شويقي",
+   "last_payment": "2026-08-01",
+   "last_invoice": "2026-08-01",
+   "last_response": "اول شهر 8"
+  },
+  {
+   "customer": "عويس سيف(ابو شويقي)",
+   "target_debt": 14200.0,
+   "area": "ابو شويقي",
+   "last_payment": "2026-07-08",
+   "last_invoice": "2026-07-08",
+   "last_response": "السبت 29/8/2026"
+  },
+  {
+   "customer": "عيد احمد عبد الفتاح(ابو السعود)",
+   "target_debt": 459564.0,
+   "area": "ابو السعود",
+   "last_payment": "2026-09-03",
+   "last_invoice": "2026-08-31",
+   "last_response": "اول الاسبوع الجي 29/8"
   }
  ],
  "daily_targets": [
@@ -11312,28 +11034,6 @@
    "last_visit": "2026-08-01"
   },
   {
-   "customer": "بادية فارم (كوم ابو راضي)",
-   "balance": 80453.85713900067,
-   "collector": "مصطفى",
-   "area": "كوم ابو راضي",
-   "due": "2026-09-05",
-   "classification": "عملاء كاش ",
-   "notes": "بكرا",
-   "last_payment": "2026-09-01",
-   "last_visit": "2026-08-29"
-  },
-  {
-   "customer": "حمدي عبد الحميد(سيلا)",
-   "balance": 75380.0,
-   "collector": "محمد شعبان",
-   "area": "سيلا",
-   "due": "2026-09-04",
-   "classification": "فاتورة بفاتورة",
-   "notes": "",
-   "last_payment": "2026-08-27",
-   "last_visit": "2026-08-05"
-  },
-  {
    "customer": "ربيع جابر عبد الحميد",
    "balance": 74585.0,
    "collector": "مصطفى",
@@ -11367,17 +11067,6 @@
    "last_visit": "2026-06-08"
   },
   {
-   "customer": "نور حميده (البراني)",
-   "balance": 55205.0,
-   "collector": "محمد شعبان",
-   "area": "البراني ",
-   "due": "2026-09-03",
-   "classification": "عملاء بالدورة",
-   "notes": "دورة اربع شهور + دفعات",
-   "last_payment": "2026-08-18",
-   "last_visit": "2026-08-31"
-  },
-  {
    "customer": "عبد الرحمن علي - مصطفى الصعيدي",
    "balance": 53300.0,
    "collector": "محمد شعبان",
@@ -11398,17 +11087,6 @@
    "notes": "",
    "last_payment": "2026-08-26",
    "last_visit": "2026-08-12"
-  },
-  {
-   "customer": "محمد احمد (الوسطى)",
-   "balance": 25765.0,
-   "collector": "محمد شعبان",
-   "area": "مرعب",
-   "due": "2026-08-30",
-   "classification": "فاتورة بفاتورة",
-   "notes": "بكرا 30/8",
-   "last_payment": "2026-09-03",
-   "last_visit": "2026-08-29"
   },
   {
    "customer": "محمد راغب (الهداهده)",
@@ -11541,17 +11219,6 @@
    "notes": "زيارة كل جمعة مع ربيع قرني",
    "last_payment": "2025-04-16",
    "last_visit": "2026-08-16"
-  },
-  {
-   "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-   "balance": 2260.0,
-   "collector": "محمد شعبان",
-   "area": "الشيخ علي",
-   "due": "2026-09-03",
-   "classification": "فاتورة بفاتورة",
-   "notes": "الخميس 3/9",
-   "last_payment": "2026-08-20",
-   "last_visit": "2026-09-02"
   },
   {
    "customer": "محمد فتحي حسن(مرعب)",
@@ -11781,28 +11448,10 @@
      "last_payment": "2026-08-25"
     },
     {
-     "customer": "نور حميده (البراني)",
-     "balance": 55205.0,
-     "last_invoice": "2026-08-13",
-     "last_payment": "2026-08-18"
-    },
-    {
-     "customer": "عمر محمد عبدالعظيم(الشيخ علي)",
-     "balance": 2260.0,
-     "last_invoice": "2026-08-20",
-     "last_payment": "2026-08-20"
-    },
-    {
      "customer": "احمد سلامه (حلوان)",
      "balance": 86020.0,
      "last_invoice": "2026-08-27",
      "last_payment": "2026-08-29"
-    },
-    {
-     "customer": "حمدي عبد الحميد(سيلا)",
-     "balance": 75380.0,
-     "last_invoice": "2026-08-27",
-     "last_payment": "2026-08-27"
     },
     {
      "customer": "عيد احمد عبد الفتاح(ابو السعود)",
@@ -11829,12 +11478,6 @@
      "last_payment": "2026-07-27"
     },
     {
-     "customer": "محمد احمد (الوسطى)",
-     "balance": 25765.0,
-     "last_invoice": "2026-09-03",
-     "last_payment": "2026-09-03"
-    },
-    {
      "customer": "حسين احمدحسين (قيصر)",
      "balance": 60345.0,
      "last_invoice": "2026-09-03",
@@ -11844,12 +11487,6 @@
   },
   "مصطفى": {
    "today": [
-    {
-     "customer": "بادية فارم (كوم ابو راضي)",
-     "balance": 80453.85713900067,
-     "last_invoice": "2026-09-03",
-     "last_payment": "2026-09-01"
-    },
     {
      "customer": "محمد راغب (الهداهده)",
      "balance": 22065.0,
@@ -12478,7 +12115,7 @@
    "seq": "63",
    "customer": "نور حميده (البراني)",
    "balance": 55205.0,
-   "due_date": "2026-09-03",
+   "due_date": "2026-09-16",
    "cycle_start": "2026-05-18",
    "cycle_end": "2026-11-18",
    "days_left": 74.0
