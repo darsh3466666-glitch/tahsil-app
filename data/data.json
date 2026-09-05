@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-09-05 14:16:21",
+  "generated_at": "2026-09-05 14:17:01",
   "source": "شيت تحصيل.xlsm",
   "version": "1.0"
  },
@@ -6511,12 +6511,12 @@
    "balance": 22065.0,
    "last_payment": "2026-08-05",
    "last_invoice": "2026-09-03",
-   "last_visit": "2026-08-16",
+   "last_visit": "2026-09-05",
    "agreement_days": "20",
-   "due_date": "2026-09-05",
+   "due_date": "2026-09-25",
    "status": "نشط",
    "collector": "مصطفى",
-   "today_status": "🎯 هدف اليوم",
+   "today_status": "🟢 ساري",
    "classification": "عملاء بالدورة",
    "notes": "عليه 13 قديم",
    "agreements": "دفعات",
@@ -10090,24 +10090,6 @@
    "rating": "خطر 🔴 (متوقف/راكد)"
   },
   {
-   "prev_due": "2026-08-16",
-   "appt_status": "20",
-   "new_due": "2026-09-05",
-   "customer": "محمد راغب (الهداهده)",
-   "target_debt": 22065.0,
-   "area": "الهداهده",
-   "last_payment": "2026-08-05",
-   "last_invoice": "2026-09-03",
-   "last_response": "عليه 13 قديم",
-   "total_withdrawn": 99880.0,
-   "total_paid": 46050.0,
-   "collected": 0.0,
-   "remaining": 22065.0,
-   "collection_rate": "0",
-   "turnover": "4.5266258780874686",
-   "rating": "جيد 🟡 (منتظم)"
-  },
-  {
    "prev_due": "2026-08-15",
    "appt_status": "20",
    "new_due": "2026-09-04",
@@ -10491,7 +10473,7 @@
    "balance": 22065.0,
    "expected": 0.0,
    "collected": 0.0,
-   "due": "2026-09-05",
+   "due": "2026-09-25",
    "pay_ratio": "0",
    "pay_status": "",
    "remaining": 0.0,
@@ -11021,17 +11003,6 @@
    "last_visit": "2026-08-12"
   },
   {
-   "customer": "محمد راغب (الهداهده)",
-   "balance": 22065.0,
-   "collector": "مصطفى",
-   "area": "الهداهده",
-   "due": "2026-09-05",
-   "classification": "عملاء بالدورة",
-   "notes": "عليه 13 قديم",
-   "last_payment": "2026-08-05",
-   "last_visit": "2026-08-16"
-  },
-  {
    "customer": "عويس سيف(ابو شويقي)",
    "balance": 14200.0,
    "collector": "محمد شعبان",
@@ -11407,12 +11378,6 @@
   },
   "مصطفى": {
    "today": [
-    {
-     "customer": "محمد راغب (الهداهده)",
-     "balance": 22065.0,
-     "last_invoice": "2026-09-03",
-     "last_payment": "2026-08-05"
-    },
     {
      "customer": "محمد حفني (اهناسيا) المسيد",
      "balance": 886.0500000000029,
@@ -11963,7 +11928,7 @@
    "seq": "55",
    "customer": "محمد راغب (الهداهده)",
    "balance": 22065.0,
-   "due_date": "2026-09-05",
+   "due_date": "2026-09-25",
    "cycle_start": "2026-02-14",
    "cycle_end": "2026-08-14",
    "days_left": -22.0
